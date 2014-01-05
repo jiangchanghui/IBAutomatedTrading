@@ -3,6 +3,7 @@ package com.ib.sample;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import javax.swing.Box;
@@ -29,6 +30,7 @@ import com.ib.controller.ApiController.ITimeHandler;
 import com.ib.controller.Types.NewsType;
 import com.ib.controller.Types.SecType;
 import com.reademail.main.mailReader;
+import com.web.server.WebServer;
 
 
 import apidemo.MarketDataPanel;
@@ -59,7 +61,7 @@ public class main implements IConnectionHandler{
 	public ApiController controller() 		{ return m_controller; }
 	public JFrame frame() 					{ return m_frame; }
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
 		INSTANCE.run();
 	}
@@ -84,10 +86,10 @@ public class main implements IConnectionHandler{
 
 	
 	
-	private void run() {
+	private void run() throws UnknownHostException {
 		
 		mailReader _mailReader = new mailReader(this);
-		
+		WebServer _webServer = new WebServer();
 		
 		m_tabbedPanel.addTab( "Connection", m_connectionPanel);
 		m_tabbedPanel.addTab( "Market Data", m_mktDataPanel);

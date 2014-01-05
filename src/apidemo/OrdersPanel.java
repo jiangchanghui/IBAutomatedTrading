@@ -27,7 +27,7 @@ import com.ib.controller.OrderType;
 import com.ib.controller.ApiController.ILiveOrderHandler;
 import com.ib.sample.main;
 public class OrdersPanel extends JPanel {
-	private OrdersModel m_model = new OrdersModel();
+	public OrdersModel m_model = new OrdersModel();
 	private JTable m_table = new JTable( m_model);
 
 	OrdersPanel() {
@@ -169,7 +169,7 @@ public class OrdersPanel extends JPanel {
 		main.INSTANCE.controller().reqLiveOrders( m_model);
 	}
 	
-	static class OrdersModel extends AbstractTableModel implements ILiveOrderHandler {
+	public static class OrdersModel extends AbstractTableModel implements ILiveOrderHandler {
 		private HashMap<Long,OrderRow> m_map = new HashMap<Long,OrderRow>();
 		private ArrayList<OrderRow> m_orders = new ArrayList<OrderRow>();
 
@@ -259,7 +259,7 @@ public class OrdersPanel extends JPanel {
 		}
 	}
 	
-	static class OrderRow {
+	public static class OrderRow {
 		NewContract m_contract;
 		NewOrder m_order;
 		NewOrderState m_state;

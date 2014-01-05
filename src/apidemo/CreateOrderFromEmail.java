@@ -22,8 +22,13 @@ import com.ib.sample.main;
 public class CreateOrderFromEmail {
 
 	
-	public void CreateOrder(String Symbol, int Quantity, Action Side)
+	public void CreateOrder(String Symbol, int Quantity, Action Side, Double FFLimit)
 	{
+		if (Symbol==null  || Quantity == 0 || Side == null || FFLimit == 0.0)
+		{
+			return;
+		}
+		
 		double FarPrice =  0.0;
 		
 		GetPosition(Symbol);
@@ -34,8 +39,7 @@ public class CreateOrderFromEmail {
 		order.totalQuantity(Quantity);
 		order.action(Side);
 		
-		//FarPrice = GetFarPrice(contract,Side);
-		
+			
 		order.orderType(OrderType.MKT);
 		
 		order.lmtPrice(FarPrice);
@@ -44,7 +48,8 @@ public class CreateOrderFromEmail {
 		contract.exchange("SMART");
 		contract.currency("USD");
 		
-		;
+		if (!FatFingerViolation(contract, order,FFLimit))
+		{
 		
 		main.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 			@Override public void orderState(NewOrderState orderState) {
@@ -63,7 +68,7 @@ public class CreateOrderFromEmail {
 				});
 			}
 		});
-		
+		}
 		
 	}
 	private double GetFarPrice(NewContract contract,Action side)
@@ -92,18 +97,43 @@ public class CreateOrderFromEmail {
 	{
 		ITradeReportHandler m_tradeReportHandler = null;
 		OrdersModel m_model = new OrdersModel();
-		main.INSTANCE.controller().reqExecutions( new ExecutionFilter(), m_tradeReportHandler);
+		TradesPanel m_tradesPanel = new TradesPanel();
+		main.INSTANCE.controller().reqExecutions( new ExecutionFilter(), m_tradesPanel);
 		main.INSTANCE.controller().reqLiveOrders( m_model);
 
 		
 		
+	//	m_tradesPanel.ac
+		
 		for (int i=0;i< m_model.getRowCount();i++)
 		{
+		
 		//	m_model.get(i).;
 		}
 		
+	}
+	public String GetPositions()
+	{
+		OrdersModel m_model = new OrdersModel();
+		main.INSTANCE.controller().reqLiveOrders( m_model);
+		
+		return m_model.get(1).m_contract.symbol();
+	}
+	
+	private boolean FatFingerViolation(NewContract contract, NewOrder order,Double FFLimit)
+	{
+		Double FarPrice = GetFarPrice(contract,order.action());
+	
+		Double Notional = FarPrice * order.totalQuantity();
+		
+		if (Notional > FFLimit)
+			return true;
+		else
+			return false;
 		
 		
 		
 	}
+	
+	
 }
