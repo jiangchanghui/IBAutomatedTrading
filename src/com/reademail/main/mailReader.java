@@ -13,6 +13,7 @@ import javax.mail.event.MessageChangedEvent;
 import javax.mail.event.MessageChangedListener;
 import javax.mail.event.MessageCountEvent;
 import javax.mail.event.MessageCountListener;
+import javax.mail.internet.InternetAddress;
 
 import apidemo.ApiDemo;
 import apidemo.CreateOrderFromEmail;
@@ -92,16 +93,18 @@ public class mailReader {
 						
 						 try {
 							Message msg = folder.getMessage(folder.getMessageCount());
+							
+							String from = InternetAddress.toString(msg.getFrom());
 							System.out.println("SENT DATE:" + msg.getSentDate());
-							System.out.println("FROM:" + msg.getFrom()); 
+							System.out.println("FROM:" + from); 
 							
 					            System.out.println("SUBJECT:" + msg.getSubject());
 					        
-					            if (msg.getFrom().equals("gold@bullsonwallstreet.com"))
-					            {					            
+					       //     if (from.contains("gold@bullsonwallstreet.com"))
+					        //    {					            
 					            OrderTemplate  _OrderTemplate = Split(msg.getSubject());
 					            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
-					            }
+					         //   }
 							
 						} catch (MessagingException e) {
 							// TODO Auto-generated catch block

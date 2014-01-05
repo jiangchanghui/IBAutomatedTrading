@@ -48,8 +48,8 @@ public class CreateOrderFromEmail {
 		contract.exchange("SMART");
 		contract.currency("USD");
 		
-		if (!FatFingerViolation(contract, order,FFLimit))
-		{
+	//	if (!FatFingerViolation(contract, order,FFLimit))
+		//{
 		
 		main.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 			@Override public void orderState(NewOrderState orderState) {
@@ -59,16 +59,23 @@ public class CreateOrderFromEmail {
 					}
 				});
 			}
-			@Override public void handle(int errorCode, final String errorMsg) {
+			@Override public void handle(final int errorCode, final String errorMsg) {
 				
 				SwingUtilities.invokeLater( new Runnable() {
 					@Override public void run() {
-						System.out.println(errorMsg);
+						System.out.println(errorCode + " " + errorMsg);
+						
+						
+						if (errorMsg.contains("Order held"))
+						{
+							main.INSTANCE.controller().cancelAllOrders();
+						}
+						
 					}
 				});
 			}
 		});
-		}
+	//	}
 		
 	}
 	private double GetFarPrice(NewContract contract,Action side)
@@ -117,7 +124,13 @@ public class CreateOrderFromEmail {
 		OrdersModel m_model = new OrdersModel();
 		main.INSTANCE.controller().reqLiveOrders( m_model);
 		
-		return m_model.get(1).m_contract.symbol();
+		int rowcount = m_model.getRowCount();
+		
+		Object obj = m_model.getValueAt(rowcount-1,6);
+		String str = obj == null ? "" : obj.toString();
+		
+		
+		return str;
 	}
 	
 	private boolean FatFingerViolation(NewContract contract, NewOrder order,Double FFLimit)
