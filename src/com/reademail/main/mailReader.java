@@ -292,8 +292,23 @@ public class mailReader {
 		
 		_Execs = m_tradesPanel.getExecutions();
 		
-	//	_Execs.
-	//	System.out.println(test);
+	
+		System.out.println(_Execs.isEmpty());
+		System.out.println(_Execs.toString());
+		System.out.println(_Execs.isEmpty());
+		
+	/*Need to check what these become when there are no executions....
+		When there are executions 
+		Non Debug:
+		true
+		[]
+		true
+		
+		Debug:
+		false
+		[apidemo.TradesPanel$FullExec@62caba4, apidemo.TradesPanel$FullExec@5eb89f26, apidemo.TradesPanel$FullExec@2ad8a85f, apidemo.TradesPanel$FullExec@76160af2, apidemo.TradesPanel$FullExec@2128d26f, apidemo.TradesPanel$FullExec@7f0f866a, apidemo.TradesPanel$FullExec@5441da51, apidemo.TradesPanel$FullExec@2f64270e, apidemo.TradesPanel$FullExec@58402070, apidemo.TradesPanel$FullExec@5a11c653, apidemo.TradesPanel$FullExec@44f3a157, apidemo.TradesPanel$FullExec@56e57a1e, apidemo.TradesPanel$FullExec@73b47423, apidemo.TradesPanel$FullExec@4c34e12d, apidemo.TradesPanel$FullExec@23ab7871, apidemo.TradesPanel$FullExec@4e705502, apidemo.TradesPanel$FullExec@30dd1e89, apidemo.TradesPanel$FullExec@4ffcd6f, apidemo.TradesPanel$FullExec@360834f9, apidemo.TradesPanel$FullExec@54cde325, apidemo.TradesPanel$FullExec@18fbbda2, apidemo.TradesPanel$FullExec@375ee37e, apidemo.TradesPanel$FullExec@36a98198, apidemo.TradesPanel$FullExec@327b3e31, apidemo.TradesPanel$FullExec@39301cdb]
+		false
+	*/	
 		int _PositionQuantity = 0;
 		
 		
