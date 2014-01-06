@@ -28,7 +28,7 @@ public class TradesPanel extends JPanel implements ITradeReportHandler {
 	private HashMap<String,FullExec> m_map = new HashMap<String,FullExec>();
 	private Model m_model = new Model();
 	
-	TradesPanel() {
+	public TradesPanel() {
 		JTable table = new JTable( m_model);
 		JScrollPane scroll = new JScrollPane( table);
 		scroll.setBorder( new TitledBorder( "Trade Log"));
@@ -80,6 +80,32 @@ public class TradesPanel extends JPanel implements ITradeReportHandler {
 		}
 	}
 
+	public int getExecutionCount()
+	{
+		return m_trades.size();
+		
+	}
+	public ArrayList<FullExec> getExecutions()
+	{
+		return m_trades;
+		
+	}
+	
+	
+	public Object getValueAt(int row, int col) {
+		FullExec full = m_trades.get( row);
+		
+		switch( col) {
+			case 0: return full.m_trade.m_time;
+			case 1: return full.m_trade.m_acctNumber;
+			case 2: return full.m_trade.m_side;
+			case 3: return full.m_trade.m_shares;
+			case 4: return full.m_contract.description();
+			case 5: return full.m_trade.m_price;
+			case 6: return full.m_commissionReport != null ? full.m_commissionReport.m_commission : null;
+			default: return null;
+		}
+	}
 	private class Model extends AbstractTableModel {
 		@Override public int getRowCount() {
 			return m_trades.size();
@@ -118,14 +144,18 @@ public class TradesPanel extends JPanel implements ITradeReportHandler {
 		}
 	}
 
-	static class FullExec {
-		NewContract m_contract;
-		Execution m_trade;
+	public static class FullExec {
+		public NewContract m_contract;
+		public Execution m_trade;
 		CommissionReport m_commissionReport;
 		
 		FullExec( NewContract contract, Execution trade) {
 			m_contract = contract;
 			m_trade = trade;
 		}
+		
+		Execution getExecution() {
+	            return m_trade;
+	    }
 	}
 }

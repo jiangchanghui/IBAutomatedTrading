@@ -1,12 +1,16 @@
 package apidemo;
 
+import java.util.ArrayList;
+
 import javax.swing.SwingUtilities;
 
 import apidemo.OrdersPanel.OrderRow;
 import apidemo.OrdersPanel.OrdersModel;
 import apidemo.TopModel.TopRow;
 
+import com.ib.client.CommissionReport;
 import com.ib.client.Contract;
+import com.ib.client.Execution;
 import com.ib.client.ExecutionFilter;
 import com.ib.controller.ApiController.ILiveOrderHandler;
 import com.ib.controller.NewContract;
@@ -31,7 +35,8 @@ public class CreateOrderFromEmail {
 		
 		double FarPrice =  0.0;
 		
-		GetPosition(Symbol);
+	
+		
 		
 		NewContract contract = new NewContract();
 		NewOrder order = new NewOrder();
@@ -65,7 +70,7 @@ public class CreateOrderFromEmail {
 					@Override public void run() {
 						System.out.println(errorCode + " " + errorMsg);
 						
-						
+						//checks for locate required and cancels the order - essentially IOC
 						if (errorMsg.contains("Order held"))
 						{
 							main.INSTANCE.controller().cancelAllOrders();
@@ -100,7 +105,7 @@ public class CreateOrderFromEmail {
 			return 0.0;
 	}
 	
-	private void GetPosition(String Symbol)
+	private Exec GetPosition(String Symbol)
 	{
 		ITradeReportHandler m_tradeReportHandler = null;
 		OrdersModel m_model = new OrdersModel();
@@ -108,29 +113,54 @@ public class CreateOrderFromEmail {
 		main.INSTANCE.controller().reqExecutions( new ExecutionFilter(), m_tradesPanel);
 		main.INSTANCE.controller().reqLiveOrders( m_model);
 
+						
+		ArrayList<apidemo.TradesPanel.FullExec> _Execs = new ArrayList<apidemo.TradesPanel.FullExec>();
+		
+		_Execs = m_tradesPanel.getExecutions();
 		
 		
-	//	m_tradesPanel.ac
 		
-		for (int i=0;i< m_model.getRowCount();i++)
+		
+		for (int i=0;i< _Execs.size();i++)
 		{
+			if (_Execs.get(i).m_contract.symbol().equals(Symbol))
+			{
+				return new Exec(_Execs.get(i).m_contract.symbol(),_Execs.get(i).m_trade.m_side,_Execs.get(i).m_trade.m_shares);
+			}
+//		System.out.println(_Execs.get(i).m_contract.symbol());
+//		System.out.println(_Execs.get(i).m_trade.m_shares);
+//		System.out.println(_Execs.get(i).m_trade.m_avgPrice);
+//		System.out.println(_Execs.get(i).m_trade.m_side);
 		
-		//	m_model.get(i).;
 		}
+		return null;
 		
 	}
 	public String GetPositions()
 	{
+		ITradeReportHandler m_tradeReportHandler = null;
 		OrdersModel m_model = new OrdersModel();
+		TradesPanel m_tradesPanel = new TradesPanel();
+		main.INSTANCE.controller().reqExecutions( new ExecutionFilter(), m_tradesPanel);
 		main.INSTANCE.controller().reqLiveOrders( m_model);
+
+						
+		ArrayList<apidemo.TradesPanel.FullExec> _Execs = new ArrayList<apidemo.TradesPanel.FullExec>();
 		
-		int rowcount = m_model.getRowCount();
-		
-		Object obj = m_model.getValueAt(rowcount-1,6);
-		String str = obj == null ? "" : obj.toString();
+		_Execs = m_tradesPanel.getExecutions();
 		
 		
-		return str;
+		
+		
+		for (int i=0;i< _Execs.size();i++)
+		{
+		System.out.println(_Execs.get(i).m_contract.description().toString());
+		System.out.println(_Execs.get(i).m_trade.m_shares);
+		System.out.println(_Execs.get(i).m_trade.m_avgPrice);
+		System.out.println(_Execs.get(i).m_trade.m_side);
+		
+		}
+		return "null";
 	}
 	
 	private boolean FatFingerViolation(NewContract contract, NewOrder order,Double FFLimit)
@@ -147,6 +177,32 @@ public class CreateOrderFromEmail {
 		
 		
 	}
-	
-	
+
+	static class Exec {
+		String Symbol;
+		String Side;
+		int Quantity;
+		
+		Exec(String Symbol, String Side, int Quantity)
+		{
+			this.Symbol = Symbol;
+			this.Side = Side;
+			this.Quantity = Quantity;
+		}
+		
+		String getSymbol()
+		{
+			return Symbol;
+		}
+		String getSide()
+		{
+			return Side;
+		}
+		int getQuantity()
+		{
+			return Quantity;
+		}
+	}
+		
+		
 }

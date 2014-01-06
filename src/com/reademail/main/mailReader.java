@@ -17,10 +17,19 @@ import javax.mail.internet.InternetAddress;
 
 import apidemo.ApiDemo;
 import apidemo.CreateOrderFromEmail;
+import apidemo.TradesPanel;
+
+import apidemo.OrdersPanel.OrdersModel;
+
+import com.ib.client.ExecutionFilter;
+import com.ib.controller.ApiController.ITradeReportHandler;
 import com.ib.controller.Types.Action;
 import com.ib.sample.main;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
+
+
+
 public class mailReader {
 
 	main _mainInstance;
@@ -33,7 +42,7 @@ public class mailReader {
 		
 	private void Start()
 	{
-		TestLogic();
+	//	TestLogic();
 		final CreateOrderFromEmail _CreateOrder = new CreateOrderFromEmail();				
 		SubjectSplitter _SubjectSplitter = new SubjectSplitter();
 		  
@@ -194,24 +203,39 @@ public class mailReader {
 			
 			if (s.contains("SHORT") && Subject.contains("COVER"))
 			{
-				//Need to lookup current position
+				int Position = GetPosition(Ticker);
+				Quantity = Position;
 				Side = Action.BUY;
 				continue;
 			}
 			
-			//Position Close . Need to check current postiion in ticker and close it.
+			
 			if (s.contains("OUT"))
 			{
-			//	close position
+				int Position = GetPosition(Ticker);
+				Quantity = Position;
 				
+				if (Position < 0)
+				{
+					Side=Action.BUY;
+				}
+				else if (Position > 0)
+				{
+					Side=Action.SELL;
+				}
 			}
 			
 			
 			if (s.contains("1/2"))
 			{
-				//Close Half position
+				int Position = GetPosition(Ticker);
+				Quantity = (Position/2);
 			}
-			
+			if (s.contains("1/4"))
+			{
+				int Position = GetPosition(Ticker);
+				Quantity = (Position/4);
+			}
 			if (s.contains("1K"))
 			{
 			Quantity = 1000;
@@ -238,7 +262,7 @@ public class mailReader {
 			continue;
 			}	
 			
-			if (s.matches(regex)) 
+			if (s.matches(regex) && Quantity ==0) 
 			{
 			   Quantity = Integer.parseInt(s);
 			   continue;
@@ -253,8 +277,75 @@ public class mailReader {
 		
 		return _OrderTemplate;
 	}
+	private int GetPosition(String Symbol)
+	{
+		ITradeReportHandler m_tradeReportHandler = null;
+		OrdersModel m_model = new OrdersModel();
+		TradesPanel m_tradesPanel = new TradesPanel();
+		main.INSTANCE.controller().reqExecutions( new ExecutionFilter(), m_tradesPanel);
+		main.INSTANCE.controller().reqLiveOrders( m_model);
+
+						
+		ArrayList<apidemo.TradesPanel.FullExec> _Execs = new ArrayList<apidemo.TradesPanel.FullExec>();
+		
+		_Execs = m_tradesPanel.getExecutions();
+		
+		
+		int _PositionQuantity = 0;
+		
+		
+		for (int i=0;i< _Execs.size();i++)
+		{
+			System.out.println(_Execs.get(i).m_contract.symbol());
+			System.out.println(_Execs.get(i).m_trade.m_shares);
+			System.out.println(_Execs.get(i).m_trade.m_avgPrice);
+			System.out.println(_Execs.get(i).m_trade.m_side);
+			
+			if (_Execs.get(i).m_contract.symbol().equals(Symbol))
+			{
+				if (_Execs.get(i).m_trade.m_side.equals("BOT"))
+				{
+					_PositionQuantity +=_Execs.get(i).m_trade.m_shares;
+					
+				}
+				else
+				{
+					_PositionQuantity -=_Execs.get(i).m_trade.m_shares;
+				}
+			}
 	
-	
+		
+		}
+		return _PositionQuantity;
+		
+		
+	}
+	static class Exec {
+		String Symbol;
+		String Side;
+		int Quantity;
+		
+		Exec(String Symbol, String Side, int Quantity)
+		{
+			this.Symbol = Symbol;
+			this.Side = Side;
+			this.Quantity = Quantity;
+		}
+		
+		String getSymbol()
+		{
+			return Symbol;
+		}
+		String getSide()
+		{
+			return Side;
+		}
+		int getQuantity()
+		{
+			return Quantity;
+		}
+	}
+		
 	private void TestLogic()
 	{
 		BufferedReader br;
