@@ -584,7 +584,12 @@ public class ApiController implements EWrapper {
     	m_client.reqExecutions( m_reqId++, filter);
 		sendEOM();
     }
-
+    public boolean reqExecutions2( ExecutionFilter filter, ITradeReportHandler handler) {
+    	m_tradeReportHandler = handler;
+    boolean test = 	m_client.reqExecutions2( m_reqId++, filter);
+		sendEOM();
+		return test;
+    }
 	@Override public void execDetails(int reqId, Contract contract, Execution execution) {
 		if (m_tradeReportHandler != null) {
 			int i = execution.m_execId.lastIndexOf( '.');

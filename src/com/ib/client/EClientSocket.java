@@ -1574,7 +1574,45 @@ public class EClientSocket {
             close();
         }
     }
+    public synchronized boolean reqExecutions2(int reqId, ExecutionFilter filter) {
+        // not connected?
+        if( !m_connected) {
+            notConnected();
+            return false;
+        }
 
+        final int VERSION = 3;
+
+        // send cancel order msg
+        try {
+            send( REQ_EXECUTIONS);
+            send( VERSION);
+
+            if (m_serverVersion >= MIN_SERVER_VER_EXECUTION_DATA_CHAIN) {
+            	send( reqId);
+            }
+
+            // Send the execution rpt filter data
+            if ( m_serverVersion >= 9 ) {
+                send( filter.m_clientId);
+                send( filter.m_acctCode);
+
+                // Note that the valid format for m_time is "yyyymmdd-hh:mm:ss"
+                send( filter.m_time);
+                send( filter.m_symbol);
+                send( filter.m_secType);
+                send( filter.m_exchange);
+                send( filter.m_side);
+            }
+          
+        }
+        
+        catch( Exception e) {
+            error( EClientErrors.NO_VALID_ID, EClientErrors.FAIL_SEND_EXEC, "" + e);
+            close();
+        }
+		return true;
+    }
     public synchronized void cancelOrder( int id) {
         // not connected?
         if( !m_connected) {

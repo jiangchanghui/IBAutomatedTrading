@@ -201,7 +201,7 @@ public class mailReader {
 				continue;
 			}
 			
-			if (s.contains("SHORT") && Subject.contains("COVER"))
+			if (Subject.contains("COVER"))
 			{
 				int Position = GetPosition(Ticker);
 				Quantity = Position;
@@ -282,15 +282,18 @@ public class mailReader {
 		ITradeReportHandler m_tradeReportHandler = null;
 		OrdersModel m_model = new OrdersModel();
 		TradesPanel m_tradesPanel = new TradesPanel();
-		main.INSTANCE.controller().reqExecutions( new ExecutionFilter(), m_tradesPanel);
-		main.INSTANCE.controller().reqLiveOrders( m_model);
+	boolean test=main.INSTANCE.controller().reqExecutions2( new ExecutionFilter(), m_tradesPanel);
+	//	main.INSTANCE.controller().reqLiveOrders( m_model);
 
 						
 		ArrayList<apidemo.TradesPanel.FullExec> _Execs = new ArrayList<apidemo.TradesPanel.FullExec>();
 		
+		
+		
 		_Execs = m_tradesPanel.getExecutions();
 		
-		
+	//	_Execs.
+	//	System.out.println(test);
 		int _PositionQuantity = 0;
 		
 		

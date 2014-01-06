@@ -29,6 +29,7 @@ public class TradesPanel extends JPanel implements ITradeReportHandler {
 	private Model m_model = new Model();
 	
 	public TradesPanel() {
+		
 		JTable table = new JTable( m_model);
 		JScrollPane scroll = new JScrollPane( table);
 		scroll.setBorder( new TitledBorder( "Trade Log"));
