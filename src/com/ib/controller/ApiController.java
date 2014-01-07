@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.StringTokenizer;
 
 import com.ib.client.CommissionReport;
@@ -30,8 +32,11 @@ import com.ib.controller.Types.FundamentalType;
 import com.ib.controller.Types.MktDataType;
 import com.ib.controller.Types.NewsType;
 import com.ib.controller.Types.WhatToShow;
+import com.reademail.main.mailReader;
 
 public class ApiController implements EWrapper {
+	private static final Logger log = Logger.getLogger( ApiController.class.getName() );
+	
 	private ApiConnection m_client;
 	private final ILogger m_outLogger;
 	private final ILogger m_inLogger;
@@ -689,8 +694,10 @@ public class ApiController implements EWrapper {
 	}
 
 	public void cancelAllOrders() {
+		log.log(Level.WARNING ,"Sending Cancels");
 		m_client.reqGlobalCancel();
 		sendEOM();
+		log.log(Level.INFO ,"Cancels Sent");
 	}
 
 	public void exerciseOption( String account, NewContract contract, ExerciseType type, int quantity, boolean override) {

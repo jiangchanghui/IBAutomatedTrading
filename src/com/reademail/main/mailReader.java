@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.mail.*;
@@ -14,6 +16,7 @@ import javax.mail.event.MessageChangedListener;
 import javax.mail.event.MessageCountEvent;
 import javax.mail.event.MessageCountListener;
 import javax.mail.internet.InternetAddress;
+import javax.swing.table.AbstractTableModel;
 
 import apidemo.ApiDemo;
 import apidemo.CreateOrderFromEmail;
@@ -21,7 +24,13 @@ import apidemo.TradesPanel;
 
 import apidemo.OrdersPanel.OrdersModel;
 
+import apidemo.PositionsPanel.PositionModel;
+
+
 import com.ib.client.ExecutionFilter;
+import com.ib.controller.Formats;
+import com.ib.controller.NewContract;
+import com.ib.controller.ApiController.IPositionHandler;
 import com.ib.controller.ApiController.ITradeReportHandler;
 import com.ib.controller.Types.Action;
 import com.ib.sample.main;
@@ -31,7 +40,7 @@ import com.sun.mail.imap.IMAPStore;
 
 
 public class mailReader {
-
+	private static final Logger log = Logger.getLogger( mailReader.class.getName() );
 	main _mainInstance;
 	 Double _FFLimit=0.0;
 	public mailReader(main main) {
@@ -49,13 +58,16 @@ public class mailReader {
 		 Properties props = new Properties();
 		 String _Email="";
 		 String _Password="";
-		
+		 String _TradeAlertEmail="";
+		 final boolean FilterEmails=true;
 		 try {
+			 log.log(Level.INFO ,"Processing config entries");
 			props.load(new FileInputStream("c:\\config.properties"));
 			_Email = props.getProperty("email");
 	    	_Password = props.getProperty("password");
+	    	_TradeAlertEmail = props.getProperty("alertemail");
 			_FFLimit = Double.valueOf(props.getProperty("fflimit"));
-			
+			 log.log(Level.INFO ,"Processing config entries -Done");
 		} catch (Exception e1) {
 		}
 		 
@@ -98,22 +110,25 @@ public class mailReader {
 	               
 					@Override
 					public void messagesAdded(MessageCountEvent arg0) {
-						 System.out.println("New Email");
-						
+					
+						 log.log(Level.INFO ,"New EMail");
 						 try {
 							Message msg = folder.getMessage(folder.getMessageCount());
 							
 							String from = InternetAddress.toString(msg.getFrom());
-							System.out.println("SENT DATE:" + msg.getSentDate());
-							System.out.println("FROM:" + from); 
+							 log.log(Level.INFO ,"SENT DATE : {0}",msg.getSentDate());
+							 log.log(Level.INFO ,"FROM : {0}",from);
+							 log.log(Level.INFO ,"SUBJECT : {0}",msg.getSubject());
+					           
 							
-					            System.out.println("SUBJECT:" + msg.getSubject());
 					        
-					       //     if (from.contains("gold@bullsonwallstreet.com"))
-					        //    {					            
+					        //   if (FilterEmails && from == "gold@bullsonwallstreet.com")
+					      //     {					            
 					            OrderTemplate  _OrderTemplate = Split(msg.getSubject());
+					            log.log(Level.INFO ,"Routing order for {0}",_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 					            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
-					         //   }
+					    
+					            //     }
 							
 						} catch (MessagingException e) {
 							// TODO Auto-generated catch block
@@ -125,7 +140,7 @@ public class mailReader {
 
 					@Override
 					public void messagesRemoved(MessageCountEvent arg0) {
-						 System.out.println("Message Removed Event fired");
+						
 						
 					}
 	            });
@@ -133,14 +148,14 @@ public class mailReader {
 	    folder.addMessageChangedListener(new MessageChangedListener() {
 
 	                public void messageChanged(MessageChangedEvent e) {
-	                    System.out.println("Message Changed Event fired");
+	                
 	                }
 	            });
 	            
 	    Thread t = new Thread(new Runnable() {
 
 		            public void run() {
-		            	 System.out.println("Starting listening");
+		            	 log.log(Level.INFO ,"Listening for new emails" );
 		                try {
 		                    while (true) {
 		                    	
@@ -163,6 +178,8 @@ public class mailReader {
 	
 	public OrderTemplate Split(String Message)
 	{
+		 log.log(Level.INFO ,"Received message : {0}", Message );
+		
 		String Subject = Message.toUpperCase();
 		String[] array = Subject.split(" "); 
 		String Ticker=null;;
@@ -177,6 +194,7 @@ public class mailReader {
 			if (s.startsWith("$"))
 			{
 				Ticker = s.substring(1).toUpperCase();
+				log.log(Level.INFO ,"Set Ticker to ", Ticker );
 				continue;
 			}
 			
@@ -190,6 +208,8 @@ public class mailReader {
 					Side = Action.SELL;
 				if (s.contains("<SW>"))
 					Side = null;
+				
+				log.log(Level.INFO ,"Set Side to ", Side );
 				continue;
 			}
 			
@@ -198,6 +218,7 @@ public class mailReader {
 			if (s.contains("SHORT") && Subject.contains("<S>"))
 			{
 				Side = Action.SELL;
+				log.log(Level.INFO ,"Set Ticker to SELL becuase message continas SHORT and <S>");
 				continue;
 			}
 			
@@ -205,7 +226,11 @@ public class mailReader {
 			{
 				int Position = GetPosition(Ticker);
 				Quantity = Position;
-				Side = Action.BUY;
+				if (Position < 0)
+				{
+					Side = Action.BUY;
+				}
+				log.log(Level.INFO ,"Set SIDE to BU becuase subject contains COVER");
 				continue;
 			}
 			
@@ -223,117 +248,136 @@ public class mailReader {
 				{
 					Side=Action.SELL;
 				}
+				log.log(Level.INFO ,"Set quantity to {0} becuase message contains OUT", Quantity);
+				log.log(Level.INFO ,"Set Side to {0} becuase Position is {1}",new Object[]{Side,Position});
+				continue;
 			}
 			
 			
-			if (s.contains("1/2"))
+			if (s.contains("1/"))
 			{
-				int Position = GetPosition(Ticker);
-				Quantity = (Position/2);
+				int number = Integer.parseInt(s.substring(s.indexOf("/")+1,s.indexOf("/")+2));
+				int Position = Math.abs(GetPosition(Ticker));
+				Quantity = (Position/number);
+				log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1} and position is{2}", new Object[]{Quantity,s,Position});
 			}
-			if (s.contains("1/4"))
-			{
-				int Position = GetPosition(Ticker);
-				Quantity = (Position/4);
-			}
+		
+			
 			if (s.contains("1K"))
 			{
 			Quantity = 1000;
+			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {2}",new Object[]{Quantity,s});
 			continue;
 			}	
 			if (s.contains("1.5K"))
 			{
 			Quantity = 1500;
+			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {2}",new Object[]{Quantity,s});
 			continue;
 			}	
 			if (s.contains("2K"))
 			{
 			Quantity = 2000;
+			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {2}",new Object[]{Quantity,s});
 			continue;
 			}	
 			if (s.contains("2.5K"))
 			{
 			Quantity = 2500;
+			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {2}",new Object[]{Quantity,s});
 			continue;
 			}	
 			if (s.contains("3K"))
 			{
 			Quantity = 3000;
+			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {2}",new Object[]{Quantity,s});
 			continue;
 			}	
 			
 			if (s.matches(regex) && Quantity ==0) 
 			{
 			   Quantity = Integer.parseInt(s);
+			   log.log(Level.INFO ,"Set quantity to {0} becuase message contains {2}",new Object[]{Quantity,s});
 			   continue;
 			}
 		}
-		if (Subject.contains("SWING"))
+		if (Subject.contains("SWING") || Subject.contains("<SW>"))
 		{
 			Ticker = null;
+			log.log(Level.INFO ,"Message contains SWING and so Ticker is {0}",Ticker);
 		}
+		
+		
 			OrderTemplate _OrderTemplate = new OrderTemplate(Quantity,Ticker,Side);
 		
 		
 		return _OrderTemplate;
 	}
+	 PositionModel m_model = new PositionModel();
 	private int GetPosition(String Symbol)
 	{
-		ITradeReportHandler m_tradeReportHandler = null;
-		OrdersModel m_model = new OrdersModel();
-		TradesPanel m_tradesPanel = new TradesPanel();
-	boolean test=main.INSTANCE.controller().reqExecutions2( new ExecutionFilter(), m_tradesPanel);
+		log.log(Level.INFO ,"Getting Position data for {0}",Symbol);
+		
+	//	ITradeReportHandler m_tradeReportHandler = null;
+	//	OrdersModel m_model1 = new OrdersModel();
+	//	TradesPanel m_tradesPanel = new TradesPanel();
+	
+	//boolean test=main.INSTANCE.controller().reqExecutions2( new ExecutionFilter(), m_tradesPanel);
 	//	main.INSTANCE.controller().reqLiveOrders( m_model);
 
-						
-		ArrayList<apidemo.TradesPanel.FullExec> _Execs = new ArrayList<apidemo.TradesPanel.FullExec>();
+	main.INSTANCE.controller().reqPositions( m_model);
+	
+		//ArrayList<apidemo.TradesPanel.FullExec> _Execs = new ArrayList<apidemo.TradesPanel.FullExec>();
+		
+//		while (m_model.getRowCount()==0)
 		
 		
-		
-		_Execs = m_tradesPanel.getExecutions();
+	//	_Execs = m_tradesPanel.getExecutions();
 		
 	
-		System.out.println(_Execs.isEmpty());
-		System.out.println(_Execs.toString());
-		System.out.println(_Execs.isEmpty());
+	//	System.out.println(m_model.getValueAt(0, 1));
+	//	System.out.println(_Execs.toString());
+	//	System.out.println(_Execs.isEmpty());
 		
-	/*Need to check what these become when there are no executions....
-		When there are executions 
-		Non Debug:
-		true
-		[]
-		true
-		
-		Debug:
-		false
-		[apidemo.TradesPanel$FullExec@62caba4, apidemo.TradesPanel$FullExec@5eb89f26, apidemo.TradesPanel$FullExec@2ad8a85f, apidemo.TradesPanel$FullExec@76160af2, apidemo.TradesPanel$FullExec@2128d26f, apidemo.TradesPanel$FullExec@7f0f866a, apidemo.TradesPanel$FullExec@5441da51, apidemo.TradesPanel$FullExec@2f64270e, apidemo.TradesPanel$FullExec@58402070, apidemo.TradesPanel$FullExec@5a11c653, apidemo.TradesPanel$FullExec@44f3a157, apidemo.TradesPanel$FullExec@56e57a1e, apidemo.TradesPanel$FullExec@73b47423, apidemo.TradesPanel$FullExec@4c34e12d, apidemo.TradesPanel$FullExec@23ab7871, apidemo.TradesPanel$FullExec@4e705502, apidemo.TradesPanel$FullExec@30dd1e89, apidemo.TradesPanel$FullExec@4ffcd6f, apidemo.TradesPanel$FullExec@360834f9, apidemo.TradesPanel$FullExec@54cde325, apidemo.TradesPanel$FullExec@18fbbda2, apidemo.TradesPanel$FullExec@375ee37e, apidemo.TradesPanel$FullExec@36a98198, apidemo.TradesPanel$FullExec@327b3e31, apidemo.TradesPanel$FullExec@39301cdb]
-		false
-	*/	
+	
 		int _PositionQuantity = 0;
+		log.log(Level.INFO ,"{0} Executions found",m_model.getRowCount());
 		
 		
-		for (int i=0;i< _Execs.size();i++)
+		while (m_model.getRowCount()==0)
 		{
-			System.out.println(_Execs.get(i).m_contract.symbol());
-			System.out.println(_Execs.get(i).m_trade.m_shares);
-			System.out.println(_Execs.get(i).m_trade.m_avgPrice);
-			System.out.println(_Execs.get(i).m_trade.m_side);
+			log.log(Level.FINEST ,"{0} Executions found retrying",m_model.getRowCount());
+			System.out.println("here");
+			System.out.println(m_model.getRowCount());
+			try {
+			//	synchronised wait(1000);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		//		System.out.println("exception");
+			}
 			
-			if (_Execs.get(i).m_contract.symbol().equals(Symbol))
+			
+		}
+		
+		log.log(Level.INFO ,"{0} Executions found",m_model.getRowCount());
+		for (int i=0;i< m_model.getRowCount();i++)
+		{
+			log.log(Level.INFO ,"{0} {1} avg price of {2}",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
+			
+						
+			if (m_model.getValueAt(i, 2).equals(Symbol))
 			{
-				if (_Execs.get(i).m_trade.m_side.equals("BOT"))
-				{
-					_PositionQuantity +=_Execs.get(i).m_trade.m_shares;
-					
-				}
-				else
-				{
-					_PositionQuantity -=_Execs.get(i).m_trade.m_shares;
-				}
+				
+				
+				Object obj = m_model.getValueAt(i, 3);
+				_PositionQuantity = (Integer) (obj == null ? "" :  obj);
+				
 			}
 	
 		
 		}
+		log.log(Level.INFO ,"Returning position {0} for Ticker {1}",new Object[]{_PositionQuantity,Symbol});
 		return _PositionQuantity;
 		
 		
@@ -363,7 +407,101 @@ public class mailReader {
 			return Quantity;
 		}
 	}
+	
+	public class PositionModel extends AbstractTableModel implements IPositionHandler {
+		HashMap<PositionKey,PositionRow> m_map = new HashMap<PositionKey,PositionRow>();
+		ArrayList<PositionRow> m_list = new ArrayList<PositionRow>();
+
+		@Override public void position(String account, NewContract contract, int position, double avgCost) {
+			PositionKey key = new PositionKey( account, contract.conid() );
+			PositionRow row = m_map.get( key);
+			if (row == null) {
+				row = new PositionRow();
+				m_map.put( key, row);
+				m_list.add( row);
+			}
+			row.update( account, contract, position, avgCost);
+			
+			
+		}
+
+		@Override public void positionEnd() {
+			m_model.fireTableDataChanged();
+			
+		}
+
+		public void clear() {
+			m_map.clear();
+			m_list.clear();
+			fireTableDataChanged();
+		}
+
+		@Override public int getRowCount() {
+			return m_map.size();
+		}
+
+		@Override public int getColumnCount() {
+			return 4;
+		}
 		
+		@Override public String getColumnName(int col) {
+			switch( col) {
+				case 0: return "Account";
+				case 1: return "Contract";
+				case 2: return "Position";
+				case 3: return "Avg Cost";
+				default: return null;
+			}
+		}
+
+		@Override public Object getValueAt(int rowIn, int col) {
+			PositionRow row = m_list.get( rowIn);
+			
+			switch( col) {
+				case 0: return row.m_account;
+				case 1: return row.m_contract.description();
+				case 2: return row.m_contract.symbol();
+				case 3: return row.m_position;
+				case 4: return Formats.fmt( row.m_avgCost);
+				default: return null;
+			}
+		}
+	}
+	
+	private static class PositionKey {
+		String m_account;
+		int m_conid;
+
+		PositionKey( String account, int conid) {
+			m_account = account;
+			m_conid = conid;
+		}
+		
+		@Override public int hashCode() {
+			return m_account.hashCode() + m_conid;
+		}
+		
+		@Override public boolean equals(Object obj) {
+			PositionKey other = (PositionKey)obj;
+			return m_account.equals( other.m_account) && m_conid == other.m_conid;
+		}
+	}
+
+	private static class PositionRow {
+		String m_account;
+		NewContract m_contract;
+		int m_position;
+		double m_avgCost;
+
+		void update(String account, NewContract contract, int position, double avgCost) {
+			m_account = account;
+			m_contract = contract;
+			m_position = position;
+			m_avgCost = avgCost;
+		}
+	}
+	
+	
 	private void TestLogic()
 	{
 		BufferedReader br;

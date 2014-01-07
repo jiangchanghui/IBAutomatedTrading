@@ -8,9 +8,13 @@ import java.io.DataOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.ib.controller.ApiController;
 
 public class EClientSocket {
-
+	private static final Logger log = Logger.getLogger( EClientSocket.class.getName() );
     // Client version history
     //
     // 	6 = Added parentId to orderStatus
@@ -2130,6 +2134,7 @@ public class EClientSocket {
         if (m_serverVersion < MIN_SERVER_VER_REQ_GLOBAL_CANCEL) {
             error(EClientErrors.NO_VALID_ID, EClientErrors.UPDATE_TWS,
                     "  It does not support globalCancel requests.");
+            log.log(Level.SEVERE ,"Error occured when trying to cancel all orders , TWS needs updating");
             return;
         }
 

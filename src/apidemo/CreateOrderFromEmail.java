@@ -1,6 +1,8 @@
 package apidemo;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
 
@@ -22,14 +24,16 @@ import com.ib.controller.OrderType;
 import com.ib.controller.Types.Action;
 import com.ib.controller.Types.SecType;
 import com.ib.sample.main;
+import com.reademail.main.mailReader;
 
 public class CreateOrderFromEmail {
-
+	private static final Logger log = Logger.getLogger( CreateOrderFromEmail.class.getName() );
 	
 	public void CreateOrder(String Symbol, int Quantity, Action Side, Double FFLimit)
 	{
 		if (Symbol==null  || Quantity == 0 || Side == null || FFLimit == 0.0)
 		{
+			 log.log(Level.WARNING ,"Order Create failed with Symbol : {0}, Quantity : {1}, Side : {2}, FFLimit :{3}",new Object[]{Symbol,Quantity,Side.toString(),FFLimit});
 			return;
 		}
 		
@@ -55,7 +59,7 @@ public class CreateOrderFromEmail {
 		
 	//	if (!FatFingerViolation(contract, order,FFLimit))
 		//{
-		
+		log.log(Level.INFO ,"Order being executed for {0} {1} {2} at {3}",new Object[]{Side,Quantity,Side.toString(),order.orderType().toString()});
 		main.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 			@Override public void orderState(NewOrderState orderState) {
 				SwingUtilities.invokeLater( new Runnable() {
@@ -68,11 +72,11 @@ public class CreateOrderFromEmail {
 				
 				SwingUtilities.invokeLater( new Runnable() {
 					@Override public void run() {
-						System.out.println(errorCode + " " + errorMsg);
-						
+						log.log(Level.SEVERE ,"Order execution failed with ({0}:{1})",new Object[]{errorCode,errorMsg});						
 						//checks for locate required and cancels the order - essentially IOC
 						if (errorMsg.contains("Order held"))
 						{
+							log.log(Level.SEVERE ,"Order is held, cancelling all open orders");
 							main.INSTANCE.controller().cancelAllOrders();
 						}
 						

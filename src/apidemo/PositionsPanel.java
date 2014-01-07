@@ -71,7 +71,7 @@ public class PositionsPanel extends NewTabPanel {
 		m_model.clear();
 	}
 	
-	private class PositionModel extends AbstractTableModel implements IPositionHandler {
+	public class PositionModel extends AbstractTableModel implements IPositionHandler {
 		HashMap<PositionKey,PositionRow> m_map = new HashMap<PositionKey,PositionRow>();
 		ArrayList<PositionRow> m_list = new ArrayList<PositionRow>();
 
