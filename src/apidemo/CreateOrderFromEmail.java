@@ -79,7 +79,10 @@ public class CreateOrderFromEmail {
 							log.log(Level.SEVERE ,"Order is held, cancelling all open orders");
 							main.INSTANCE.controller().cancelAllOrders();
 						}
-						
+						if (errorMsg.contains("not be placed"))
+						{
+							main.INSTANCE.controller().cancelAllOrders();
+						}
 					}
 				});
 			}
