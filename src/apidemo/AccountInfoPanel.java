@@ -47,7 +47,7 @@ public class AccountInfoPanel extends JPanel implements INewTab, IAccountHandler
 	private JTable m_mktValTable = new Table( m_mktValModel, 2);
 	private JLabel m_lastUpdated = new JLabel();
 
-	AccountInfoPanel() {
+	public AccountInfoPanel() {
 		m_lastUpdated.setHorizontalAlignment( SwingConstants.RIGHT);
 		
 		m_accounts.setPreferredSize( new Dimension( 10000, 100) );

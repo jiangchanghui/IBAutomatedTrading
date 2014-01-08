@@ -59,7 +59,7 @@ public class CreateOrderFromEmail {
 		
 	//	if (!FatFingerViolation(contract, order,FFLimit))
 		//{
-		log.log(Level.INFO ,"Order being executed for {0} {1} {2} at {3}",new Object[]{Side,Quantity,Side.toString(),order.orderType().toString()});
+		log.log(Level.INFO ,"Order being executed for {0} {1} {2} at {3}",new Object[]{Side,Quantity,Symbol,order.orderType().toString()});
 		main.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 			@Override public void orderState(NewOrderState orderState) {
 				SwingUtilities.invokeLater( new Runnable() {

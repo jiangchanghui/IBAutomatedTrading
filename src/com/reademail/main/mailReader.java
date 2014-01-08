@@ -186,7 +186,7 @@ public class mailReader {
 		int Quantity=0;;
 		Action Side=null;
 		String regex = "[0-9]+";
-		
+		int _location=0;
 		for(String s : array)
 		{
 			//TICKER
@@ -194,7 +194,8 @@ public class mailReader {
 			if (s.startsWith("$"))
 			{
 				Ticker = s.substring(1).toUpperCase();
-				log.log(Level.INFO ,"Set Ticker to ", Ticker );
+				log.log(Level.INFO ,"Set Ticker to {0}", Ticker );
+				_location++;
 				continue;
 			}
 			
@@ -209,33 +210,32 @@ public class mailReader {
 				if (s.contains("<SW>"))
 					Side = null;
 				
-				log.log(Level.INFO ,"Set Side to ", Side );
+				log.log(Level.INFO ,"Set Side to {0}", Side );
+				_location++;
 				continue;
 			}
-			
+			//Quantity
+			if (s.matches(regex) && _location<6) 
+			{
+			   Quantity = Integer.parseInt(s);
+			   log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
+			   _location++;
+			   continue;
+			}
 			//SHORT			
 			
 			if (s.contains("SHORT") && Subject.contains("<S>"))
 			{
 				Side = Action.SELL;
 				log.log(Level.INFO ,"Set Ticker to SELL becuase message continas SHORT and <S>");
-				continue;
-			}
-			
-			if (Subject.contains("COVER"))
-			{
-				int Position = GetPosition(Ticker);
-				Quantity = Position;
-				if (Position < 0)
-				{
-					Side = Action.BUY;
-				}
-				log.log(Level.INFO ,"Set SIDE to BU becuase subject contains COVER");
+				_location++;
 				continue;
 			}
 			
 			
-			if (s.contains("OUT"))
+			
+			
+			if (s.contains("OUT") && Quantity==0)
 			{
 				int Position = GetPosition(Ticker);
 				Quantity = Position;
@@ -249,7 +249,8 @@ public class mailReader {
 					Side=Action.SELL;
 				}
 				log.log(Level.INFO ,"Set quantity to {0} becuase message contains OUT", Quantity);
-				log.log(Level.INFO ,"Set Side to {0} becuase Position is {1}",new Object[]{Side,Position});
+				log.log(Level.INFO ,"Set Side to {0} becuase Position is {1} and this is a cover/sell long",new Object[]{Side,Position});
+				_location++;
 				continue;
 			}
 			
@@ -260,46 +261,72 @@ public class mailReader {
 				int Position = Math.abs(GetPosition(Ticker));
 				Quantity = (Position/number);
 				log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1} and position is{2}", new Object[]{Quantity,s,Position});
+				_location++;
 			}
 		
+			if (s.contains("K") && s.length()==2)
+			{
+				int number = Integer.parseInt(s.substring(0,1));
+				
+				Quantity = number*1000;
+				log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}", new Object[]{Quantity,s});
+				_location++;
+			}
+			
 			
 			if (s.contains("1K"))
 			{
 			Quantity = 1000;
-			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {2}",new Object[]{Quantity,s});
+			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
+			_location++;
 			continue;
 			}	
 			if (s.contains("1.5K"))
 			{
 			Quantity = 1500;
-			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {2}",new Object[]{Quantity,s});
+			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
+			_location++;
 			continue;
 			}	
 			if (s.contains("2K"))
 			{
 			Quantity = 2000;
-			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {2}",new Object[]{Quantity,s});
+			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
+			_location++;
 			continue;
 			}	
 			if (s.contains("2.5K"))
 			{
 			Quantity = 2500;
-			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {2}",new Object[]{Quantity,s});
+			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
+			_location++;
 			continue;
 			}	
 			if (s.contains("3K"))
 			{
 			Quantity = 3000;
-			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {2}",new Object[]{Quantity,s});
+			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
+			_location++;
 			continue;
 			}	
 			
-			if (s.matches(regex) && Quantity ==0) 
+			_location++;
+			
+		}
+		log.log(Level.INFO ,"End of main logic, checking entire message");
+		
+		if (Subject.contains("COVER"))
+		{
+			int Position = GetPosition(Ticker);
+			Quantity = Position;
+			if (Position < 0)
 			{
-			   Quantity = Integer.parseInt(s);
-			   log.log(Level.INFO ,"Set quantity to {0} becuase message contains {2}",new Object[]{Quantity,s});
-			   continue;
+				Side = Action.BUY;
 			}
+			log.log(Level.INFO ,"Set SIDE to BUY becuase subject contains COVER");
+			log.log(Level.INFO ,"Set Quantity to {0}",Quantity);
+			_location++;
+			
 		}
 		if (Subject.contains("SWING") || Subject.contains("<SW>"))
 		{
@@ -338,33 +365,57 @@ public class mailReader {
 	//	System.out.println(m_model.getValueAt(0, 1));
 	//	System.out.println(_Execs.toString());
 	//	System.out.println(_Execs.isEmpty());
-		
+	
 	
 		int _PositionQuantity = 0;
+		int count2=0;
+		int count=0;
 		log.log(Level.INFO ,"{0} Executions found",m_model.getRowCount());
 		
-		
-		while (m_model.getRowCount()==0)
+		  long lDateTime = new Date().getTime();
+		  
+		  long _timeout = 5000;
+		  long _delta=0;
+		  int _iterator=0;
+		while (m_model.getRowCount()==0 && _iterator<5)
 		{
 			log.log(Level.FINEST ,"{0} Executions found retrying",m_model.getRowCount());
-			System.out.println("here");
-			System.out.println(m_model.getRowCount());
+				
 			try {
-			//	synchronised wait(1000);
-			} catch (Exception e) {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-		//		System.out.println("exception");
-			}
+			}	
 			
+			_iterator++;
+			
+			
+		//	 long lDateTimeNow = new Date().getTime();
+			
+		//	_delta = lDateTimeNow-lDateTime;
 			
 		}
 		
+		count = m_model.getRowCount();
+		
+		if( count ==0)
+			{
+				return 0;
+			}
+		
+		
+		log.log(Level.INFO ,"It took {0} ms to find the position data",_delta);
+		
+		
+		
 		log.log(Level.INFO ,"{0} Executions found",m_model.getRowCount());
-		for (int i=0;i< m_model.getRowCount();i++)
+		
+		
+		
+		for (int i=0;i< count;i++)
 		{
 			log.log(Level.INFO ,"{0} {1} avg price of {2}",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
-			
 						
 			if (m_model.getValueAt(i, 2).equals(Symbol))
 			{
@@ -374,9 +425,55 @@ public class mailReader {
 				_PositionQuantity = (Integer) (obj == null ? "" :  obj);
 				
 			}
+		}
+		if (_PositionQuantity==0)
+		{
+			
+			
+			//try again
+			count2 = m_model.getRowCount();
+			for (int i=0;i< count2;i++)
+			{
+				log.log(Level.INFO ,"{0} {1} avg price of {2}",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
+							
+				if (m_model.getValueAt(i, 2).equals(Symbol))
+				{
+					Object obj = m_model.getValueAt(i, 3);
+					_PositionQuantity = (Integer) (obj == null ? "" :  obj);
+					
+				}
+			}
+		}
+	
+		//check if its still zero
+		
+		if (_PositionQuantity==0 && count!=count2)
+		{
+			try {
+				Thread.sleep(2000);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+			
+			for (int i=0;i< m_model.getRowCount();i++)
+			{
+				log.log(Level.INFO ,"{0} {1} avg price of {2}",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
+							
+				if (m_model.getValueAt(i, 2).equals(Symbol))
+				{
+					Object obj = m_model.getValueAt(i, 3);
+					_PositionQuantity = (Integer) (obj == null ? "" :  obj);
+					
+				}
+			}
+			
+		}
+		
 	
 		
-		}
+		
+		
 		log.log(Level.INFO ,"Returning position {0} for Ticker {1}",new Object[]{_PositionQuantity,Symbol});
 		return _PositionQuantity;
 		

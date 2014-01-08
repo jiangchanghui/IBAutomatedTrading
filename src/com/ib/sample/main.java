@@ -33,6 +33,7 @@ import com.reademail.main.mailReader;
 import com.web.server.WebServer;
 
 
+import apidemo.AccountInfoPanel;
 import apidemo.MarketDataPanel;
 import apidemo.TicketDlg;
 import apidemo.TradingPanel;
@@ -60,7 +61,7 @@ public class main implements IConnectionHandler{
 	public ArrayList<String> accountList() 	{ return m_acctList; }
 	public ApiController controller() 		{ return m_controller; }
 	public JFrame frame() 					{ return m_frame; }
-	
+	private final AccountInfoPanel m_acctInfoPanel = new AccountInfoPanel();
 	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
 		INSTANCE.run();
@@ -94,7 +95,7 @@ public class main implements IConnectionHandler{
 		m_tabbedPanel.addTab( "Connection", m_connectionPanel);
 		m_tabbedPanel.addTab( "Market Data", m_mktDataPanel);
 		m_tabbedPanel.addTab( "Trading", m_tradingPanel);
-		
+		m_tabbedPanel.addTab( "Account Info", m_acctInfoPanel);
 		// m_tabbedPanel.addTab( "Strategy", m_stratPanel); in progress
 			
 		m_msg.setEditable( false);

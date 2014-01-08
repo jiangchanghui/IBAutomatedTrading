@@ -2204,6 +2204,9 @@ public class EClientSocket {
         catch (IOException e) {
             error( EClientErrors.NO_VALID_ID, EClientErrors.FAIL_SEND_REQPOSITIONS, "" + e);
         }
+        
+        
+        
     }
 
     public synchronized void cancelPositions() {
