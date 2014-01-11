@@ -22,7 +22,7 @@ import com.ib.controller.Types.MktDataType;
 import com.ib.sample.main;
 
 
-class TopModel extends AbstractTableModel {
+public class TopModel extends AbstractTableModel {
 	private ArrayList<TopRow> m_rows = new ArrayList<TopRow>();
 
 	void addRow( NewContract contract) {
@@ -92,12 +92,12 @@ class TopModel extends AbstractTableModel {
 		main.INSTANCE.controller().cancelTopMktData( m_rows.get( i) );
 	}
 	
-	static class TopRow extends TopMktDataAdapter {
+	public static class TopRow extends TopMktDataAdapter {
 		AbstractTableModel m_model;
 		String m_description;
-		double m_bid;
-		double m_ask;
-		double m_last;
+		public double m_bid;
+		public double m_ask;
+		public double m_last;
 		long m_lastTime;
 		int m_bidSize;
 		int m_askSize;
@@ -105,7 +105,7 @@ class TopModel extends AbstractTableModel {
 		int m_volume;
 		boolean m_frozen;
 		
-		TopRow( AbstractTableModel model, String description) {
+		public TopRow( AbstractTableModel model, String description) {
 			m_model = model;
 			m_description = description;
 		}

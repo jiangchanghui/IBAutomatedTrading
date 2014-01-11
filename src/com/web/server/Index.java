@@ -17,6 +17,7 @@ import apidemo.CreateOrderFromEmail;
 import apidemo.OrdersPanel;
 import apidemo.OrdersPanel.OrdersModel;
 import apidemo.PositionsPanel.PositionModel;
+import apidemo.TopModel.TopRow;
 
 
 import com.google.gson.Gson;
@@ -40,9 +41,12 @@ import java.util.List;
 
 import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
+import com.ib.controller.NewOrder;
 import com.ib.controller.OrderStatus;
+import com.ib.controller.OrderType;
 import com.ib.controller.ApiController.IPositionHandler;
 import com.ib.controller.Types.Action;
+import com.ib.controller.Types.SecType;
 import com.ib.sample.main;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -54,7 +58,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import com.reademail.main.OrderTemplate;
 import com.reademail.main.mailReader;
-
+import apidemo.TopModel.TopRow;
 
 
 
@@ -123,7 +127,7 @@ public class Index extends Thread{
 	        JSONObject obj_cols_1 = new JSONObject();
 	        JSONObject obj_cols_2 = new JSONObject();
 	        JSONObject obj_cols_3 = new JSONObject();
-	      
+	        JSONObject obj_cols_4 = new JSONObject();
 		
 		 obj_cols_1.put("id", "");
 	        obj_cols_1.put("label", "Ticker");
@@ -137,12 +141,16 @@ public class Index extends Thread{
 	        obj_cols_3.put("label", "AvgPx");
 	        obj_cols_3.put("type", "string");
 
-	        
+	        obj_cols_4.put("id", "");
+	        obj_cols_4.put("label", "LastPrice");
+	        obj_cols_4.put("type", "string");
+
 			
 			
 	        l_cols.add(obj_cols_1);
 	        l_cols.add(obj_cols_2);
 	        l_cols.add(obj_cols_3);
+	        l_cols.add(obj_cols_4);
 	        obj1.put("cols", l_cols);
 		
 		
@@ -179,23 +187,30 @@ public class Index extends Thread{
 			 obj_response = m_model.getValueAt(i, 4);
 			String AvgPrice = (String) (obj_response == null ? "" :  obj_response);
 			
+			 obj_response = m_model.getValueAt(i, 2);
+				String Symbol = (String) (obj_response == null ? "" :  obj_response);
+				
+			double LastPx = GetFarPrice(Symbol);
+			
 			LinkedList l1_rows = new LinkedList();
  			JSONObject obj_row1 = new JSONObject();
 	        JSONObject obj_row2 = new JSONObject();
 	        JSONObject obj_row3 = new JSONObject();
-	  
+	        JSONObject obj_row4 = new JSONObject();
+	  	  
 	        obj_row1.put("v", _Symbol);
 	        obj_row1.put("f", null);
 	        obj_row2.put("v", Quantity);
 	        obj_row2.put("f", null);
 	        obj_row3.put("v", AvgPrice);
 	        obj_row3.put("f", null);
-	        
+	        obj_row4.put("v", LastPx);
+	        obj_row4.put("f", null);
 	        
 	        l1_rows.add(obj_row1);
 	        l1_rows.add(obj_row2);
 	        l1_rows.add(obj_row3);
-	      
+	        l1_rows.add(obj_row4);
 	        LinkedHashMap m1 = new LinkedHashMap();
 	        m1.put("c", l1_rows);
             l_final.add(m1);
@@ -285,6 +300,10 @@ public class Index extends Thread{
 			 obj_response = m_model.getValueAt(i, 7);
 			 OrderStatus Status = (OrderStatus) (obj_response == null ? "" :  obj_response);
 			 
+			 
+			 
+			 
+			 
 			 	LinkedList l1_rows = new LinkedList();
 	 			JSONObject obj_row1 = new JSONObject();
 		        JSONObject obj_row2 = new JSONObject();
@@ -320,6 +339,28 @@ public class Index extends Thread{
         
 
 	}
+	
+	private double GetFarPrice(String Symbol)
+	{
+		NewContract contract = new NewContract();
+		NewOrder order = new NewOrder();
+		contract.symbol(Symbol);
+				
+		contract.secType(SecType.STK);
+		contract.exchange("SMART");
+		contract.currency("USD");
+		
+			
+		
+		TopRow row = new TopRow( null, contract.description() );
+		//m_rows.add( row);
+		main.INSTANCE.controller().reqTopMktData(contract, "", false, row);
+	//	fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
+		
+		return row.m_last;
+	}
+	
+	
 	
 	class Order {
 		String Symbol;
