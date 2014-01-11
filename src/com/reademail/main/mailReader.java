@@ -34,151 +34,73 @@ import com.ib.controller.ApiController.IPositionHandler;
 import com.ib.controller.ApiController.ITradeReportHandler;
 import com.ib.controller.Types.Action;
 import com.ib.sample.main;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.QueueingConsumer;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
 
 
-public class mailReader {
+public class mailReader extends Thread{
 	private static final Logger log = Logger.getLogger( mailReader.class.getName() );
-	main _mainInstance;
-	 Double _FFLimit=0.0;
-	public mailReader(main main) {
-		_mainInstance = main;
-		Start();
-	}
-
-		
-	private void Start()
+	 private final static String QUEUE_NEWEMAIL = "NEWEMAIL";
+	 static Double _FFLimit=0.0;
+			
+	public void run()
 	{
 	//	TestLogic();
 		final CreateOrderFromEmail _CreateOrder = new CreateOrderFromEmail();				
 		SubjectSplitter _SubjectSplitter = new SubjectSplitter();
-		  
+		
+		try{
 		 Properties props = new Properties();
-		 String _Email="";
-		 String _Password="";
-		 String _TradeAlertEmail="";
-		 final boolean FilterEmails=true;
-		 try {
-			 log.log(Level.INFO ,"Processing config entries");
-			props.load(new FileInputStream("c:\\config.properties"));
-			_Email = props.getProperty("email");
-	    	_Password = props.getProperty("password");
-	    	_TradeAlertEmail = props.getProperty("alertemail");
-			_FFLimit = Double.valueOf(props.getProperty("fflimit"));
-			 log.log(Level.INFO ,"Processing config entries -Done");
-		} catch (Exception e1) {
-		}
-		 
-		 
-		 
-	        props.setProperty("mail.store.protocol", "imaps");
-	        try {
-	            Session session = Session.getInstance(props, null);
-	            Store store = session.getStore();
-	            store.connect("imap.gmail.com", _Email, _Password);
-	           
-	            
-	           /* 
-	            Folder inbox = store.getFolder("INBOX");
-	            inbox.open(Folder.READ_ONLY);
-	            Message msg = inbox.getMessage(inbox.getMessageCount());
-	            Address[] in = msg.getFrom();
-	            for (Address address : in) {
-	                System.out.println("FROM:" + address.toString());
-	            }
-	            Multipart mp = (Multipart) msg.getContent();
-	            BodyPart bp = mp.getBodyPart(0);
-	            System.out.println("SENT DATE:" + msg.getSentDate());
-	            System.out.println("SUBJECT:" + msg.getSubject());
-	            System.out.println("CONTENT:" + bp.getContent());
-	            */
-	            
-	         //   IMAPStore imapStore = (IMAPStore) session.getStore("imaps");
-	         //   imapStore.connect();
-	            
-	           final Folder folder = store.getFolder("INBOX");
-	            
-	         //   final IMAPFolder folder = (IMAPFolder) imapStore.getFolder("Inbox");
-	            folder.open(Folder.READ_WRITE);
-	            
-	           
-	            
-	            folder.addMessageCountListener(new MessageCountListener() {
+		 props.load(new FileInputStream("c:\\config.properties"));
+		 _FFLimit = Double.valueOf(props.getProperty("fflimit"));
 
-	               
-					@Override
-					public void messagesAdded(MessageCountEvent arg0) {
-					
-						 log.log(Level.INFO ,"New EMail");
-						 try {
-							Message msg = folder.getMessage(folder.getMessageCount());
-							
-							String from = InternetAddress.toString(msg.getFrom());
-							 log.log(Level.INFO ,"SENT DATE : {0}",msg.getSentDate());
-							 log.log(Level.INFO ,"FROM : {0}",from);
-							 log.log(Level.INFO ,"SUBJECT : {0}",msg.getSubject());
 					           
 							
-					        
-					        //   if (FilterEmails && from == "gold@bullsonwallstreet.com")
-					      //     {					            
-					            OrderTemplate  _OrderTemplate = Split(msg.getSubject());
+		 ConnectionFactory factory = new ConnectionFactory();
+		    factory.setHost("localhost");
+		    Connection connection = factory.newConnection();
+		    Channel channel_Recv = connection.createChannel();
+		    Channel channel_Send = connection.createChannel();
+		    channel_Recv.queueDeclare(QUEUE_NEWEMAIL, false, false, false, null);
+		     		    
+		    QueueingConsumer consumer = new QueueingConsumer(channel_Recv);
+		    channel_Recv.basicConsume(QUEUE_NEWEMAIL, true, consumer);
+		    
+		    
+		    
+		    while (true) {
+		      log.log(Level.INFO,"Trading waiting for new emails on Queue : {0}",QUEUE_NEWEMAIL);
+		    //blocking call until a message enteres queue
+		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+		      String message = new String(delivery.getBody());
+		      log.log(Level.INFO,"Trading received new message on queue {0} : {1}",new Object[]{QUEUE_NEWEMAIL,message});
+		 
+					  
+					            OrderTemplate  _OrderTemplate = Split(message);
 					            log.log(Level.INFO ,"Routing order for {0}",_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 					            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
 					    
-					            //     }
+			    }
 							
-						} catch (MessagingException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						 
-						 
-					}
-
-					@Override
-					public void messagesRemoved(MessageCountEvent arg0) {
-						
-						
-					}
-	            });
-
-	    folder.addMessageChangedListener(new MessageChangedListener() {
-
-	                public void messageChanged(MessageChangedEvent e) {
-	                
-	                }
-	            });
+					
+		}
+		catch (Exception e)
+		{
+			 log.log(Level.SEVERE ,"Error occured with Trading Email listene : {0}",e.toString());
+		}
+	 
 	            
-	    Thread t = new Thread(new Runnable() {
-
-		            public void run() {
-		            	 log.log(Level.INFO ,"Listening for new emails" );
-		                try {
-		                    while (true) {
-		                    	
-		                        ((IMAPFolder) folder).idle();
-		                    }
-		                } catch (MessagingException ex) {
-		                    //Handling exception goes here
-		                }
-		            }
-		        });
-
-        t.start();
-	            
-	            
-	            
-	        } catch (Exception mex) {
-	            mex.printStackTrace();
-	        }
+	    
 	}
 	
 	public OrderTemplate Split(String Message)
 	{
-		 log.log(Level.INFO ,"Received message : {0}", Message );
+		 log.log(Level.INFO ,"Deciphering  message : {0}", Message );
 		
 		String Subject = Message.toUpperCase();
 		String[] array = Subject.split(" "); 
@@ -238,7 +160,7 @@ public class mailReader {
 			if (s.contains("OUT") && Quantity==0)
 			{
 				int Position = GetPosition(Ticker);
-				Quantity = Position;
+				Quantity = Math.abs(Position);
 				
 				if (Position < 0)
 				{
@@ -335,7 +257,7 @@ public class mailReader {
 		}
 		
 		
-			OrderTemplate _OrderTemplate = new OrderTemplate(Quantity,Ticker,Side);
+			OrderTemplate _OrderTemplate = new OrderTemplate(Math.abs(Quantity),Ticker,Side);
 		
 		
 		return _OrderTemplate;
@@ -447,7 +369,7 @@ public class mailReader {
 	
 		//check if its still zero
 		
-		if (_PositionQuantity==0 && count!=count2)
+		if (_PositionQuantity==0)
 		{
 			try {
 				Thread.sleep(2000);

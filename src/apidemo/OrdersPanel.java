@@ -30,7 +30,7 @@ public class OrdersPanel extends JPanel {
 	public OrdersModel m_model = new OrdersModel();
 	private JTable m_table = new JTable( m_model);
 
-	OrdersPanel() {
+	public OrdersPanel() {
 		JScrollPane scroll = new JScrollPane( m_table);
 		scroll.setBorder( new TitledBorder( "Live Orders"));
 		
@@ -167,6 +167,7 @@ public class OrdersPanel extends JPanel {
 		m_model.clear();
 		m_model.fireTableDataChanged();
 		main.INSTANCE.controller().reqLiveOrders( m_model);
+		
 	}
 	
 	public static class OrdersModel extends AbstractTableModel implements ILiveOrderHandler {

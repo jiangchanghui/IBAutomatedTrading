@@ -26,11 +26,10 @@ public class WebServer {
            
        //     S.WriteLog("IP Address : "+IP);
             
-       Endpoint.publish("http://"+IP+":5123/web", new Index());
+    //   Endpoint.publish("http://"+IP+":5123/web", new Index());
 
-       
+      new Index().start();
       
-      System.out.println("Server is up!");
 		
 	}
 }

@@ -89,7 +89,7 @@ public class main implements IConnectionHandler{
 	
 	private void run() throws UnknownHostException {
 		
-		mailReader _mailReader = new mailReader(this);
+		new mailReader().start();
 		WebServer _webServer = new WebServer();
 		
 		m_tabbedPanel.addTab( "Connection", m_connectionPanel);
