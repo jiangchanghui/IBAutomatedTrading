@@ -5,7 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -46,11 +49,13 @@ import com.sun.mail.imap.IMAPStore;
 public class mailReader extends Thread{
 	private static final Logger log = Logger.getLogger( mailReader.class.getName() );
 	 private final static String QUEUE_NEWEMAIL = "NEWEMAIL";
+	 private static String QUsername="";
+	 private static String QPassword="";
 	 static Double _FFLimit=0.0;
 			
 	public void run()
 	{
-	//	TestLogic();
+		AttachLogHandler();
 		final CreateOrderFromEmail _CreateOrder = new CreateOrderFromEmail();				
 		SubjectSplitter _SubjectSplitter = new SubjectSplitter();
 		
@@ -58,11 +63,16 @@ public class mailReader extends Thread{
 		 Properties props = new Properties();
 		 props.load(new FileInputStream("c:\\config.properties"));
 		 _FFLimit = Double.valueOf(props.getProperty("fflimit"));
-
+		 QUsername = props.getProperty("qusername");
+		 QPassword = props.getProperty("qpassword");
 					           
 							
 		 ConnectionFactory factory = new ConnectionFactory();
 		    factory.setHost("localhost");
+		    factory.setUsername(QUsername); 
+			factory.setPassword(QPassword); 
+			factory.setVirtualHost("/"); 
+		    
 		    Connection connection = factory.newConnection();
 		    Channel channel_Recv = connection.createChannel();
 		    Channel channel_Send = connection.createChannel();
@@ -74,6 +84,11 @@ public class mailReader extends Thread{
 		    
 		    
 		    while (true) {
+		    	
+		    	
+		    	try{
+		    		
+		    	
 		      log.log(Level.INFO,"Trading waiting for new emails on Queue : {0}",QUEUE_NEWEMAIL);
 		    //blocking call until a message enteres queue
 		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
@@ -82,9 +97,19 @@ public class mailReader extends Thread{
 		 
 					  
 					            OrderTemplate  _OrderTemplate = Split(message);
-					            log.log(Level.INFO ,"Routing order for {0}",_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
+					            log.log(Level.INFO ,"*****Logic completed, Routing order for {0}",_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 					            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
-					    
+					 
+					            
+		    	}
+		    	catch(Exception e)
+		    	{
+		    		 log.log(Level.SEVERE ,"Error occured with Trading Email listener : {0}",e.toString());
+		    	}
+					            
+					            
+					            
+					            
 			    }
 							
 					
@@ -113,7 +138,7 @@ public class mailReader extends Thread{
 		{
 			//TICKER
 			
-			if (s.startsWith("$"))
+			if (s.startsWith("$") && Ticker==null)
 			{
 				Ticker = s.substring(1).toUpperCase();
 				log.log(Level.INFO ,"Set Ticker to {0}", Ticker );
@@ -181,9 +206,18 @@ public class mailReader extends Thread{
 			{
 				int number = Integer.parseInt(s.substring(s.indexOf("/")+1,s.indexOf("/")+2));
 				int Position = Math.abs(GetPosition(Ticker));
-				Quantity = (Position/number);
+				if(Position>0)
+				{
+					Quantity = (Position/number);
 				log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1} and position is{2}", new Object[]{Quantity,s,Position});
+				}
+				else 
+				{
+				Quantity=0;
+				log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1} and position is{2}", new Object[]{Quantity,s,Position});
+				}
 				_location++;
+				
 			}
 		
 			if (s.contains("K") && s.length()==2)
@@ -237,27 +271,65 @@ public class mailReader extends Thread{
 		}
 		log.log(Level.INFO ,"End of main logic, checking entire message");
 		
-		if (Subject.contains("COVER"))
+		if (Quantity==0)
 		{
-			int Position = GetPosition(Ticker);
-			Quantity = Position;
-			if (Position < 0)
+			if (Subject.contains("COVER") || Subject.contains("FLAT"))
 			{
-				Side = Action.BUY;
+				int Position = GetPosition(Ticker);
+				Quantity = Position;
+				if (Position < 0)
+				{
+					Side = Action.BUY;
+				}
+				else
+				{
+					Side = Action.SELL;
+				}
+				log.log(Level.INFO ,"Set SIDE to {0} becuase subject contains COVER/FLAT",Side.toString());
+				log.log(Level.INFO ,"Set Quantity to {0}",Quantity);
+				_location++;
+				
 			}
-			log.log(Level.INFO ,"Set SIDE to BUY becuase subject contains COVER");
-			log.log(Level.INFO ,"Set Quantity to {0}",Quantity);
-			_location++;
-			
 		}
 		if (Subject.contains("SWING") || Subject.contains("<SW>"))
 		{
+			int Position = GetPosition(Ticker);
+			if (Position ==0)
+			{
 			Ticker = null;
 			log.log(Level.INFO ,"Message contains SWING and so Ticker is {0}",Ticker);
+			}
+			else
+			{
+				Quantity = Position;
+					if (Position < 0)
+					{
+						Side = Action.BUY;
+					}
+					else
+					{
+						Side=Action.SELL;
+					}
+			}
 		}
+		if (!Subject.substring(0, 10).contains("<S>") && !Subject.substring(0, 10).contains("<B>"))
+		{
+			Ticker="none";
+			
+		}
+		//Check for quotations at the start and end.
+		Ticker.trim();
+		if (Ticker.endsWith("\""))
+		{
+			Ticker = Ticker.substring(0,Ticker.length()-2);
+		}
+		if (Ticker.startsWith("\""))
+		{
+			Ticker = Ticker.substring(1);
+		}
+			
 		
-		
-			OrderTemplate _OrderTemplate = new OrderTemplate(Math.abs(Quantity),Ticker,Side);
+		OrderTemplate _OrderTemplate = new OrderTemplate(Math.abs(Quantity),Ticker,Side);
 		
 		
 		return _OrderTemplate;
@@ -265,6 +337,7 @@ public class mailReader extends Thread{
 	 PositionModel m_model = new PositionModel();
 	private int GetPosition(String Symbol)
 	{
+		
 		log.log(Level.INFO ,"Getting Position data for {0}",Symbol);
 		
 	//	ITradeReportHandler m_tradeReportHandler = null;
@@ -294,6 +367,7 @@ public class mailReader extends Thread{
 		int count=0;
 		log.log(Level.INFO ,"{0} Executions found",m_model.getRowCount());
 		
+	
 		  long lDateTime = new Date().getTime();
 		  
 		  long _timeout = 5000;
@@ -521,30 +595,24 @@ public class mailReader extends Thread{
 	}
 	
 	
-	private void TestLogic()
+	public OrderTemplate getSplit(String message)
 	{
-		BufferedReader br;
-		try {
-			br = new BufferedReader(new FileReader("C:\\Users\\Ben\\SampleSubjects.txt"));
-			PrintWriter writer = new PrintWriter("C:\\Users\\Ben\\SampleSubjects_processed.txt", "UTF-8");
-		String line;
-		while ((line = br.readLine()) != null) {
-		   
-			if (!(line.contains("http")) && line.contains("$"))
-			{
-				 OrderTemplate  _OrderTemplate = Split(line);
-			     writer.println(line+","+_OrderTemplate.getSide()+","+_OrderTemplate.getTicker()+","+_OrderTemplate.getQuantity());
-			}
-		}
-		br.close();
-		writer.close();
-		
-		} catch (Exception e) {
-			
-			e.printStackTrace();
-		}
-		
-		
+	
+		return Split(message);
 	}
+	 private void AttachLogHandler()
+	 {
+		 try
+			{
+			Date date = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			Handler handler = new FileHandler("C:\\Users\\Ben\\IBLogs\\IBTrading"+sdf.format(date)+".log");
+			log.addHandler(handler);
+			}
+			catch (Exception e)
+			{
+				System.out.println(e.toString());
+			}
+	 }
 	
 }

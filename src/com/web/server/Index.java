@@ -1,11 +1,16 @@
 package com.web.server;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +36,7 @@ import org.json.simple.JSONObject;
 
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
@@ -67,12 +73,24 @@ public class Index extends Thread{
 	private static final Logger log = Logger.getLogger( mailReader.class.getName() );
 	 private final static String QUEUE_WEBQUERY = "WEBREQUEST";
 	 private final static String QUEUE_WEBRESPONSE = "WEBRESPONSE";
-	
+	 private static String QUsername="";
+	 private  static String QPassword="";
 	 public void run()
 	{
 		try{
-		 ConnectionFactory factory = new ConnectionFactory();
+			AttachLogHandler();
+			Properties props = new Properties();
+			log.log(Level.INFO ,"Processing config entries");
+			props.load(new FileInputStream("c:\\config.properties"));
+			QUsername = props.getProperty("qusername");
+	    	QPassword = props.getProperty("qpassword");
+	    	log.log(Level.INFO ,"Processing config entries complete");
+	    	ConnectionFactory factory = new ConnectionFactory();
 		    factory.setHost("localhost");
+		    factory.setUsername(QUsername); 
+			factory.setPassword(QPassword); 
+			factory.setVirtualHost("/");   
+		    
 		    Connection connection = factory.newConnection();
 		    Channel channel_Recv = connection.createChannel();
 		    Channel channel_Send = connection.createChannel();
@@ -485,7 +503,20 @@ public class Index extends Thread{
 			m_avgCost = avgCost;
 		}
 	}
-	
+	 private void AttachLogHandler()
+	 {
+		 try
+			{
+			Date date = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			Handler handler = new FileHandler("C:\\Users\\Ben\\IBLogs\\IBTrading"+sdf.format(date)+".log");
+			log.addHandler(handler);
+			}
+			catch (Exception e)
+			{
+				System.out.println(e.toString());
+			}
+	 }
 	
 }
 
