@@ -87,6 +87,15 @@ public class ApiController implements EWrapper {
 		sendEOM();
 	}
 
+	public boolean IsConnected()
+	{
+		return m_client.GetConnected();
+		
+		
+	}
+	
+	
+	
 	public void disconnect() {
 		m_client.eDisconnect();
 		m_connectionHandler.disconnected();

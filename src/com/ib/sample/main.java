@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.JFrame;
@@ -62,6 +64,10 @@ public class main implements IConnectionHandler{
 	public ApiController controller() 		{ return m_controller; }
 	public JFrame frame() 					{ return m_frame; }
 	private final AccountInfoPanel m_acctInfoPanel = new AccountInfoPanel();
+	
+	public Map<String,String> m_ordersMap = new HashMap<String,String>();
+		
+	
 	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
 		INSTANCE.run();

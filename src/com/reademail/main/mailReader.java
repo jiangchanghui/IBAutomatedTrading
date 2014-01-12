@@ -99,7 +99,7 @@ public class mailReader extends Thread{
 					            OrderTemplate  _OrderTemplate = Split(message);
 					            log.log(Level.INFO ,"*****Logic completed, Routing order for {0}",_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 					            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
-					 
+					            main.INSTANCE.m_ordersMap.put(message,_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 					            
 		    	}
 		    	catch(Exception e)
@@ -162,7 +162,7 @@ public class mailReader extends Thread{
 				continue;
 			}
 			//Quantity
-			if (s.matches(regex) && _location<6) 
+			if (s.matches(regex) && _location<5) 
 			{
 			   Quantity = Integer.parseInt(s);
 			   log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});

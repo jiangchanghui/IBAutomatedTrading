@@ -214,6 +214,13 @@ public class EClientSocket {
         m_anyWrapper = anyWrapper;
     }
 
+    public boolean GetConnected()
+    {
+    	return m_connected;
+    	    	
+    }
+    
+    
     public synchronized void eConnect( String host, int port, int clientId) {
         // already connected?
         host = checkConnected(host);

@@ -31,7 +31,7 @@ public class CreateOrderFromEmail {
 	
 	public void CreateOrder(String Symbol, int Quantity, Action Side, Double FFLimit)
 	{
-		if (Symbol==null  || Quantity == 0 || Side == null || FFLimit == 0.0)
+		if (Symbol==null  || Quantity == 0 || Side == null)
 		{
 			 log.log(Level.WARNING ,"Order Create failed with Symbol : {0}, Quantity : {1}, Side : {2}, FFLimit :{3}",new Object[]{Symbol,Quantity,Side.toString(),FFLimit});
 			return;
@@ -51,7 +51,7 @@ public class CreateOrderFromEmail {
 			
 		order.orderType(OrderType.MKT);
 		
-		order.lmtPrice(FarPrice);
+		//order.lmtPrice(FarPrice);
 		
 		contract.secType(SecType.STK);
 		contract.exchange("SMART");
@@ -77,11 +77,11 @@ public class CreateOrderFromEmail {
 						if (errorMsg.contains("Order held"))
 						{
 							log.log(Level.SEVERE ,"Order is held, cancelling all open orders");
-						//	main.INSTANCE.controller().cancelAllOrders();
+					//		main.INSTANCE.controller().cancelAllOrders();
 						}
 						if (errorMsg.contains("not be placed"))
 						{
-						//	main.INSTANCE.controller().cancelAllOrders();
+					//		main.INSTANCE.controller().cancelAllOrders();
 						}
 					}
 				});

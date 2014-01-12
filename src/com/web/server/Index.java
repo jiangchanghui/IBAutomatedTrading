@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.FileHandler;
@@ -75,6 +76,8 @@ public class Index extends Thread{
 	 private final static String QUEUE_WEBRESPONSE = "WEBRESPONSE";
 	 private static String QUsername="";
 	 private  static String QPassword="";
+	 ConnectionFactory factory;
+	 Connection connection;
 	 public void run()
 	{
 		try{
@@ -85,13 +88,13 @@ public class Index extends Thread{
 			QUsername = props.getProperty("qusername");
 	    	QPassword = props.getProperty("qpassword");
 	    	log.log(Level.INFO ,"Processing config entries complete");
-	    	ConnectionFactory factory = new ConnectionFactory();
+	    	factory = new ConnectionFactory();
 		    factory.setHost("localhost");
 		    factory.setUsername(QUsername); 
 			factory.setPassword(QPassword); 
 			factory.setVirtualHost("/");   
 		    
-		    Connection connection = factory.newConnection();
+		    connection = factory.newConnection();
 		    Channel channel_Recv = connection.createChannel();
 		    Channel channel_Send = connection.createChannel();
 		    channel_Recv.queueDeclare(QUEUE_WEBQUERY, false, false, false, null);
@@ -118,6 +121,19 @@ public class Index extends Thread{
 		      {
 		    	Response = GetOpenPositions();
 		      }
+		      if (message.equals("GETHISTORY"))
+		      {
+		    	Response = GetHistory();
+		      }
+		      if (message.equals("CANCELALL"))
+		      {
+		    	Response = CancelAllOrders();
+		      }
+		      if (message.equals("ISCONNECTED"))
+		      {
+		    	Response = IsConnected();
+		      }
+		     
 		      channel_Send.basicPublish("", QUEUE_WEBRESPONSE, null, Response.getBytes());
 		      log.log(Level.INFO,"Sent WebReply message on Topic {0} : {1}",new Object[]{QUEUE_WEBRESPONSE,Response});
 		    }
@@ -129,12 +145,86 @@ public class Index extends Thread{
 		
 		
 	}
-	private void CancelAllOrders()
+	 
+	 private String IsConnected()
+	 {
+		if ( main.INSTANCE.controller().IsConnected()==true)
+		{
+			return "CONNECTED";	
+		}
+		else
+		{
+			return "DISCONNECTED";
+		}
+		 
+	 }
+	 
+	 
+	 
+	private String GetHistory() {
+
+	Map<String,String> m_ordersMap = new HashMap<String,String>();
+		
+		m_ordersMap = main.INSTANCE.m_ordersMap;
+		
+		 LinkedList l_cols = new LinkedList();
+	        LinkedList l_final = new LinkedList();
+	        JSONObject obj1 = new JSONObject();
+	        JSONObject obj_cols_1 = new JSONObject();
+	        JSONObject obj_cols_2 = new JSONObject();
+		
+	        obj_cols_1.put("id", "");
+	        obj_cols_1.put("label", "Message");
+	        obj_cols_1.put("type", "string");
+
+	        obj_cols_2.put("id", "");
+	        obj_cols_2.put("label", "Created Order");
+	        obj_cols_2.put("type", "string");
+	        
+	        l_cols.add(obj_cols_1);
+	        l_cols.add(obj_cols_2);
+	
+	        obj1.put("cols", l_cols);
+	        
+	        for (Map.Entry<String, String> entry : m_ordersMap.entrySet())
+	        {
+	            System.out.println(entry.getKey() + "/" + entry.getValue());
+	            	         
+	    	LinkedList l1_rows = new LinkedList();
+ 			JSONObject obj_row1 = new JSONObject();
+	        JSONObject obj_row2 = new JSONObject();
+	        
+	  	  
+	        obj_row1.put("v", entry.getKey());
+	        obj_row1.put("f", null);
+	        obj_row2.put("v", entry.getValue());
+	        obj_row2.put("f", null);
+	        
+	        l1_rows.add(obj_row1);
+	        l1_rows.add(obj_row2);
+	       
+	        LinkedHashMap m1 = new LinkedHashMap();
+	        m1.put("c", l1_rows);
+            l_final.add(m1);
+	        }
+	        obj1.put("rows", l_final);
+		return obj1.toJSONString();
+	}
+
+	
+	
+	private String CancelAllOrders()
 	{
-		
-		
-		
-		
+		try
+		{
+			main.INSTANCE.controller().cancelAllOrders();
+			return "Cancel sent for all orders";
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE,e.toString());
+			return e.toString();
+		}
 	}
 	  PositionModel m_model = new PositionModel();
 	private String GetOpenPositions()
@@ -208,7 +298,8 @@ public class Index extends Thread{
 			 obj_response = m_model.getValueAt(i, 2);
 				String Symbol = (String) (obj_response == null ? "" :  obj_response);
 				
-			double LastPx = GetFarPrice(Symbol);
+			double LastPx = 0.0;
+					//GetFarPrice(Symbol);
 			
 			LinkedList l1_rows = new LinkedList();
  			JSONObject obj_row1 = new JSONObject();
@@ -377,6 +468,7 @@ public class Index extends Thread{
 		
 		return row.m_last;
 	}
+	
 	
 	
 	
