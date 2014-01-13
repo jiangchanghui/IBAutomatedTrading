@@ -133,6 +133,13 @@ public class Index extends Thread{
 		      {
 		    	Response = IsConnected();
 		      }
+		      if (message.equals("RUN_EMAIL_LISTENER"))
+		      {
+		    	  Runtime.getRuntime().exec("java -jar C:\\Users\\Ben\\Documents\\IBJars\\EmailListener_0.4.jar");
+		    	Response = "true";
+		      }
+		      
+		      
 		     
 		      channel_Send.basicPublish("", QUEUE_WEBRESPONSE, null, Response.getBytes());
 		      log.log(Level.INFO,"Sent WebReply message on Topic {0} : {1}",new Object[]{QUEUE_WEBRESPONSE,Response});

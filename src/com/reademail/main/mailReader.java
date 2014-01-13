@@ -328,7 +328,6 @@ public class mailReader extends Thread{
 			Ticker = Ticker.substring(1);
 		}
 			
-		
 		OrderTemplate _OrderTemplate = new OrderTemplate(Math.abs(Quantity),Ticker,Side);
 		
 		
