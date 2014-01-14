@@ -47,7 +47,7 @@ import com.ib.controller.Types.DeepType;
 import com.ib.controller.Types.DurationUnit;
 import com.ib.controller.Types.MktDataType;
 import com.ib.controller.Types.WhatToShow;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
  
 public class MarketDataPanel extends JPanel {
 	private final NewContract m_contract = new NewContract();
@@ -132,7 +132,7 @@ public class MarketDataPanel extends JPanel {
 		}
 
 		void onReqType() {
-			main.INSTANCE.controller().reqMktDataType( m_typeCombo.getSelectedItem() );
+			IBTradingMain.INSTANCE.controller().reqMktDataType( m_typeCombo.getSelectedItem() );
 		}
 		
 		class TopTable extends JTable {
@@ -169,7 +169,7 @@ public class MarketDataPanel extends JPanel {
 			m_contractPanel.onOK();
 			DeepResultsPanel resultPanel = new DeepResultsPanel();
 			m_resultsPanel.addTab( "Deep " + m_contract.symbol(), resultPanel, true, true);
-			main.INSTANCE.controller().reqDeepMktData(m_contract, 6, resultPanel);
+			IBTradingMain.INSTANCE.controller().reqDeepMktData(m_contract, 6, resultPanel);
 		}
 	}
 
@@ -200,7 +200,7 @@ public class MarketDataPanel extends JPanel {
 		}
 		
 		protected void onDesub() {
-			main.INSTANCE.controller().cancelDeepMktData( this);
+			IBTradingMain.INSTANCE.controller().cancelDeepMktData( this);
 		}
 
 		@Override public void activated() {
@@ -208,7 +208,7 @@ public class MarketDataPanel extends JPanel {
 
 		/** Called when the tab is closed by clicking the X. */
 		@Override public void closed() {
-			main.INSTANCE.controller().cancelDeepMktData( this);
+			IBTradingMain.INSTANCE.controller().cancelDeepMktData( this);
 		}
 		
 		@Override public void updateMktDepth(int pos, String mm, DeepType operation, DeepSide side, double price, int size) {
@@ -338,7 +338,7 @@ public class MarketDataPanel extends JPanel {
 		protected void onHistorical() {
 			m_contractPanel.onOK();
 			BarResultsPanel panel = new BarResultsPanel( true);
-			main.INSTANCE.controller().reqHistoricalData(m_contract, m_end.getText(), m_duration.getInt(), m_durationUnit.getSelectedItem(), m_barSize.getSelectedItem(), m_whatToShow.getSelectedItem(), m_rthOnly.isSelected(), panel);
+			IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, m_end.getText(), m_duration.getInt(), m_durationUnit.getSelectedItem(), m_barSize.getSelectedItem(), m_whatToShow.getSelectedItem(), m_rthOnly.isSelected(), panel);
 			m_resultsPanel.addTab( "Historical " + m_contract.symbol(), panel, true, true);
 		}
 	}
@@ -376,7 +376,7 @@ public class MarketDataPanel extends JPanel {
 		protected void onRealTime() {
 			m_contractPanel.onOK();
 			BarResultsPanel panel = new BarResultsPanel( false);
-			main.INSTANCE.controller().reqRealTimeBars(m_contract, m_whatToShow.getSelectedItem(), m_rthOnly.isSelected(), panel);
+			IBTradingMain.INSTANCE.controller().reqRealTimeBars(m_contract, m_whatToShow.getSelectedItem(), m_rthOnly.isSelected(), panel);
 			m_resultsPanel.addTab( "Real-time " + m_contract.symbol(), panel, true, true);
 		}
 	}
@@ -413,10 +413,10 @@ public class MarketDataPanel extends JPanel {
 		/** Called when the tab is closed by clicking the X. */
 		@Override public void closed() {
 			if (m_historical) {
-				main.INSTANCE.controller().cancelHistoricalData( this);
+				IBTradingMain.INSTANCE.controller().cancelHistoricalData( this);
 			}
 			else {
-				main.INSTANCE.controller().cancelRealtimeBars( this);
+				IBTradingMain.INSTANCE.controller().cancelRealtimeBars( this);
 			}
 		}
 
@@ -516,7 +516,7 @@ public class MarketDataPanel extends JPanel {
 			ScannerResultsPanel resultsPanel = new ScannerResultsPanel();
 			m_resultsPanel.addTab( sub.scanCode(), resultsPanel, true, true);
 
-			main.INSTANCE.controller().reqScannerSubscription( sub, resultsPanel);
+			IBTradingMain.INSTANCE.controller().reqScannerSubscription( sub, resultsPanel);
 		}
 	}
 
@@ -537,7 +537,7 @@ public class MarketDataPanel extends JPanel {
 
 		/** Called when the tab is closed by clicking the X. */
 		@Override public void closed() {
-			main.INSTANCE.controller().cancelScannerSubscription( this);
+			IBTradingMain.INSTANCE.controller().cancelScannerSubscription( this);
 			m_model.desubscribe();
 		}
 

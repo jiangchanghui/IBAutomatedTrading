@@ -19,7 +19,7 @@ import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
 import com.ib.controller.NewTickType;
 import com.ib.controller.Types.MktDataType;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 
 
 public class TopModel extends AbstractTableModel {
@@ -28,7 +28,7 @@ public class TopModel extends AbstractTableModel {
 	void addRow( NewContract contract) {
 		TopRow row = new TopRow( this, contract.description() );
 		m_rows.add( row);
-		main.INSTANCE.controller().reqTopMktData(contract, "", false, row);
+		IBTradingMain.INSTANCE.controller().reqTopMktData(contract, "", false, row);
 		fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
 	}
 
@@ -39,7 +39,7 @@ public class TopModel extends AbstractTableModel {
 
 	public void desubscribe() {
 		for (TopRow row : m_rows) {
-			main.INSTANCE.controller().cancelTopMktData( row);
+			IBTradingMain.INSTANCE.controller().cancelTopMktData( row);
 		}
 	}		
 
@@ -89,7 +89,7 @@ public class TopModel extends AbstractTableModel {
 	}
 
 	public void cancel(int i) {
-		main.INSTANCE.controller().cancelTopMktData( m_rows.get( i) );
+		IBTradingMain.INSTANCE.controller().cancelTopMktData( m_rows.get( i) );
 	}
 	
 	public static class TopRow extends TopMktDataAdapter {

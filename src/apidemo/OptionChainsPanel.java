@@ -41,7 +41,7 @@ import com.ib.controller.NewContractDetails;
 import com.ib.controller.NewTickType;
 import com.ib.controller.Types.Right;
 import com.ib.controller.Types.SecType;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 public class OptionChainsPanel extends JPanel {
 	private NewContract m_underContract = new NewContract();
 	private NewTabbedPanel m_tabbedPanel = new NewTabbedPanel();
@@ -84,7 +84,7 @@ public class OptionChainsPanel extends JPanel {
 		m_underContract.exchange( m_exchange.getText().toUpperCase() ); 
 		m_underContract.currency( m_currency.getText().toUpperCase() ); 
 
-		main.INSTANCE.controller().reqContractDetails( m_underContract, new IContractDetailsHandler() {
+		IBTradingMain.INSTANCE.controller().reqContractDetails( m_underContract, new IContractDetailsHandler() {
 			@Override public void contractDetails(ArrayList<NewContractDetails> list) {
 				onRecUnderDetails( list);
 			}
@@ -93,7 +93,7 @@ public class OptionChainsPanel extends JPanel {
 
 	protected void onRecUnderDetails(ArrayList<NewContractDetails> list) {
 		if (list.size() != 1) {
-			main.INSTANCE.show( "Error: " + list.size() + " underlying contracts returned");
+			IBTradingMain.INSTANCE.show( "Error: " + list.size() + " underlying contracts returned");
 			return;
 		}
 		
@@ -107,7 +107,7 @@ public class OptionChainsPanel extends JPanel {
 		final ChainPanel symbolPanel = new ChainPanel();
 		m_tabbedPanel.addTab( optContract.symbol(), symbolPanel, true, true);
 		
-		main.INSTANCE.controller().reqContractDetails( optContract, symbolPanel);
+		IBTradingMain.INSTANCE.controller().reqContractDetails( optContract, symbolPanel);
 	}
 	
 	private class ChainPanel extends NewTabPanel implements IContractDetailsHandler, ActionListener  {
@@ -146,7 +146,7 @@ public class OptionChainsPanel extends JPanel {
 			
 			m_timer.start();
 			
-			main.INSTANCE.controller().reqTopMktData( m_underContract, "", false, m_stockListener);
+			IBTradingMain.INSTANCE.controller().reqTopMktData( m_underContract, "", false, m_stockListener);
 		}
 		
 		/** Called when the tab is first visited. */
@@ -155,7 +155,7 @@ public class OptionChainsPanel extends JPanel {
 
     	/** Called when the tab is closed by clicking the X. */
         @Override public void closed() {
-            main.INSTANCE.controller().cancelTopMktData( m_stockListener);
+            IBTradingMain.INSTANCE.controller().cancelTopMktData( m_stockListener);
             m_putsModel.desubscribe();
             m_callsModel.desubscribe();
             m_timer.stop();
@@ -201,7 +201,7 @@ public class OptionChainsPanel extends JPanel {
 			
             public void desubscribe() {
                 for (ChainRow row : m_list) {
-                    main.INSTANCE.controller().cancelOptionMktData( row);
+                    IBTradingMain.INSTANCE.controller().cancelOptionMktData( row);
                 }
             }
 			
@@ -218,7 +218,7 @@ public class OptionChainsPanel extends JPanel {
 				ChainRow row = new ChainRow( contract);
 				m_list.add( row);
 				
-				main.INSTANCE.controller().reqOptionMktData(contract, "", snapshot, row);
+				IBTradingMain.INSTANCE.controller().reqOptionMktData(contract, "", snapshot, row);
 				
 				if (snapshot) {
 					Util.sleep( 11); // try to avoid pacing violation at TWS

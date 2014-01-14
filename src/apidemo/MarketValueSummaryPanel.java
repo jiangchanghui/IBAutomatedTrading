@@ -16,7 +16,7 @@ import apidemo.util.NewTabbedPanel.NewTabPanel;
 
 import com.ib.controller.ApiController.IMarketValueSummaryHandler;
 import com.ib.controller.MarketValueTag;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 public class MarketValueSummaryPanel extends NewTabPanel implements IMarketValueSummaryHandler {
 	private MktValModel m_model = new MktValModel();
 
@@ -56,11 +56,11 @@ public class MarketValueSummaryPanel extends NewTabPanel implements IMarketValue
 	}
 
 	private void subscribe() {
-		main.INSTANCE.controller().reqMarketValueSummary( "All", this);
+		IBTradingMain.INSTANCE.controller().reqMarketValueSummary( "All", this);
 	}
 
 	private void desubscribe() {
-		main.INSTANCE.controller().cancelMarketValueSummary( this);
+		IBTradingMain.INSTANCE.controller().cancelMarketValueSummary( this);
 		m_model.clear();
 	}
 

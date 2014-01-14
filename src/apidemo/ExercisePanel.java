@@ -26,7 +26,7 @@ import com.ib.controller.Position;
 import com.ib.controller.ApiController.IAccountHandler;
 import com.ib.controller.Types.ExerciseType;
 import com.ib.controller.Types.SecType;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 
 public class ExercisePanel extends HorzPanel implements INewTab, IAccountHandler {
 	private DefaultListModel m_acctList = new DefaultListModel();
@@ -61,7 +61,7 @@ public class ExercisePanel extends HorzPanel implements INewTab, IAccountHandler
 			if (!selAcct.equals( m_selAcct) ) {
 				m_selAcct = selAcct;
 				m_portfolioModel.clear();
-				main.INSTANCE.controller().reqAccountUpdates(true, m_selAcct, this);
+				IBTradingMain.INSTANCE.controller().reqAccountUpdates(true, m_selAcct, this);
 			}
 		}
 	}
@@ -91,7 +91,7 @@ public class ExercisePanel extends HorzPanel implements INewTab, IAccountHandler
 			int i = m_portTable.getSelectedRow();
 			if (i != -1 && account != null) {
 				Position position = m_portfolioModel.getPosition( i);
-				main.INSTANCE.controller().exerciseOption(account, position.contract(), m_combo.getSelectedItem(), m_qty.getInt(), m_override.isSelected() );
+				IBTradingMain.INSTANCE.controller().exerciseOption(account, position.contract(), m_combo.getSelectedItem(), m_qty.getInt(), m_override.isSelected() );
 			}
 		}
 	}
@@ -105,7 +105,7 @@ public class ExercisePanel extends HorzPanel implements INewTab, IAccountHandler
 		
 	/** Called when the tab is first visited. */
 	@Override public void activated() {
-		for (String account : main.INSTANCE.accountList() ) {
+		for (String account : IBTradingMain.INSTANCE.accountList() ) {
 			m_acctList.addElement( account);
 		}
 	}

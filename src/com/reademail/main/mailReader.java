@@ -36,7 +36,7 @@ import com.ib.controller.NewContract;
 import com.ib.controller.ApiController.IPositionHandler;
 import com.ib.controller.ApiController.ITradeReportHandler;
 import com.ib.controller.Types.Action;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -99,7 +99,7 @@ public class mailReader extends Thread{
 					            OrderTemplate  _OrderTemplate = Split(message);
 					            log.log(Level.INFO ,"*****Logic completed, Routing order for {0}",_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 					            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
-					            main.INSTANCE.m_ordersMap.put(message,_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
+					            IBTradingMain.INSTANCE.m_ordersMap.put(message,_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 					            
 		    	}
 		    	catch(Exception e)
@@ -271,12 +271,12 @@ public class mailReader extends Thread{
 		}
 		log.log(Level.INFO ,"End of main logic, checking entire message");
 		
-		if (Quantity==0)
-		{
+		//if (Quantity==0)
+	//	{
 			if (Subject.contains("COVER") || Subject.contains("FLAT"))
 			{
 				int Position = GetPosition(Ticker);
-				Quantity = Position;
+				log.log(Level.INFO ,"Position {0}",Position);
 				if (Position < 0)
 				{
 					Side = Action.BUY;
@@ -285,12 +285,27 @@ public class mailReader extends Thread{
 				{
 					Side = Action.SELL;
 				}
+				if (Position ==0)
+				{
+					Quantity =0;
+					Ticker = "none";
+					
+				}
+				else if (Quantity ==0 || Quantity > Math.abs(Position))
+					{
+						Quantity = Position;
+						
+						
+					}
+			}
+				
 				log.log(Level.INFO ,"Set SIDE to {0} becuase subject contains COVER/FLAT",Side.toString());
 				log.log(Level.INFO ,"Set Quantity to {0}",Quantity);
 				_location++;
 				
-			}
-		}
+			
+
+		
 		if (Subject.contains("SWING") || Subject.contains("<SW>"))
 		{
 			int Position = GetPosition(Ticker);
@@ -346,7 +361,7 @@ public class mailReader extends Thread{
 	//boolean test=main.INSTANCE.controller().reqExecutions2( new ExecutionFilter(), m_tradesPanel);
 	//	main.INSTANCE.controller().reqLiveOrders( m_model);
 
-	main.INSTANCE.controller().reqPositions( m_model);
+	IBTradingMain.INSTANCE.controller().reqPositions( m_model);
 	
 		//ArrayList<apidemo.TradesPanel.FullExec> _Execs = new ArrayList<apidemo.TradesPanel.FullExec>();
 		

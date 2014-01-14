@@ -19,7 +19,7 @@ import apidemo.util.VerticalPanel;
 import com.ib.controller.AccountSummaryTag;
 import com.ib.controller.ApiController.IAccountSummaryHandler;
 import com.ib.controller.Formats;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 
 
 public class AccountSummaryPanel extends NewTabPanel {
@@ -61,21 +61,21 @@ public class AccountSummaryPanel extends NewTabPanel {
 	}
 	
 	private void subscribe() {
-		main.INSTANCE.controller().reqAccountSummary( "All", AccountSummaryTag.values(), m_model); 
+		IBTradingMain.INSTANCE.controller().reqAccountSummary( "All", AccountSummaryTag.values(), m_model); 
 	}
 	
 	private void desubscribe() {
-		main.INSTANCE.controller().cancelAccountSummary( m_model);
+		IBTradingMain.INSTANCE.controller().cancelAccountSummary( m_model);
 		m_model.clear();
 	}
 	
-	private class SummaryModel extends AbstractTableModel implements IAccountSummaryHandler {
+	public class SummaryModel extends AbstractTableModel implements IAccountSummaryHandler {
 		ArrayList<SummaryRow> m_rows = new ArrayList<SummaryRow>();
 		HashMap<String,SummaryRow> m_map = new HashMap<String,SummaryRow>();
 		boolean m_complete;
 
 		public void clear() {
-			main.INSTANCE.controller().cancelAccountSummary( this);
+			IBTradingMain.INSTANCE.controller().cancelAccountSummary( this);
 			m_rows.clear();
 			m_map.clear();
 			m_complete = false;
@@ -142,7 +142,7 @@ public class AccountSummaryPanel extends NewTabPanel {
 		}
 	}
 	
-	private static class SummaryRow {
+	public static class SummaryRow {
 		String m_account;
 		HashMap<AccountSummaryTag,String> m_map = new HashMap<AccountSummaryTag,String>();
 		

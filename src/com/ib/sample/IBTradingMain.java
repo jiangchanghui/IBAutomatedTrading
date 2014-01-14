@@ -45,8 +45,8 @@ import apidemo.util.VerticalPanel;
 
 
 
-public class main implements IConnectionHandler{
-	public static main INSTANCE = new main();
+public class IBTradingMain implements IConnectionHandler{
+	public static IBTradingMain INSTANCE = new IBTradingMain();
 	private final JFrame m_frame = new JFrame();
 	private final NewTabbedPanel m_tabbedPanel = new NewTabbedPanel(true);
 	private final ConnectionPanel m_connectionPanel = new ConnectionPanel();

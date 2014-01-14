@@ -2,7 +2,7 @@
  * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
 
 package apidemo;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class TradesPanel extends JPanel implements ITradeReportHandler {
 	}
 	
 	private void onRefresh() {
-		main.INSTANCE.controller().reqExecutions( new ExecutionFilter(), this);
+		IBTradingMain.INSTANCE.controller().reqExecutions( new ExecutionFilter(), this);
 	}
 
 	@Override public void tradeReport(String tradeKey, NewContract contract, Execution trade) {

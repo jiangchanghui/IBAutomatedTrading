@@ -33,7 +33,7 @@ import com.ib.controller.MarketValueTag;
 import com.ib.controller.Position;
 import com.ib.controller.ApiController.IAccountHandler;
 import com.ib.controller.Types.SecType;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 
 public class AccountInfoPanel extends JPanel implements INewTab, IAccountHandler {
 	private DefaultListModel m_acctList = new DefaultListModel();
@@ -80,11 +80,11 @@ public class AccountInfoPanel extends JPanel implements INewTab, IAccountHandler
 	
 	/** Called when the tab is first visited. */
 	@Override public void activated() {
-		for (String account : main.INSTANCE.accountList() ) {
+		for (String account : IBTradingMain.INSTANCE.accountList() ) {
 			m_acctList.addElement( account);
 		}
 		
-		if (main.INSTANCE.accountList().size() == 1) {
+		if (IBTradingMain.INSTANCE.accountList().size() == 1) {
 			m_accounts.setSelectedIndex( 0);
 		}
 	}
@@ -102,7 +102,7 @@ public class AccountInfoPanel extends JPanel implements INewTab, IAccountHandler
 				m_marginModel.clear();
 				m_mktValModel.clear();
 				m_portfolioModel.clear();
-				main.INSTANCE.controller().reqAccountUpdates(true, m_selAcct, this);
+				IBTradingMain.INSTANCE.controller().reqAccountUpdates(true, m_selAcct, this);
 			}
 		}
 	}
@@ -420,7 +420,7 @@ public class AccountInfoPanel extends JPanel implements INewTab, IAccountHandler
 	}
 
 	/** If val is a number, format it with commas and no decimals. */
-	static String format(String val, String currency) {
+	public static String format(String val, String currency) {
 		if (val == null || val.length() == 0) {
 			return null;
 		}

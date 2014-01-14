@@ -21,7 +21,7 @@ import apidemo.util.NewTabbedPanel.NewTabPanel;
 import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
 import com.ib.controller.ApiController.IPositionHandler;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 
 public class PositionsPanel extends NewTabPanel {
 	private PositionModel m_model = new PositionModel();
@@ -63,11 +63,11 @@ public class PositionsPanel extends NewTabPanel {
 	}
 	
 	private void subscribe() {
-		main.INSTANCE.controller().reqPositions( m_model);
+		IBTradingMain.INSTANCE.controller().reqPositions( m_model);
 	}
 	
 	private void desubscribe() {
-		main.INSTANCE.controller().cancelPositions( m_model);
+		IBTradingMain.INSTANCE.controller().cancelPositions( m_model);
 		m_model.clear();
 	}
 	

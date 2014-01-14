@@ -33,7 +33,7 @@ import com.ib.controller.ApiController.IAdvisorHandler;
 import com.ib.controller.Profile.Type;
 import com.ib.controller.Types.FADataType;
 import com.ib.controller.Types.Method;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 
 public class AdvisorPanel extends NewTabPanel implements IAdvisorHandler {
 	static DefaultCellEditor DEF_CELL_EDITOR = new DefaultCellEditor( new JTextField() );
@@ -78,9 +78,9 @@ public class AdvisorPanel extends NewTabPanel implements IAdvisorHandler {
 
 	/** Called when the tab is first visited. */
 	@Override public void activated() {
-		main.INSTANCE.controller().reqAdvisorData( FADataType.GROUPS, this);
-		main.INSTANCE.controller().reqAdvisorData( FADataType.PROFILES, this );
-		main.INSTANCE.controller().reqAdvisorData( FADataType.ALIASES, this );
+		IBTradingMain.INSTANCE.controller().reqAdvisorData( FADataType.GROUPS, this);
+		IBTradingMain.INSTANCE.controller().reqAdvisorData( FADataType.PROFILES, this );
+		IBTradingMain.INSTANCE.controller().reqAdvisorData( FADataType.ALIASES, this );
 	}
 	
 	/** Called when the tab is closed by clicking the X. */
@@ -199,7 +199,7 @@ public class AdvisorPanel extends NewTabPanel implements IAdvisorHandler {
 		}
 
 		public void transmit() {
-			main.INSTANCE.controller().updateGroups(m_groups);
+			IBTradingMain.INSTANCE.controller().updateGroups(m_groups);
 		}
 
 		@Override public int getRowCount() {
@@ -313,7 +313,7 @@ public class AdvisorPanel extends NewTabPanel implements IAdvisorHandler {
 		}
 
 		public void transmit() {
-			main.INSTANCE.controller().updateProfiles( m_profiles);
+			IBTradingMain.INSTANCE.controller().updateProfiles( m_profiles);
 		}
 
 		@Override public int getRowCount() {

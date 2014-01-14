@@ -19,8 +19,11 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.swing.table.AbstractTableModel;
 
+import apidemo.AccountInfoPanel;
 import apidemo.CreateOrderFromEmail;
 import apidemo.OrdersPanel;
+import apidemo.AccountSummaryPanel.SummaryModel;
+import apidemo.AccountSummaryPanel.SummaryRow;
 import apidemo.OrdersPanel.OrdersModel;
 import apidemo.PositionsPanel.PositionModel;
 import apidemo.TopModel.TopRow;
@@ -46,15 +49,17 @@ import java.util.ArrayList;
 
 import java.util.List;
 
+import com.ib.controller.AccountSummaryTag;
 import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
 import com.ib.controller.NewOrder;
 import com.ib.controller.OrderStatus;
 import com.ib.controller.OrderType;
+import com.ib.controller.ApiController.IAccountSummaryHandler;
 import com.ib.controller.ApiController.IPositionHandler;
 import com.ib.controller.Types.Action;
 import com.ib.controller.Types.SecType;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -155,7 +160,7 @@ public class Index extends Thread{
 	 
 	 private String IsConnected()
 	 {
-		if ( main.INSTANCE.controller().IsConnected()==true)
+		if ( IBTradingMain.INSTANCE.controller().IsConnected()==true)
 		{
 			return "CONNECTED";	
 		}
@@ -172,7 +177,7 @@ public class Index extends Thread{
 
 	Map<String,String> m_ordersMap = new HashMap<String,String>();
 		
-		m_ordersMap = main.INSTANCE.m_ordersMap;
+		m_ordersMap = IBTradingMain.INSTANCE.m_ordersMap;
 		
 		 LinkedList l_cols = new LinkedList();
 	        LinkedList l_final = new LinkedList();
@@ -224,7 +229,7 @@ public class Index extends Thread{
 	{
 		try
 		{
-			main.INSTANCE.controller().cancelAllOrders();
+			IBTradingMain.INSTANCE.controller().cancelAllOrders();
 			return "Cancel sent for all orders";
 		}
 		catch (Exception e)
@@ -271,7 +276,7 @@ public class Index extends Thread{
 		
 		log.log(Level.INFO ,"Getting Position data for all Symbols");
 		
-		main.INSTANCE.controller().reqPositions( m_model);
+		IBTradingMain.INSTANCE.controller().reqPositions( m_model);
 		Object obj_response=null;
 		int _iterator=0;
 		while (m_model.getRowCount()==0 && _iterator<10)
@@ -288,7 +293,7 @@ public class Index extends Thread{
 			_iterator++;
 			
 		}
-		log.log(Level.FINEST ,"{0} Executions found",m_model.getRowCount());
+		log.log(Level.INFO ,"{0} Executions found",m_model.getRowCount());
 		for (int i=0;i<m_model.getRowCount();i++)
 		{
 		//	log.log(Level.INFO ,"{0} {1} avg price of {2}",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
@@ -305,7 +310,7 @@ public class Index extends Thread{
 			 obj_response = m_model.getValueAt(i, 2);
 				String Symbol = (String) (obj_response == null ? "" :  obj_response);
 				
-			double LastPx = 0.0;
+			double LastPx =0.0; 
 					//GetFarPrice(Symbol);
 			
 			LinkedList l1_rows = new LinkedList();
@@ -349,7 +354,7 @@ public class Index extends Thread{
 	        JSONObject obj_cols_3 = new JSONObject();
 	        JSONObject obj_cols_4 = new JSONObject();
 		OrdersModel m_model = new OrdersModel();
-		main.INSTANCE.controller().reqLiveOrders( m_model);
+		IBTradingMain.INSTANCE.controller().reqLiveOrders( m_model);
 		
 		  long _timeout = 5000;
 		  long _delta=0;
@@ -455,9 +460,11 @@ public class Index extends Thread{
         
 
 	}
-	
+	private SummaryModel m_summary = new SummaryModel();
 	private double GetFarPrice(String Symbol)
 	{
+		try{
+			
 		NewContract contract = new NewContract();
 		NewOrder order = new NewOrder();
 		contract.symbol(Symbol);
@@ -470,10 +477,22 @@ public class Index extends Thread{
 		
 		TopRow row = new TopRow( null, contract.description() );
 		//m_rows.add( row);
-		main.INSTANCE.controller().reqTopMktData(contract, "", false, row);
+		AccountInfoPanel A = new AccountInfoPanel();
+	//	IBTradingMain.INSTANCE.controller().reqAccountUpdates(true, "DU172464", A);
+		
+	//	IBTradingMain.INSTANCE.controller().reqAccountSummary( "All", AccountSummaryTag.values(), m_summary);
+		
+		//IBTradingMain.INSTANCE.controller().reqTopMktData(contract, "", false, row);
 	//	fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
 		
 		return row.m_last;
+		}
+		catch (Exception e)
+		{
+			log.log(Level.WARNING,e.toString());
+			return 0.0;
+			
+		}
 	}
 	
 	
@@ -616,6 +635,89 @@ public class Index extends Thread{
 				System.out.println(e.toString());
 			}
 	 }
-	
-}
+	 private class SummaryModel extends AbstractTableModel implements IAccountSummaryHandler {
+			ArrayList<SummaryRow> m_rows = new ArrayList<SummaryRow>();
+			HashMap<String,SummaryRow> m_map = new HashMap<String,SummaryRow>();
+			boolean m_complete;
+
+			public void clear() {
+				IBTradingMain.INSTANCE.controller().cancelAccountSummary( this);
+				m_rows.clear();
+				m_map.clear();
+				m_complete = false;
+				fireTableDataChanged();
+			}
+
+			@Override public void accountSummary(String account, AccountSummaryTag tag, String value, String currency) {
+				SummaryRow row = m_map.get( account);
+				if (row == null) {
+					row = new SummaryRow();
+					m_map.put( account, row);
+					m_rows.add( row);
+				}
+				row.update( account, tag, value);
+				
+				if (m_complete) {
+					fireTableDataChanged();
+				}
+			}
+			
+			@Override public void accountSummaryEnd() {
+				fireTableDataChanged();
+				m_complete = true;
+			}
+
+			@Override public int getRowCount() {
+				return m_rows.size();
+			}
+
+			@Override public int getColumnCount() {
+				return AccountSummaryTag.values().length + 1; // add one for Account column 
+			}
+			
+			@Override public String getColumnName(int col) {
+				if (col == 0) {
+					return "Account";
+				}
+				return AccountSummaryTag.values()[col - 1].toString();
+			}
+
+			@Override public Object getValueAt(int rowIn, int col) {
+				SummaryRow row = m_rows.get( rowIn);
+
+				if (col == 0) {
+					return row.m_account;
+				}
+				
+				AccountSummaryTag tag = AccountSummaryTag.values()[col - 1];
+				String val = row.m_map.get( tag);
+				
+				switch( tag) {
+					case Cushion: return fmtPct( val);
+					case LookAheadNextChange: return fmtTime( val);
+					default: return AccountInfoPanel.format( val, null);
+				}
+			}
+
+			public String fmtPct(String val) {
+				return val == null || val.length() == 0 ? null : Formats.fmtPct( Double.parseDouble( val) );
+			}
+
+			public String fmtTime(String val) {
+				return val == null || val.length() == 0 || val.equals( "0") ? null : Formats.fmtDate( Long.parseLong( val) * 1000);
+			}
+		}
+		
+		private static class SummaryRow {
+			String m_account;
+			HashMap<AccountSummaryTag,String> m_map = new HashMap<AccountSummaryTag,String>();
+			
+			public void update(String account, AccountSummaryTag tag, String value) {
+				m_account = account;
+				m_map.put( tag, value);
+			} 
+		}
+	}
+
+
 
