@@ -108,7 +108,10 @@ public class Index extends Thread{
 		    log.log(Level.INFO,"Initialised Receive Queue: {0} and Send Queue : {1} for web requests",new Object[]{QUEUE_WEBQUERY,QUEUE_WEBRESPONSE});
 		    
 		    while (true) {
-		      log.log(Level.INFO,"Trading waiting for web querys on Queue : {0}",QUEUE_WEBQUERY);
+		      try{
+		    	
+		    	
+		    	log.log(Level.INFO,"Trading waiting for web querys on Queue : {0}",QUEUE_WEBQUERY);
 		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 		      String message = new String(delivery.getBody());
 		      log.log(Level.INFO,"Received new message on Topic {0} : {1}",new Object[]{QUEUE_WEBQUERY,message});
@@ -136,13 +139,22 @@ public class Index extends Thread{
 		      if (message.equals("RUN_EMAIL_LISTENER"))
 		      {
 		    	  Runtime.getRuntime().exec("java -jar C:\\Users\\Ben\\Documents\\IBJars\\EmailListener_0.4.jar");
-		    	Response = "true";
+		    	Response = "Executed Successfully";
 		      }
 		      
 		      
 		     
 		      channel_Send.basicPublish("", QUEUE_WEBRESPONSE, null, Response.getBytes());
 		      log.log(Level.INFO,"Sent WebReply message on Topic {0} : {1}",new Object[]{QUEUE_WEBRESPONSE,Response});
+		    
+		      }
+		      catch(Exception e)
+		      {
+		    	  log.log(Level.SEVERE,"Web Request listener error", e.toString());
+		      }
+		    
+		    
+		    
 		    }
 		}
 		catch (Exception e)

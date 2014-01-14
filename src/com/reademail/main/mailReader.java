@@ -178,7 +178,24 @@ public class mailReader extends Thread{
 				_location++;
 				continue;
 			}
+			if (s.contains("OUT") )
+			{
+				int Position = GetPosition(Ticker);
 			
+				
+				if (Position < 0)
+				{
+					Side=Action.BUY;
+				}
+				else if (Position > 0)
+				{
+					Side=Action.SELL;
+				}
+			
+				log.log(Level.INFO ,"Set Side to {0} becuase Position is {1} and this is a cover/sell long",new Object[]{Side,Position});
+				_location++;
+				continue;
+			}
 			
 			
 			
