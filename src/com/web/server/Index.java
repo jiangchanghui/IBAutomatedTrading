@@ -83,6 +83,7 @@ public class Index extends Thread{
 	 private  static String QPassword="";
 	 ConnectionFactory factory;
 	 Connection connection;
+	  final CreateOrderFromEmail _CreateOrder = new CreateOrderFromEmail();		
 	 public void run()
 	{
 		try{
@@ -146,7 +147,18 @@ public class Index extends Thread{
 		    	  Runtime.getRuntime().exec("java -jar C:\\Users\\Ben\\Documents\\IBJars\\EmailListener_0.4.jar");
 		    	Response = "Executed Successfully";
 		      }
-		      
+		      if (message.startsWith("NEW_ORDER"))
+		      {
+		    	  String[] parts = message.split(";");
+		    	  
+		    	  String _Symbol = parts[1];
+		    	  int _Quantity = Integer.parseInt(parts[2]);
+		    	  Action _Side = Action.valueOf(parts[3].toUpperCase());
+		    	  
+		    	  log.log(Level.INFO,"Routing order for creation from Email request {0}", message);
+		    	  _CreateOrder.CreateOrder(_Symbol,_Quantity,_Side,0.0);
+		    	  Response = "Routed order for "+_Side.toString()+" "+_Quantity+" "+_Symbol+"at MKT";
+		      }
 		      
 		     
 		      channel_Send.basicPublish("", QUEUE_WEBRESPONSE, null, Response.getBytes());
