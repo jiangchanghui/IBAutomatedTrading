@@ -33,7 +33,7 @@ import com.ib.controller.ApiController.IRealTimeBarHandler;
 import com.ib.controller.Types.BarSize;
 import com.ib.controller.Types.DurationUnit;
 import com.ib.controller.Types.WhatToShow;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 
 public class StratPanel extends StackPanel implements IHistoricalDataHandler, IRealTimeBarHandler {
 	final private NewContract m_contract = new NewContract();
@@ -113,7 +113,7 @@ public class StratPanel extends StackPanel implements IHistoricalDataHandler, IR
 	
 	protected void onStart() {
 		m_contractPanel.onOK();
-		main.INSTANCE.controller().reqRealTimeBars(m_contract, WhatToShow.TRADES, false, this);
+		IBTradingMain.INSTANCE.controller().reqRealTimeBars(m_contract, WhatToShow.TRADES, false, this);
 	}
 
 	@Override public void realtimeBar(Bar bar) {
@@ -122,7 +122,7 @@ public class StratPanel extends StackPanel implements IHistoricalDataHandler, IR
 			QueryLength queryLength = getQueryLength( barSize);
 			String date = Bar.format( bar.time() * 1000);
 			int duration = m_bars.getInt() * queryLength.m_units;
-			main.INSTANCE.controller().reqHistoricalData(m_contract, date, duration, queryLength.m_unit, barSize, WhatToShow.TRADES, false, this);
+			IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, date, duration, queryLength.m_unit, barSize, WhatToShow.TRADES, false, this);
 			m_req = true;
 		}
 		addBar( bar);
@@ -157,8 +157,8 @@ public class StratPanel extends StackPanel implements IHistoricalDataHandler, IR
 	}
 
 	protected void onStop() {
-		main.INSTANCE.controller().cancelRealtimeBars(this);
-		main.INSTANCE.controller().cancelHistoricalData(this);
+		IBTradingMain.INSTANCE.controller().cancelRealtimeBars(this);
+		IBTradingMain.INSTANCE.controller().cancelHistoricalData(this);
 	}
 
 	void add( JPanel p, Object...objs) {

@@ -27,7 +27,7 @@ import com.ib.controller.ApiController.IFundamentalsHandler;
 import com.ib.controller.NewContract;
 import com.ib.controller.NewContractDetails;
 import com.ib.controller.Types.FundamentalType;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 
 public class ContractInfoPanel extends JPanel {
 	private final NewContract m_contract = new NewContract();
@@ -64,7 +64,7 @@ public class ContractInfoPanel extends JPanel {
 			
 			DetailsResultsPanel panel = new DetailsResultsPanel();
 			m_resultsPanels.addTab( m_contract.symbol() + " " + "Description", panel, true, true);
-			main.INSTANCE.controller().reqContractDetails(m_contract, panel);
+			IBTradingMain.INSTANCE.controller().reqContractDetails(m_contract, panel);
 		}
 	}
 
@@ -129,7 +129,7 @@ public class ContractInfoPanel extends JPanel {
 			FundaResultPanel panel = new FundaResultPanel();
 			FundamentalType type = m_type.getSelectedItem();
 			m_resultsPanels.addTab( m_contract.symbol() + " " + type, panel, true, true);
-			main.INSTANCE.controller().reqFundamentals( m_contract, type, panel); 
+			IBTradingMain.INSTANCE.controller().reqFundamentals( m_contract, type, panel); 
 		}
 	}	
 	
@@ -166,7 +166,7 @@ public class ContractInfoPanel extends JPanel {
 
 		/** Called when the tab is first visited. */
 		@Override public void activated() {
-			main.INSTANCE.controller().reqFundamentals(m_contract, FundamentalType.ReportRatios, this);
+			IBTradingMain.INSTANCE.controller().reqFundamentals(m_contract, FundamentalType.ReportRatios, this);
 		}
 		
 		/** Called when the tab is closed by clicking the X. */

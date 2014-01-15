@@ -42,7 +42,7 @@ import com.ib.controller.ApiController.IContractDetailsHandler;
 import com.ib.controller.ApiController.IEfpHandler;
 import com.ib.controller.Types.Action;
 import com.ib.controller.Types.SecType;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 
 
 public class ComboPanel extends JPanel implements INewTab {
@@ -76,7 +76,7 @@ public class ComboPanel extends JPanel implements INewTab {
 
 	/** Called when the tab is first visited. */
 	@Override public void activated() {
-		main.INSTANCE.controller().reqLiveOrders( m_ordersModel);
+		IBTradingMain.INSTANCE.controller().reqLiveOrders( m_ordersModel);
 	}
 
 	/** Called when the tab is closed by clicking the X. */
@@ -171,7 +171,7 @@ public class ComboPanel extends JPanel implements INewTab {
 
 		protected void onAddLeg() {
 			m_contractPanel.onOK();
-			main.INSTANCE.controller().reqContractDetails( m_contract, new IContractDetailsHandler() {
+			IBTradingMain.INSTANCE.controller().reqContractDetails( m_contract, new IContractDetailsHandler() {
 				@Override public void contractDetails(ArrayList<NewContractDetails> list) {
 					for (NewContractDetails details : list) {
 						addLeg( details);
@@ -311,7 +311,7 @@ public class ComboPanel extends JPanel implements INewTab {
 				dn.exchange( m_exchange.getText().toUpperCase() ); 
 				dn.currency( m_currency.getText().toUpperCase() ); 
 				
-				main.INSTANCE.controller().reqContractDetails(dn, new IContractDetailsHandler() {
+				IBTradingMain.INSTANCE.controller().reqContractDetails(dn, new IContractDetailsHandler() {
 					@Override public void contractDetails(ArrayList<NewContractDetails> list) {
 						if (list.size() == 1) {
 							NewContract c = list.get( 0).contract();
@@ -319,7 +319,7 @@ public class ComboPanel extends JPanel implements INewTab {
 							m_dnText.setText( String.format( "Delta-neutral: %s Delta: %s  Price: %s", c.description(), m_delta.getText(), m_price.getText() ) );
 						}
 						else {
-							main.INSTANCE.show( "DN description does not define a uniqe contract");
+							IBTradingMain.INSTANCE.show( "DN description does not define a uniqe contract");
 							m_dnContract = null;
 							m_dnText.setText( null);
 						}
@@ -401,7 +401,7 @@ public class ComboPanel extends JPanel implements INewTab {
 			fut.expiry( m_expiry.getText() );
 			fut.currency( "USD");
 			
-			main.INSTANCE.controller().reqContractDetails( fut, new IContractDetailsHandler() {
+			IBTradingMain.INSTANCE.controller().reqContractDetails( fut, new IContractDetailsHandler() {
 				@Override public void contractDetails(ArrayList<NewContractDetails> list) {
 					// if two futures are returned, assume that the first is is no div prot and the 
 					// second one is div prot; unfortunately TWS does not send down the div prot flag
@@ -410,7 +410,7 @@ public class ComboPanel extends JPanel implements INewTab {
 						addFutLeg( list.get( i) );
 					}
 					else if (list.size() != 1) {
-						main.INSTANCE.show( "Request does not define a valid unique futures contract");
+						IBTradingMain.INSTANCE.show( "Request does not define a valid unique futures contract");
 					}
 					else {
 						addFutLeg( list.get( 0) );
@@ -427,7 +427,7 @@ public class ComboPanel extends JPanel implements INewTab {
 			stk.exchange( m_stkExch.getText() );
 			stk.currency( "USD");
 			
-			main.INSTANCE.controller().reqContractDetails( stk, new IContractDetailsHandler() {
+			IBTradingMain.INSTANCE.controller().reqContractDetails( stk, new IContractDetailsHandler() {
 				@Override public void contractDetails(ArrayList<NewContractDetails> list) {
 					for (NewContractDetails data : list) {
 						addLeg( data.contract(), Action.SELL, 100);
@@ -495,7 +495,7 @@ public class ComboPanel extends JPanel implements INewTab {
 			void addRow(NewContract contract) {
 				EfpRow row = new EfpRow( this, contract.description() );
 				m_rows.add( row);
-				main.INSTANCE.controller().reqEfpMktData( contract, "", false, row);
+				IBTradingMain.INSTANCE.controller().reqEfpMktData( contract, "", false, row);
 				fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
 			}
 

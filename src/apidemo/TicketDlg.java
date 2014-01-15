@@ -47,7 +47,7 @@ import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.TimeInForce;
 import com.ib.controller.Types.TriggerMethod;
 import com.ib.controller.Types.VolatilityType;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 
 public class TicketDlg extends JDialog {
 	private boolean m_editContract;
@@ -63,7 +63,7 @@ public class TicketDlg extends JDialog {
 	private final ScalePanel m_scalePanel;
 	
 	public TicketDlg(NewContract contract, NewOrder order) {
-		super( main.INSTANCE.frame());
+		super( IBTradingMain.INSTANCE.frame());
 		
 		if (contract == null) {
 			contract = new NewContract();
@@ -149,9 +149,9 @@ public class TicketDlg extends JDialog {
 		contract.secType(SecType.STK);
 	
 		
-		main.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
+		IBTradingMain.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 			@Override public void orderState(NewOrderState orderState) {
-				main.INSTANCE.controller().removeOrderHandler( this);
+				IBTradingMain.INSTANCE.controller().removeOrderHandler( this);
 				SwingUtilities.invokeLater( new Runnable() {
 					@Override public void run() {
 						dispose();
@@ -182,9 +182,9 @@ public class TicketDlg extends JDialog {
 			dispose();
 		}
 
-		main.INSTANCE.controller().placeOrModifyOrder( m_contract, m_order, new IOrderHandler() {
+		IBTradingMain.INSTANCE.controller().placeOrModifyOrder( m_contract, m_order, new IOrderHandler() {
 			@Override public void orderState(NewOrderState orderState) {
-				main.INSTANCE.controller().removeOrderHandler( this);
+				IBTradingMain.INSTANCE.controller().removeOrderHandler( this);
 				SwingUtilities.invokeLater( new Runnable() {
 					@Override public void run() {
 						dispose();
@@ -206,7 +206,7 @@ public class TicketDlg extends JDialog {
 		scrape();
 		
 		m_order.whatIf( true);
-		main.INSTANCE.controller().placeOrModifyOrder( m_contract, m_order, new IOrderHandler() {
+		IBTradingMain.INSTANCE.controller().placeOrModifyOrder( m_contract, m_order, new IOrderHandler() {
 			@Override public void orderState(final NewOrderState orderState) {
 				SwingUtilities.invokeLater( new Runnable() {
 					@Override public void run() {
@@ -254,7 +254,7 @@ public class TicketDlg extends JDialog {
 	}
 
 	class OrderPanel extends VerticalPanel {
-		final TCombo<String> m_account = new TCombo<String>( main.INSTANCE.accountList().toArray(new String[0]) );
+		final TCombo<String> m_account = new TCombo<String>( IBTradingMain.INSTANCE.accountList().toArray(new String[0]) );
 		final TCombo<Action> m_action = new TCombo<Action>( Action.values() );
 		final UpperField m_quantity = new UpperField( "100");
 		final UpperField m_displaySize = new UpperField();
@@ -268,7 +268,7 @@ public class TicketDlg extends JDialog {
 		OrderPanel() {
 			m_orderType.removeItemAt( 0); // remove None
 			
-			m_account.setSelectedItem( m_order.account() != null ? m_order.account() : main.INSTANCE.accountList().get( 0) ); 
+			m_account.setSelectedItem( m_order.account() != null ? m_order.account() : IBTradingMain.INSTANCE.accountList().get( 0) ); 
 			m_action.setSelectedItem( m_order.action() );
 			m_quantity.setText( m_order.totalQuantity());
 			m_displaySize.setText( m_order.displaySize());

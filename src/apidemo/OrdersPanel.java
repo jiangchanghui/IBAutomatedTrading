@@ -25,7 +25,7 @@ import com.ib.controller.NewOrderState;
 import com.ib.controller.OrderStatus;
 import com.ib.controller.OrderType;
 import com.ib.controller.ApiController.ILiveOrderHandler;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 public class OrdersPanel extends JPanel {
 	public OrdersModel m_model = new OrdersModel();
 	private JTable m_table = new JTable( m_model);
@@ -114,22 +114,22 @@ public class OrdersPanel extends JPanel {
 	}
 
 	protected void onTakeOverExisting() {
-		main.INSTANCE.controller().takeTwsOrders( m_model);
+		IBTradingMain.INSTANCE.controller().takeTwsOrders( m_model);
 	}
 
 	protected void onTakeOverFuture() {
-		main.INSTANCE.controller().takeFutureTwsOrders( m_model);
+		IBTradingMain.INSTANCE.controller().takeFutureTwsOrders( m_model);
 	}
 
 	protected void onCancel() {
 		OrderRow order = getSelectedOrder();
 		if (order != null) {
-			main.INSTANCE.controller().cancelOrder( order.m_order.orderId() );
+			IBTradingMain.INSTANCE.controller().cancelOrder( order.m_order.orderId() );
 		}
 	}
 
 	protected void onCancelAll() {
-		main.INSTANCE.controller().cancelAllOrders();
+		IBTradingMain.INSTANCE.controller().cancelAllOrders();
 	}
 
 	private OrderRow getSelectedOrder() {
@@ -166,7 +166,7 @@ public class OrdersPanel extends JPanel {
 	protected void onRefresh() {
 		m_model.clear();
 		m_model.fireTableDataChanged();
-		main.INSTANCE.controller().reqLiveOrders( m_model);
+		IBTradingMain.INSTANCE.controller().reqLiveOrders( m_model);
 		
 	}
 	

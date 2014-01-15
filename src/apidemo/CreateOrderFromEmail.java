@@ -23,7 +23,7 @@ import com.ib.controller.ApiController.ITradeReportHandler;
 import com.ib.controller.OrderType;
 import com.ib.controller.Types.Action;
 import com.ib.controller.Types.SecType;
-import com.ib.sample.main;
+import com.ib.sample.IBTradingMain;
 import com.reademail.main.mailReader;
 
 public class CreateOrderFromEmail {
@@ -60,7 +60,7 @@ public class CreateOrderFromEmail {
 	//	if (!FatFingerViolation(contract, order,FFLimit))
 		//{
 		log.log(Level.INFO ,"Order being executed for {0} {1} {2} at {3}",new Object[]{Side,Quantity,Symbol,order.orderType().toString()});
-		main.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
+		IBTradingMain.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 			@Override public void orderState(NewOrderState orderState) {
 				SwingUtilities.invokeLater( new Runnable() {
 					@Override public void run() {
@@ -77,11 +77,11 @@ public class CreateOrderFromEmail {
 						if (errorMsg.contains("Order held"))
 						{
 							log.log(Level.SEVERE ,"Order is held, cancelling all open orders");
-							main.INSTANCE.controller().cancelAllOrders();
+							IBTradingMain.INSTANCE.controller().cancelAllOrders();
 						}
 						if (errorMsg.contains("not be placed"))
 						{
-							main.INSTANCE.controller().cancelAllOrders();
+							IBTradingMain.INSTANCE.controller().cancelAllOrders();
 						}
 					}
 				});
@@ -94,7 +94,7 @@ public class CreateOrderFromEmail {
 	{
 		TopRow row = new TopRow( null, contract.description() );
 		//m_rows.add( row);
-		main.INSTANCE.controller().reqTopMktData(contract, "", false, row);
+		IBTradingMain.INSTANCE.controller().reqTopMktData(contract, "", false, row);
 	//	fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
 		
 		if (row.m_ask >0.0 && row.m_bid >0.0)
@@ -117,8 +117,8 @@ public class CreateOrderFromEmail {
 		ITradeReportHandler m_tradeReportHandler = null;
 		OrdersModel m_model = new OrdersModel();
 		TradesPanel m_tradesPanel = new TradesPanel();
-		main.INSTANCE.controller().reqExecutions( new ExecutionFilter(), m_tradesPanel);
-		main.INSTANCE.controller().reqLiveOrders( m_model);
+		IBTradingMain.INSTANCE.controller().reqExecutions( new ExecutionFilter(), m_tradesPanel);
+		IBTradingMain.INSTANCE.controller().reqLiveOrders( m_model);
 
 						
 		ArrayList<apidemo.TradesPanel.FullExec> _Execs = new ArrayList<apidemo.TradesPanel.FullExec>();
@@ -148,8 +148,8 @@ public class CreateOrderFromEmail {
 		ITradeReportHandler m_tradeReportHandler = null;
 		OrdersModel m_model = new OrdersModel();
 		TradesPanel m_tradesPanel = new TradesPanel();
-		main.INSTANCE.controller().reqExecutions( new ExecutionFilter(), m_tradesPanel);
-		main.INSTANCE.controller().reqLiveOrders( m_model);
+		IBTradingMain.INSTANCE.controller().reqExecutions( new ExecutionFilter(), m_tradesPanel);
+		IBTradingMain.INSTANCE.controller().reqLiveOrders( m_model);
 
 						
 		ArrayList<apidemo.TradesPanel.FullExec> _Execs = new ArrayList<apidemo.TradesPanel.FullExec>();
