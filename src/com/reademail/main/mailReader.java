@@ -298,17 +298,30 @@ public class mailReader extends Thread{
 				{
 					Side = Action.BUY;
 				}
-				else
+				if (Position > 0)
 				{
 					Side = Action.SELL;
 				}
 				if (Position ==0)
 				{
-					Quantity =0;
-					Ticker = "none";
+					Map <String, Integer> hm = new HashMap<String, Integer>();					
+					
+					ReturnObj R = new ReturnObj();
+					R = TypoQuantity(Ticker);
+					Ticker = R.getSymbol();
+					Quantity = R.getQuantity();		
+					
+						if (Quantity < 0)
+						{
+							Side = Action.BUY;
+						}
+						if (Quantity > 0)
+						{
+							Side = Action.SELL;
+						}
 					
 				}
-				else if (Quantity ==0 || Quantity > Math.abs(Position))
+				if (Quantity ==0 || Quantity > Math.abs(Position))
 					{
 						Quantity = Position;
 						
@@ -591,7 +604,77 @@ public class mailReader extends Thread{
 			}
 		}
 	}
+	public class ReturnObj {
+		   public int Quantity; 
+		   public String Symbol; 
+		   
+		   ReturnObj()
+		   {}
+		   
+		   ReturnObj(String Symbol, int Quantity)
+		   {
+			   this.Quantity = Quantity;
+			   this.Symbol = Symbol;
+		   }
+		   
+		   public String getSymbol()
+		   {
+			   return Symbol;
+		   }
+		   public int getQuantity()
+		   {
+			   return Quantity;
+		   }
+		   
+		}
+	private ReturnObj TypoQuantity(String Ticker)
+	{
+		log.log(Level.INFO ,"Checking for typo..");
+		
+		boolean typo=false;
+		int _PositionQuantity=0;
+		
+		
+		
+		for (int i=0;i< m_model.getRowCount();i++)
+		{
+			log.log(Level.INFO ,"{0} {1} avg price of {2}",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
+			
+			
+			Object obj = m_model.getValueAt(i, 2);
+			String Symbol = (String) (obj == null ? "" :  obj);
+			
+			
+			
+			typo = CheckTypo(Symbol,Ticker);
+				
+			if (typo)
+			{
+				
+				Object obj1 = m_model.getValueAt(i, 3);
+				_PositionQuantity = (Integer) (obj1 == null ? "" :  obj1);
+				return new ReturnObj(Symbol,_PositionQuantity);
+				
+			}
+		}
+		
+		return new ReturnObj("none",_PositionQuantity);
+		
+		
+	}
 	
+	
+	
+	private boolean CheckTypo(String symbol, String ticker) {
+		
+		char[] first = symbol.toCharArray();
+		  char[] second = ticker.toCharArray();
+		  Arrays.sort(first);
+		  Arrays.sort(second);
+		  return Arrays.equals(first, second);
+		
+		
+	}
 	private static class PositionKey {
 		String m_account;
 		int m_conid;
