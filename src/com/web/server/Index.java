@@ -144,7 +144,7 @@ public class Index extends Thread{
 		      }
 		      if (message.equals("RUN_EMAIL_LISTENER"))
 		      {
-		    	  Runtime.getRuntime().exec("java -jar C:\\Users\\Ben\\Documents\\IBJars\\EmailListener_0.4.jar");
+		    	  Runtime.getRuntime().exec("java -jar C:\\Users\\Ben\\Documents\\IBJars\\EmailListener.jar");
 		    	Response = "Executed Successfully";
 		      }
 		      if (message.startsWith("NEW_ORDER"))
@@ -199,10 +199,10 @@ public class Index extends Thread{
 	 
 	private String GetHistory() {
 
-	Map<String,String> m_ordersMap = new HashMap<String,String>();
+	Map<String,OrderTemplate> m_ordersMap = new HashMap<String,OrderTemplate>();
 		
 		m_ordersMap = IBTradingMain.INSTANCE.m_ordersMap;
-		
+
 		 LinkedList l_cols = new LinkedList();
 	        LinkedList l_final = new LinkedList();
 	        JSONObject obj1 = new JSONObject();
@@ -221,11 +221,13 @@ public class Index extends Thread{
 	        l_cols.add(obj_cols_2);
 	
 	        obj1.put("cols", l_cols);
-	        
-	        for (Map.Entry<String, String> entry : m_ordersMap.entrySet())
+	        log.log(Level.INFO,"Found {0} in message histroy ",m_ordersMap.size());
+	        for (Map.Entry<String, OrderTemplate> entry : m_ordersMap.entrySet())
 	        {
-	            System.out.println(entry.getKey() + "/" + entry.getValue());
-	            	         
+	          
+	           
+	           
+	            
 	    	LinkedList l1_rows = new LinkedList();
  			JSONObject obj_row1 = new JSONObject();
 	        JSONObject obj_row2 = new JSONObject();
@@ -233,7 +235,7 @@ public class Index extends Thread{
 	  	  
 	        obj_row1.put("v", entry.getKey());
 	        obj_row1.put("f", null);
-	        obj_row2.put("v", entry.getValue());
+	        obj_row2.put("v", entry.getValue().getSide().toString()+" "+entry.getValue().getTicker()+" "+entry.getValue().getQuantity());
 	        obj_row2.put("f", null);
 	        
 	        l1_rows.add(obj_row1);

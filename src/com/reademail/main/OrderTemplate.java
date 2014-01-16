@@ -13,13 +13,19 @@ public class OrderTemplate {
    
     
    
-    int getQuantity() {
+    public OrderTemplate() {
+		// TODO Auto-generated constructor stub
+	}
+
+
+
+	public int getQuantity() {
             return Quantity;
     }
-    String getTicker() {
+    public String getTicker() {
             return Ticker;
     }
-    Action getSide() {
+    public Action getSide() {
         return Side;
 }
 }

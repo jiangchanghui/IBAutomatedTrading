@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.FileHandler;
@@ -52,6 +53,9 @@ public class mailReader extends Thread{
 	 private static String QUsername="";
 	 private static String QPassword="";
 	 static Double _FFLimit=0.0;
+	private DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+	private Date date = new Date();
+	
 			
 	public void run()
 	{
@@ -99,7 +103,9 @@ public class mailReader extends Thread{
 					            OrderTemplate  _OrderTemplate = Split(message);
 					            log.log(Level.INFO ,"*****Logic completed, Routing order for {0}",_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 					            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
-					            IBTradingMain.INSTANCE.m_ordersMap.put(message,_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
+					           
+					            
+					            IBTradingMain.INSTANCE.m_ordersMap.put(dateFormat.format(date),_OrderTemplate);
 					            
 		    	}
 		    	catch(Exception e)
@@ -162,9 +168,13 @@ public class mailReader extends Thread{
 				continue;
 			}
 			//Quantity
-			if (s.matches(regex) && _location<5) 
+			if (s.matches(regex)) 
 			{
+				int Position = GetPosition(Ticker);
+				
 			   Quantity = Integer.parseInt(s);
+			
+			   
 			   log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
 			   _location++;
 			   continue;
@@ -193,6 +203,10 @@ public class mailReader extends Thread{
 				}
 			
 				log.log(Level.INFO ,"Set Side to {0} becuase Position is {1} and this is a cover/sell long",new Object[]{Side,Position});
+				
+				 				
+				
+				
 				_location++;
 				continue;
 			}

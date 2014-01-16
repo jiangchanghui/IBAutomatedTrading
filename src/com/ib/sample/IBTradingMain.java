@@ -31,6 +31,7 @@ import com.ib.controller.ApiController.IOrderHandler;
 import com.ib.controller.ApiController.ITimeHandler;
 import com.ib.controller.Types.NewsType;
 import com.ib.controller.Types.SecType;
+import com.reademail.main.OrderTemplate;
 import com.reademail.main.mailReader;
 import com.web.server.WebServer;
 
@@ -65,7 +66,7 @@ public class IBTradingMain implements IConnectionHandler{
 	public JFrame frame() 					{ return m_frame; }
 	private final AccountInfoPanel m_acctInfoPanel = new AccountInfoPanel();
 	
-	public Map<String,String> m_ordersMap = new HashMap<String,String>();
+	public Map<String,OrderTemplate> m_ordersMap = new HashMap<String,OrderTemplate>();
 		
 	
 	public static void main(String[] args) throws UnknownHostException {
