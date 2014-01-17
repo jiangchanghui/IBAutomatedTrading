@@ -1,6 +1,9 @@
 package apidemo;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,11 +31,12 @@ import com.reademail.main.mailReader;
 
 public class CreateOrderFromEmail {
 	private static final Logger log = Logger.getLogger( CreateOrderFromEmail.class.getName() );
-	
+	private DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 	public void CreateOrder(String Symbol, int Quantity, Action Side, Double FFLimit)
 	{
 		if (Symbol==null  || Quantity == 0 || Side == null)
 		{
+			
 			 log.log(Level.WARNING ,"Order Create failed with Symbol : {0}, Quantity : {1}, Side : {2}, FFLimit :{3}",new Object[]{Symbol,Quantity,Side.toString(),FFLimit});
 			return;
 		}
@@ -83,6 +87,11 @@ public class CreateOrderFromEmail {
 						{
 							IBTradingMain.INSTANCE.controller().cancelAllOrders();
 						}
+						
+						IBTradingMain.INSTANCE.m_errorMap.put(dateFormat.format(new Date()), errorMsg);
+						
+						
+						
 					}
 				});
 			}

@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.FileHandler;
@@ -144,7 +145,7 @@ public class Index extends Thread{
 		      }
 		      if (message.equals("RUN_EMAIL_LISTENER"))
 		      {
-		    	  Runtime.getRuntime().exec("java -jar C:\\Users\\Ben\\Documents\\IBJars\\EmailListener.jar");
+		    	  Runtime.getRuntime().exec("java -jar C:\\EmailListener.jar");
 		    	Response = "Executed Successfully";
 		      }
 		      if (message.startsWith("NEW_ORDER"))
@@ -157,9 +158,13 @@ public class Index extends Thread{
 		    	  
 		    	  log.log(Level.INFO,"Routing order for creation from Email request {0}", message);
 		    	  _CreateOrder.CreateOrder(_Symbol,_Quantity,_Side,0.0);
-		    	  Response = "Routed order for "+_Side.toString()+" "+_Quantity+" "+_Symbol+"at MKT";
+		    	  Response = "Routed order for "+_Side.toString()+" "+_Quantity+" "+_Symbol+" at MKT";
 		      }
-		      
+		      if (message.equals("GET_ERRORS"))
+		      {
+		    	  Response = GetErrors();
+		    	  
+		      }
 		     
 		      channel_Send.basicPublish("", QUEUE_WEBRESPONSE, null, Response.getBytes());
 		      log.log(Level.INFO,"Sent WebReply message on Topic {0} : {1}",new Object[]{QUEUE_WEBRESPONSE,Response});
@@ -196,6 +201,58 @@ public class Index extends Thread{
 	 }
 	 
 	 
+	 private String GetErrors()
+	 {
+		 Map<String,String> m_errorsMap = new HashMap<String,String>();
+			
+			m_errorsMap = IBTradingMain.INSTANCE.m_errorMap;
+
+			 LinkedList l_cols = new LinkedList();
+		        LinkedList l_final = new LinkedList();
+		        JSONObject obj1 = new JSONObject();
+		        JSONObject obj_cols_1 = new JSONObject();
+		        JSONObject obj_cols_2 = new JSONObject();
+			
+		        obj_cols_1.put("id", "");
+		        obj_cols_1.put("label", "Time");
+		        obj_cols_1.put("type", "string");
+
+		        obj_cols_2.put("id", "");
+		        obj_cols_2.put("label", "Error Message");
+		        obj_cols_2.put("type", "string");
+		        
+		        l_cols.add(obj_cols_1);
+		        l_cols.add(obj_cols_2);
+		
+		        obj1.put("cols", l_cols);
+		        log.log(Level.INFO,"Found {0} in error histroy ",m_errorsMap.size());
+		        for (Entry<String, String> entry : m_errorsMap.entrySet())
+		        {
+		          
+		           
+		           
+		            
+		    	LinkedList l1_rows = new LinkedList();
+	 			JSONObject obj_row1 = new JSONObject();
+		        JSONObject obj_row2 = new JSONObject();
+		        
+		  	  
+		        obj_row1.put("v", entry.getKey());
+		        obj_row1.put("f", null);
+		        obj_row2.put("v", entry.getValue());
+		        obj_row2.put("f", null);
+		        
+		        l1_rows.add(obj_row1);
+		        l1_rows.add(obj_row2);
+		       
+		        LinkedHashMap m1 = new LinkedHashMap();
+		        m1.put("c", l1_rows);
+	            l_final.add(m1);
+		        }
+		        obj1.put("rows", l_final);
+			return obj1.toJSONString();
+		 
+	 }
 	 
 	private String GetHistory() {
 
@@ -210,7 +267,7 @@ public class Index extends Thread{
 	        JSONObject obj_cols_2 = new JSONObject();
 		
 	        obj_cols_1.put("id", "");
-	        obj_cols_1.put("label", "Message");
+	        obj_cols_1.put("label", "Time");
 	        obj_cols_1.put("type", "string");
 
 	        obj_cols_2.put("id", "");

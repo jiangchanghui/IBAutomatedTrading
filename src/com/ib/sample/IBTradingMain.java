@@ -5,8 +5,12 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.Box;
 import javax.swing.JFrame;
@@ -19,6 +23,11 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.*;
 import com.ib.controller.ApiController;
 import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
@@ -31,6 +40,7 @@ import com.ib.controller.ApiController.IOrderHandler;
 import com.ib.controller.ApiController.ITimeHandler;
 import com.ib.controller.Types.NewsType;
 import com.ib.controller.Types.SecType;
+import com.posttrade.main.CloseAllPositions;
 import com.reademail.main.OrderTemplate;
 import com.reademail.main.mailReader;
 import com.web.server.WebServer;
@@ -67,7 +77,7 @@ public class IBTradingMain implements IConnectionHandler{
 	private final AccountInfoPanel m_acctInfoPanel = new AccountInfoPanel();
 	
 	public Map<String,OrderTemplate> m_ordersMap = new HashMap<String,OrderTemplate>();
-		
+	public Map<String,String> m_errorMap = new HashMap<String,String>();	
 	
 	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
@@ -92,12 +102,26 @@ public class IBTradingMain implements IConnectionHandler{
 		}
 	}
 
-	
-	
+	 	
 	private void run() throws UnknownHostException {
 		
 		new mailReader().start();
 		WebServer _webServer = new WebServer();
+		EoDClosePositions e = new	EoDClosePositions();
+		//Timer for task to close all positions
+	//	e.run();
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(Calendar.HOUR_OF_DAY, 21);
+		calendar.set(Calendar.MINUTE, 35);
+		calendar.set(Calendar.SECOND, 0);
+		Date time = calendar.getTime();
+
+		Timer timer = new Timer();
+		timer.schedule(new EoDClosePositions(), time);
+	
+
+		
+		
 		
 		m_tabbedPanel.addTab( "Connection", m_connectionPanel);
 		m_tabbedPanel.addTab( "Market Data", m_mktDataPanel);

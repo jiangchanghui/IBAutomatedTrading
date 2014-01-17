@@ -54,7 +54,7 @@ public class mailReader extends Thread{
 	 private static String QPassword="";
 	 static Double _FFLimit=0.0;
 	private DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-	private Date date = new Date();
+
 	
 			
 	public void run()
@@ -98,14 +98,14 @@ public class mailReader extends Thread{
 		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 		      String message = new String(delivery.getBody());
 		      log.log(Level.INFO,"Trading received new message on queue {0} : {1}",new Object[]{QUEUE_NEWEMAIL,message});
-		 
+		     
 					  
 					            OrderTemplate  _OrderTemplate = Split(message);
 					            log.log(Level.INFO ,"*****Logic completed, Routing order for {0}",_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 					            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
 					           
 					            
-					            IBTradingMain.INSTANCE.m_ordersMap.put(dateFormat.format(date),_OrderTemplate);
+					            IBTradingMain.INSTANCE.m_ordersMap.put(dateFormat.format(new Date()),_OrderTemplate);
 					            
 		    	}
 		    	catch(Exception e)
@@ -136,7 +136,7 @@ public class mailReader extends Thread{
 		String Subject = Message.toUpperCase();
 		String[] array = Subject.split(" "); 
 		String Ticker=null;;
-		int Quantity=0;;
+		int Quantity=0;
 		Action Side=null;
 		String regex = "[0-9]+";
 		int _location=0;
