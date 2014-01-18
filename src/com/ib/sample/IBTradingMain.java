@@ -23,11 +23,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.impl.StdSchedulerFactory;
-import org.quartz.*;
+
 import com.ib.controller.ApiController;
 import com.ib.controller.Formats;
 import com.ib.controller.NewContract;

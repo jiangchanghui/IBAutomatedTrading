@@ -44,6 +44,7 @@ import org.json.simple.JSONObject;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
 
@@ -63,14 +64,18 @@ import com.ib.controller.ApiController.IPositionHandler;
 import com.ib.controller.Types.Action;
 import com.ib.controller.Types.SecType;
 import com.ib.sample.IBTradingMain;
+
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.ShutdownSignalException;
 import com.reademail.main.OrderTemplate;
 import com.reademail.main.mailReader;
 import apidemo.TopModel.TopRow;
@@ -80,12 +85,16 @@ import apidemo.TopModel.TopRow;
 @WebService 
 public class Index extends Thread{
 	private static final Logger log = Logger.getLogger( mailReader.class.getName() );
-	 private final static String QUEUE_WEBQUERY = "WEBREQUEST";
-	 private final static String QUEUE_WEBRESPONSE = "WEBRESPONSE";
+	 private static String queue_web_request = "";
+	 private static String queue_web_response = "";
 	 private static String QUsername="";
 	 private  static String QPassword="";
 	 ConnectionFactory factory;
 	 Connection connection;
+	 private Channel channel;
+	 private String requestQueueName = "rpc_queue";
+	 private String replyQueueName;
+	 private QueueingConsumer consumer;
 	  final CreateOrderFromEmail _CreateOrder = new CreateOrderFromEmail();		
 	 public void run()
 	{
@@ -96,7 +105,12 @@ public class Index extends Thread{
 			props.load(new FileInputStream("c:\\config.properties"));
 			QUsername = props.getProperty("qusername");
 	    	QPassword = props.getProperty("qpassword");
+	    	queue_web_response = props.getProperty("queue_web_response");
+	    	queue_web_request = props.getProperty("queue_web_request");
 	    	log.log(Level.INFO ,"Processing config entries complete");
+	    	
+	    	
+	    	
 	    	factory = new ConnectionFactory();
 		    factory.setHost("localhost");
 		    factory.setUsername(QUsername); 
@@ -106,25 +120,28 @@ public class Index extends Thread{
 		    connection = factory.newConnection();
 		    Channel channel_Recv = connection.createChannel();
 		    Channel channel_Send = connection.createChannel();
-		    channel_Recv.queueDeclare(QUEUE_WEBQUERY, false, false, false, null);
-		    channel_Send.queueDeclare(QUEUE_WEBRESPONSE, false, false, false, null);
+		    channel_Recv.queueDeclare(queue_web_request, false, false, false, null);
+		    channel_Send.queueDeclare(queue_web_response, false, false, false, null);
 		    
 		   
 		    
 		    QueueingConsumer consumer = new QueueingConsumer(channel_Recv);
-		    channel_Recv.basicConsume(QUEUE_WEBQUERY, true, consumer);
+		    channel_Recv.basicConsume(queue_web_request, true, consumer);
 		    
-		    log.log(Level.INFO,"Initialised Receive Queue: {0} and Send Queue : {1} for web requests",new Object[]{QUEUE_WEBQUERY,QUEUE_WEBRESPONSE});
+		    log.log(Level.INFO,"Initialised Receive Queue: {0} and Send Queue : {1} for web requests",new Object[]{queue_web_request,queue_web_response});
 		    
 		    while (true) {
 		      try{
 		    	
 		    	
-		    	log.log(Level.INFO,"Trading waiting for web querys on Queue : {0}",QUEUE_WEBQUERY);
+		    	log.log(Level.INFO,"Trading waiting for web querys on Queue : {0}",queue_web_request);
 		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 		      String message = new String(delivery.getBody());
-		      log.log(Level.INFO,"Received new message on Topic {0} : {1}",new Object[]{QUEUE_WEBQUERY,message});
+		      log.log(Level.INFO,"Received new message on Topic {0} : {1}",new Object[]{queue_web_request,message});
 		      String Response="";
+		      
+		      
+		      
 		      if (message.equals("GETORDERS"))
 		      {
 		    	Response = GetOrders();
@@ -147,7 +164,7 @@ public class Index extends Thread{
 		      }
 		      if (message.equals("RUN_EMAIL_LISTENER"))
 		      {
-		    	  Runtime.getRuntime().exec("java -jar C:\\EmailListener.jar");
+		    	  Runtime.getRuntime().exec("cmd /k start cmd /c java -jar C:\\EmailListener.jar ");
 		    	Response = "Executed Successfully";
 		      }
 		      if (message.startsWith("NEW_ORDER"))
@@ -167,9 +184,15 @@ public class Index extends Thread{
 		    	  Response = GetErrors();
 		    	  
 		      }
+		      if (message.equals("CHECK_EMAIL_LISTENER"))
+		      {
+		    	  Response = CheckEmailListener();
+		    	  
+		      }
+		      
 		     
-		      channel_Send.basicPublish("", QUEUE_WEBRESPONSE, null, Response.getBytes());
-		      log.log(Level.INFO,"Sent WebReply message on Topic {0} : {1}",new Object[]{QUEUE_WEBRESPONSE,Response});
+		      channel_Send.basicPublish("", queue_web_response, null, Response.getBytes());
+		      log.log(Level.INFO,"Sent WebReply message on Topic {0} : {1}",new Object[]{queue_web_response,Response});
 		    
 		      }
 		      catch(Exception e)
@@ -189,7 +212,41 @@ public class Index extends Thread{
 		
 	}
 	 
-	 private String IsConnected()
+	 private String CheckEmailListener() throws IOException, ShutdownSignalException, ConsumerCancelledException, InterruptedException {
+		
+		 String message = "PING";
+		 channel = connection.createChannel();
+		 String response = null;
+		    replyQueueName = channel.queueDeclare().getQueue(); 
+		    consumer = new QueueingConsumer(channel);
+		    channel.basicConsume(replyQueueName, true, consumer);
+		 
+		    String corrId = java.util.UUID.randomUUID().toString();
+
+		    BasicProperties props = new BasicProperties
+                    .Builder()
+                    .correlationId(corrId)
+                    .replyTo(replyQueueName)
+                    .build();
+
+channel.basicPublish("", requestQueueName, props, message.getBytes());
+
+			while (true) {
+			QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+				if (delivery.getProperties().getCorrelationId().equals(corrId)) 
+				{
+						response = new String(delivery.getBody());
+							break;
+				}
+			}
+
+return response; 
+		
+		 
+		
+	}
+
+	private String IsConnected()
 	 {
 		if ( IBTradingMain.INSTANCE.controller().IsConnected()==true)
 		{

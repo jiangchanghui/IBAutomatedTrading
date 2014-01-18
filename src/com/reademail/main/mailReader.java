@@ -49,7 +49,7 @@ import com.sun.mail.imap.IMAPStore;
 
 public class mailReader extends Thread{
 	private static final Logger log = Logger.getLogger( mailReader.class.getName() );
-	 private final static String QUEUE_NEWEMAIL = "NEWEMAIL";
+	 private static String queue_new_email = "";
 	 private static String QUsername="";
 	 private static String QPassword="";
 	 static Double _FFLimit=0.0;
@@ -69,7 +69,7 @@ public class mailReader extends Thread{
 		 _FFLimit = Double.valueOf(props.getProperty("fflimit"));
 		 QUsername = props.getProperty("qusername");
 		 QPassword = props.getProperty("qpassword");
-					           
+		 queue_new_email = props.getProperty("queue_new_email");		           
 							
 		 ConnectionFactory factory = new ConnectionFactory();
 		    factory.setHost("localhost");
@@ -80,10 +80,10 @@ public class mailReader extends Thread{
 		    Connection connection = factory.newConnection();
 		    Channel channel_Recv = connection.createChannel();
 		    Channel channel_Send = connection.createChannel();
-		    channel_Recv.queueDeclare(QUEUE_NEWEMAIL, false, false, false, null);
+		    channel_Recv.queueDeclare(queue_new_email, false, false, false, null);
 		     		    
 		    QueueingConsumer consumer = new QueueingConsumer(channel_Recv);
-		    channel_Recv.basicConsume(QUEUE_NEWEMAIL, true, consumer);
+		    channel_Recv.basicConsume(queue_new_email, true, consumer);
 		    
 		    
 		    
@@ -93,11 +93,11 @@ public class mailReader extends Thread{
 		    	try{
 		    		
 		    	
-		      log.log(Level.INFO,"Trading waiting for new emails on Queue : {0}",QUEUE_NEWEMAIL);
+		      log.log(Level.INFO,"Trading waiting for new emails on Queue : {0}",queue_new_email);
 		    //blocking call until a message enteres queue
 		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 		      String message = new String(delivery.getBody());
-		      log.log(Level.INFO,"Trading received new message on queue {0} : {1}",new Object[]{QUEUE_NEWEMAIL,message});
+		      log.log(Level.INFO,"Trading received new message on queue {0} : {1}",new Object[]{queue_new_email,message});
 		     
 					  
 					            OrderTemplate  _OrderTemplate = Split(message);
