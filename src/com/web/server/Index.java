@@ -87,6 +87,7 @@ public class Index extends Thread{
 	private static final Logger log = Logger.getLogger( mailReader.class.getName() );
 	 private static String queue_web_request = "";
 	 private static String queue_web_response = "";
+	 private static String RPC_QUEUE_NAME = "rpc_queue";
 	 private static String QUsername="";
 	 private  static String QPassword="";
 	 ConnectionFactory factory;
@@ -118,27 +119,38 @@ public class Index extends Thread{
 			factory.setVirtualHost("/");   
 		    
 		    connection = factory.newConnection();
-		    Channel channel_Recv = connection.createChannel();
-		    Channel channel_Send = connection.createChannel();
-		    channel_Recv.queueDeclare(queue_web_request, false, false, false, null);
-		    channel_Send.queueDeclare(queue_web_response, false, false, false, null);
+		    
+		    Channel channel = connection.createChannel();
+
+			 channel.queueDeclare(RPC_QUEUE_NAME, false, false, false, null);
+
+			 channel.basicQos(1);
+
+			 QueueingConsumer consumer = new QueueingConsumer(channel);
+			 channel.basicConsume(RPC_QUEUE_NAME, false, consumer);
+
+			 System.out.println(" [x] Awaiting RPC requests");
+
+		    
+		    
 		    
 		   
-		    
-		    QueueingConsumer consumer = new QueueingConsumer(channel_Recv);
-		    channel_Recv.basicConsume(queue_web_request, true, consumer);
-		    
-		    log.log(Level.INFO,"Initialised Receive Queue: {0} and Send Queue : {1} for web requests",new Object[]{queue_web_request,queue_web_response});
-		    
 		    while (true) {
 		      try{
-		    	
-		    	
-		    	log.log(Level.INFO,"Trading waiting for web querys on Queue : {0}",queue_web_request);
-		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
-		      String message = new String(delivery.getBody());
-		      log.log(Level.INFO,"Received new message on Topic {0} : {1}",new Object[]{queue_web_request,message});
-		      String Response="";
+		    	  QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+
+		    
+		    	  BasicProperties props1 = delivery.getProperties();
+		    	  BasicProperties replyProps = new BasicProperties
+                          .Builder()
+                          .correlationId(props1.getCorrelationId())
+                          .build();
+
+		    	  String message = new String(delivery.getBody());
+
+		    	  log.log(Level.INFO, message);
+		    	  
+		    	  String Response="";
 		      
 		      
 		      
@@ -190,10 +202,10 @@ public class Index extends Thread{
 		    	  
 		      }
 		      
-		     
-		      channel_Send.basicPublish("", queue_web_response, null, Response.getBytes());
-		      log.log(Level.INFO,"Sent WebReply message on Topic {0} : {1}",new Object[]{queue_web_response,Response});
-		    
+		      channel.basicPublish( "", props1.getReplyTo(), replyProps, Response.getBytes());
+
+			     channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+			     
 		      }
 		      catch(Exception e)
 		      {
