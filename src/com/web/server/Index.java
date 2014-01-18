@@ -28,6 +28,7 @@ import apidemo.AccountSummaryPanel.SummaryRow;
 import apidemo.OrdersPanel.OrdersModel;
 import apidemo.PositionsPanel.PositionModel;
 import apidemo.TopModel.TopRow;
+import apidemo.TradesPanel;
 
 
 import com.google.gson.Gson;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 
 import java.util.List;
 
+import com.ib.client.ExecutionFilter;
 import com.ib.controller.AccountSummaryTag;
 import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
@@ -393,8 +395,7 @@ public class Index extends Thread{
 			 obj_response = m_model.getValueAt(i, 2);
 				String Symbol = (String) (obj_response == null ? "" :  obj_response);
 				
-			double LastPx =0.0; 
-					//GetFarPrice(Symbol);
+			double LastPx =0.0;
 			
 			LinkedList l1_rows = new LinkedList();
  			JSONObject obj_row1 = new JSONObject();
@@ -565,7 +566,7 @@ public class Index extends Thread{
 		
 	//	IBTradingMain.INSTANCE.controller().reqAccountSummary( "All", AccountSummaryTag.values(), m_summary);
 		
-		//IBTradingMain.INSTANCE.controller().reqTopMktData(contract, "", false, row);
+IBTradingMain.INSTANCE.controller().reqTopMktData(contract, "", false, row);
 	//	fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
 		
 		return row.m_last;
@@ -578,6 +579,103 @@ public class Index extends Thread{
 		}
 	}
 	
+	
+	private String GetExecutions()
+	{
+	 TradesPanel m_tradesPanel = new TradesPanel();
+				IBTradingMain.INSTANCE.controller().reqExecutions2( new ExecutionFilter(), m_tradesPanel);
+				
+			
+				
+	ArrayList<apidemo.TradesPanel.FullExec> _Execs = new ArrayList<apidemo.TradesPanel.FullExec>();
+			_Execs = m_tradesPanel.getExecutions();
+	
+			 LinkedList l_cols = new LinkedList();
+		        LinkedList l_final = new LinkedList();
+		        JSONObject obj1 = new JSONObject();
+		        JSONObject obj_cols_1 = new JSONObject();
+		        JSONObject obj_cols_2 = new JSONObject();
+		        JSONObject obj_cols_3 = new JSONObject();
+		        JSONObject obj_cols_4 = new JSONObject();
+		        JSONObject obj_cols_5 = new JSONObject();
+			 obj_cols_1.put("id", "");
+		        obj_cols_1.put("label", "Side");
+		        obj_cols_1.put("type", "string");
+
+		        obj_cols_2.put("id", "");
+		        obj_cols_2.put("label", "Ticker");
+		        obj_cols_2.put("type", "string");
+
+		        obj_cols_3.put("id", "");
+		        obj_cols_3.put("label", "Quantity");
+		        obj_cols_3.put("type", "number");
+
+		        obj_cols_4.put("id", "");
+		        obj_cols_4.put("label", "T.Px");
+		        obj_cols_4.put("type", "number");
+		       
+		        obj_cols_5.put("id", "");
+		        obj_cols_5.put("label", "C.Px");
+		        obj_cols_5.put("type", "number");
+				
+				
+		        l_cols.add(obj_cols_1);
+		        l_cols.add(obj_cols_2);
+		        l_cols.add(obj_cols_3);
+		        l_cols.add(obj_cols_4);
+		        l_cols.add(obj_cols_5);
+		        obj1.put("cols", l_cols);	
+			
+		        for(apidemo.TradesPanel.FullExec exec : _Execs)
+				{
+					
+					String Symbol = exec.m_contract.symbol();
+					int Quantity=exec.m_trade.m_shares;
+					double TPx = exec.m_trade.m_avgPrice;
+					double CPx = exec.m_trade.m_price;
+					String Side = exec.m_trade.m_side;
+					 
+					 
+					 
+					 
+					 	LinkedList l1_rows = new LinkedList();
+			 			JSONObject obj_row1 = new JSONObject();
+				        JSONObject obj_row2 = new JSONObject();
+				        JSONObject obj_row3 = new JSONObject();
+				        JSONObject obj_row4 = new JSONObject();
+				        JSONObject obj_row5 = new JSONObject();
+				        obj_row1.put("v", Side);
+				        obj_row1.put("f", null);
+				        obj_row2.put("v", Symbol);
+				        obj_row2.put("f", null);
+				        obj_row3.put("v", Quantity);
+				        obj_row3.put("f", null);
+				        obj_row4.put("v", TPx);
+				        obj_row4.put("f", null);
+				        obj_row5.put("v", CPx);
+				        obj_row5.put("f", null);
+				        
+				        l1_rows.add(obj_row1);
+				        l1_rows.add(obj_row2);
+				        l1_rows.add(obj_row3);
+				        l1_rows.add(obj_row4);
+				        l1_rows.add(obj_row5);
+				        LinkedHashMap m1 = new LinkedHashMap();
+				        m1.put("c", l1_rows);
+		                l_final.add(m1);
+					 
+				//	Order order = new Order(_Symbol,Side,Quantity,Status);
+					
+				//	_OrdersList.add(order);
+					
+				}
+		        obj1.put("rows", l_final);
+		    	      
+		        
+		       return obj1.toJSONString();
+		        
+			
+	}
 	
 	
 	
