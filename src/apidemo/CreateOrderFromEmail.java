@@ -77,7 +77,8 @@ public class CreateOrderFromEmail {
 				SwingUtilities.invokeLater( new Runnable() {
 					@Override public void run() {
 						log.log(Level.SEVERE ,"Order execution failed with ({0}:{1})",new Object[]{errorCode,errorMsg});						
-						//checks for locate required and cancels the order - essentially IOC
+						IBTradingMain.INSTANCE.m_errorMap.put(dateFormat.format(new Date()), errorMsg);
+						
 						if (errorMsg.contains("Order held"))
 						{
 							log.log(Level.SEVERE ,"Order is held, cancelling all open orders");
@@ -88,7 +89,7 @@ public class CreateOrderFromEmail {
 							IBTradingMain.INSTANCE.controller().cancelAllOrders();
 						}
 						
-						IBTradingMain.INSTANCE.m_errorMap.put(dateFormat.format(new Date()), errorMsg);
+						
 						
 						
 						

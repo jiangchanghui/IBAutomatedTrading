@@ -44,7 +44,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
-
+import com.twitter.main.SendTweet;
 
 
 public class mailReader extends Thread{
@@ -85,7 +85,7 @@ public class mailReader extends Thread{
 		    QueueingConsumer consumer = new QueueingConsumer(channel_Recv);
 		    channel_Recv.basicConsume(queue_new_email, true, consumer);
 		    
-		    
+		    SendTweet sendtweet = new SendTweet();
 		    
 		    while (true) {
 		    	
@@ -105,7 +105,9 @@ public class mailReader extends Thread{
 					            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
 					           
 					            
-					            IBTradingMain.INSTANCE.m_ordersMap.put(dateFormat.format(new Date()),_OrderTemplate);
+					            IBTradingMain.INSTANCE.m_ordersMap.put(message,_OrderTemplate);
+					            sendtweet.SendNewTweet(message, _OrderTemplate);
+					            
 					            
 		    	}
 		    	catch(Exception e)

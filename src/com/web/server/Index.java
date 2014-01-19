@@ -42,9 +42,11 @@ import org.json.simple.JSONObject;
 
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
 
@@ -118,42 +120,31 @@ public class Index extends Thread{
 			factory.setPassword(QPassword); 
 			factory.setVirtualHost("/");   
 		    
-		    connection = factory.newConnection();
-		    
-		    Channel channel = connection.createChannel();
-
-			 channel.queueDeclare(RPC_QUEUE_NAME, false, false, false, null);
-
-			 channel.basicQos(1);
-
-			 QueueingConsumer consumer = new QueueingConsumer(channel);
-			 channel.basicConsume(RPC_QUEUE_NAME, false, consumer);
-
-			 System.out.println(" [x] Awaiting RPC requests");
-
-		    
-		    
-		    
-		   
-		    while (true) {
-		      try{
-		    	  QueueingConsumer.Delivery delivery = consumer.nextDelivery();
-
-		    
-		    	  BasicProperties props1 = delivery.getProperties();
-		    	  BasicProperties replyProps = new BasicProperties
-                          .Builder()
-                          .correlationId(props1.getCorrelationId())
-                          .build();
-
-		    	  String message = new String(delivery.getBody());
-
-		    	  log.log(Level.INFO, message);
-		    	  
-		    	  String Response="";
+			 connection = factory.newConnection();
+             Channel channel_Recv = connection.createChannel();
+             Channel channel_Send = connection.createChannel();
+             channel_Recv.queueDeclare(queue_web_request, false, false, false, null);
+             channel_Send.queueDeclare(queue_web_response, false, false, false, null);
+             
+            
+             
+             QueueingConsumer consumer = new QueueingConsumer(channel_Recv);
+             channel_Recv.basicConsume(queue_web_request, true, consumer);
+             
+             log.log(Level.INFO,"Initialised Receive Queue: {0} and Send Queue : {1} for web requests",new Object[]{queue_web_request,queue_web_response});
+             
+             while (true) {
+               try{
+                     
+                     
+                     log.log(Level.INFO,"Trading waiting for web querys on Queue : {0}",queue_web_request);
+               QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+               String message = new String(delivery.getBody());
+               log.log(Level.INFO,"Received new message on Topic {0} : {1}",new Object[]{queue_web_request,message});
+               String Response="";
 		      
 		      
-		      
+		    
 		      if (message.equals("GETORDERS"))
 		      {
 		    	Response = GetOrders();
@@ -201,11 +192,30 @@ public class Index extends Thread{
 		    	  Response = CheckEmailListener();
 		    	  
 		      }
+		      if (message.equals("GET_EXECUTIONS"))
+		      {
+		    	  Response = GetExecutions();
+		    	  
+		      }
 		      
-		      channel.basicPublish( "", props1.getReplyTo(), replyProps, Response.getBytes());
-
-			     channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-			     
+		    /*	  
+		    	String[] ar_result = new String[6];  
+		    	  
+		    	  ar_result[0] = GetOrders();
+		    	  ar_result[1] = GetOpenPositions();
+		    	  ar_result[2] = GetHistory();
+		    	  ar_result[3] = IsConnected();
+		    	  ar_result[4] = CheckEmailListener();;
+		    	  ar_result[5] = GetErrors();
+		    	  
+		    	  ByteArrayOutputStream b = new ByteArrayOutputStream();
+		          ObjectOutputStream o = new ObjectOutputStream(b);
+		          o.writeObject(ar_result);
+		         
+		    	  */
+		    	  
+		      channel_Send.basicPublish("", queue_web_response, null, Response.getBytes());
+              log.log(Level.INFO,"Sent WebReply message on Topic {0} : {1}",new Object[]{queue_web_response,Response});
 		      }
 		      catch(Exception e)
 		      {
@@ -228,7 +238,7 @@ public class Index extends Thread{
 		
 		 String message = "PING";
 		 channel = connection.createChannel();
-		 String response = null;
+		 String response = "";
 		    replyQueueName = channel.queueDeclare().getQueue(); 
 		    consumer = new QueueingConsumer(channel);
 		    channel.basicConsume(replyQueueName, true, consumer);
@@ -244,12 +254,21 @@ public class Index extends Thread{
 channel.basicPublish("", requestQueueName, props, message.getBytes());
 
 			while (true) {
-			QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+				
+			QueueingConsumer.Delivery delivery = consumer.nextDelivery(5000);
+			if (delivery !=null)
+			{
 				if (delivery.getProperties().getCorrelationId().equals(corrId)) 
 				{
 						response = new String(delivery.getBody());
 							break;
 				}
+			}
+			else
+			{
+				response = "UNREACHABLE";
+				break;
+			}
 			}
 
 return response; 
