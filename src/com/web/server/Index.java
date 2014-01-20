@@ -37,6 +37,7 @@ import com.google.gson.annotations.SerializedName;
 
 import com.google.gson.reflect.TypeToken;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.json.simple.JSONObject;
 
@@ -121,7 +122,29 @@ public class Index extends Thread{
 			factory.setVirtualHost("/");   
 		    
 			 connection = factory.newConnection();
-             Channel channel_Recv = connection.createChannel();
+			 
+			
+		        Channel channel = connection.createChannel();
+
+		        channel.exchangeDeclare("Exchange.Web", "topic");
+		        String queueName = channel.queueDeclare().getQueue();
+
+		        
+
+		    
+		         channel.queueBind(queueName, "Exchange.Web", "web.request.*");
+		      
+
+		        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+
+		        QueueingConsumer consumer = new QueueingConsumer(channel);
+		        channel.basicConsume(queueName, true, consumer);
+
+			 
+			 
+			 
+         /*
+			 Channel channel_Recv = connection.createChannel();
              Channel channel_Send = connection.createChannel();
              channel_Recv.queueDeclare(queue_web_request, false, false, false, null);
              channel_Send.queueDeclare(queue_web_response, false, false, false, null);
@@ -132,14 +155,32 @@ public class Index extends Thread{
              channel_Recv.basicConsume(queue_web_request, true, consumer);
              
              log.log(Level.INFO,"Initialised Receive Queue: {0} and Send Queue : {1} for web requests",new Object[]{queue_web_request,queue_web_response});
+           */
              
+             
+             JSONParser parser = new JSONParser();
+             JsonKeyFinder finder = new JsonKeyFinder();
+             
+             String CorrelationID = "";
+             String message = "";
              while (true) {
                try{
                      
                      
-                     log.log(Level.INFO,"Trading waiting for web querys on Queue : {0}",queue_web_request);
+              // log.log(Level.INFO,"Trading waiting for web querys on Queue : {0}",queue_web_request);
                QueueingConsumer.Delivery delivery = consumer.nextDelivery();
-               String message = new String(delivery.getBody());
+               String received = new String(delivery.getBody());
+               String routingKey = delivery.getEnvelope().getRoutingKey();
+               System.out.println(" [x] Received '" + routingKey + "':'" + message + "'");
+              
+               
+               JSONObject json = (JSONObject)new JSONParser().parse(received);
+               System.out.println("Message=" + json.get("Message"));
+               System.out.println("CorrelationID=" + json.get("CorrelationID"));
+                            
+               CorrelationID =json.get("CorrelationID").toString();     
+               message = json.get("Message").toString();
+               
                log.log(Level.INFO,"Received new message on Topic {0} : {1}",new Object[]{queue_web_request,message});
                String Response="";
 		      
@@ -198,24 +239,18 @@ public class Index extends Thread{
 		    	  
 		      }
 		      
-		    /*	  
-		    	String[] ar_result = new String[6];  
-		    	  
-		    	  ar_result[0] = GetOrders();
-		    	  ar_result[1] = GetOpenPositions();
-		    	  ar_result[2] = GetHistory();
-		    	  ar_result[3] = IsConnected();
-		    	  ar_result[4] = CheckEmailListener();;
-		    	  ar_result[5] = GetErrors();
-		    	  
-		    	  ByteArrayOutputStream b = new ByteArrayOutputStream();
-		          ObjectOutputStream o = new ObjectOutputStream(b);
-		          o.writeObject(ar_result);
-		         
-		    	  */
-		    	  
-		      channel_Send.basicPublish("", queue_web_response, null, Response.getBytes());
-              log.log(Level.INFO,"Sent WebReply message on Topic {0} : {1}",new Object[]{queue_web_response,Response});
+		 
+		      
+		      String routingKeyResponse = "web.response."+CorrelationID;
+		      
+		      
+		      
+		      channel.basicPublish("Exchange.Web", routingKeyResponse, null, Response.getBytes());
+		      
+		      System.out.println(" Published on  : '" + routingKeyResponse + "':'" + Response + "'");
+		      
+		      
+            //  log.log(Level.INFO,"Sent WebReply message on Topic {0} : {1}",new Object[]{queue_web_response,Response});
 		      }
 		      catch(Exception e)
 		      {
@@ -670,6 +705,7 @@ IBTradingMain.INSTANCE.controller().reqTopMktData(contract, "", false, row);
 	
 	private String GetExecutions()
 	{
+		try{
 	 TradesPanel m_tradesPanel = new TradesPanel();
 				IBTradingMain.INSTANCE.controller().reqExecutions2( new ExecutionFilter(), m_tradesPanel);
 				
@@ -758,9 +794,15 @@ IBTradingMain.INSTANCE.controller().reqTopMktData(contract, "", false, row);
 					
 				}
 		        obj1.put("rows", l_final);
-		    	      
+		        return obj1.toJSONString();
+		}
+		catch (Exception e)
+		{
+			return "";
+		}
+		
 		        
-		       return obj1.toJSONString();
+		    
 		        
 			
 	}
