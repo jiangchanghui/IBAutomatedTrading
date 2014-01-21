@@ -203,7 +203,10 @@ public class mailReader extends Thread{
 				{
 					Side=Action.SELL;
 				}
-			
+				if (Position == 0)
+				{
+					Side=null;
+				}
 				log.log(Level.INFO ,"Set Side to {0} becuase Position is {1} and this is a cover/sell long",new Object[]{Side,Position});
 				
 				 				
@@ -306,7 +309,7 @@ public class mailReader extends Thread{
 		
 		//if (Quantity==0)
 	//	{
-			if (Subject.contains("COVER") || Subject.contains("FLAT"))
+			if (Subject.contains("COVER") || Subject.contains("FLAT") || Subject.contains("LAST"))
 			{
 				int Position = GetPosition(Ticker);
 				log.log(Level.INFO ,"Position {0}",Position);
@@ -388,7 +391,12 @@ public class mailReader extends Thread{
 		{
 			Ticker = Ticker.substring(1);
 		}
+		if (Side ==null)
+		{
+			Side=Action.BUY;
+			Quantity =0;
 			
+		}
 		OrderTemplate _OrderTemplate = new OrderTemplate(Math.abs(Quantity),Ticker,Side);
 		
 		
@@ -408,18 +416,6 @@ public class mailReader extends Thread{
 	//	main.INSTANCE.controller().reqLiveOrders( m_model);
 
 	IBTradingMain.INSTANCE.controller().reqPositions( m_model);
-	
-		//ArrayList<apidemo.TradesPanel.FullExec> _Execs = new ArrayList<apidemo.TradesPanel.FullExec>();
-		
-//		while (m_model.getRowCount()==0)
-		
-		
-	//	_Execs = m_tradesPanel.getExecutions();
-		
-	
-	//	System.out.println(m_model.getValueAt(0, 1));
-	//	System.out.println(_Execs.toString());
-	//	System.out.println(_Execs.isEmpty());
 	
 	
 		int _PositionQuantity = 0;
