@@ -106,7 +106,8 @@ public class mailReader extends Thread{
 					           
 					            
 					            IBTradingMain.INSTANCE.m_ordersMap.put(message,_OrderTemplate);
-					            sendtweet.SendNewTweet(message, _OrderTemplate);
+					          String Tweet = message +" -> "+ _OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity();
+					            sendtweet.SendNewTweet(Tweet);
 					            
 					            
 		    	}

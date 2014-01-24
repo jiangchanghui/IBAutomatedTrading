@@ -39,6 +39,7 @@ import com.ib.controller.Types.SecType;
 import com.posttrade.main.CloseAllPositions;
 import com.reademail.main.OrderTemplate;
 import com.reademail.main.mailReader;
+import com.twitter.main.SendTweet;
 import com.web.server.WebServer;
 
 
@@ -102,6 +103,7 @@ public class IBTradingMain implements IConnectionHandler{
 	private void run() throws UnknownHostException {
 		
 		new mailReader().start();
+		new SendTweet().start();
 		WebServer _webServer = new WebServer();
 		EoDClosePositions e = new	EoDClosePositions();
 		//Timer for task to close all positions
