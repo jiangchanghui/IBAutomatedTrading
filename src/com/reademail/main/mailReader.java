@@ -214,7 +214,7 @@ public class mailReader extends Thread{
 				
 				
 				_location++;
-				continue;
+				
 			}
 			
 			
@@ -344,13 +344,13 @@ public class mailReader extends Thread{
 				if (Quantity ==0 || Quantity > Math.abs(Position))
 					{
 						Quantity = Position;
-						
-						
+						log.log(Level.INFO ,"Quantity = {0} and Position = {1} so setting Quantity to Position",new Object[]{Quantity,Position});
+						log.log(Level.INFO ,"Set Quantity to {0}",Quantity);
 					}
 			}
 				
 				log.log(Level.INFO ,"Set SIDE to {0} becuase subject contains COVER/FLAT",Side.toString());
-				log.log(Level.INFO ,"Set Quantity to {0}",Quantity);
+				
 				_location++;
 				
 			
