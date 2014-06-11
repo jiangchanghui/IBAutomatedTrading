@@ -22,9 +22,11 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.AbstractTableModel;
 
 
 import com.ib.controller.ApiController;
+import com.ib.controller.Bar;
 import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
 import com.ib.controller.NewOrder;
@@ -32,24 +34,34 @@ import com.ib.controller.NewOrderState;
 import com.ib.controller.ApiConnection.ILogger;
 import com.ib.controller.ApiController.IBulletinHandler;
 import com.ib.controller.ApiController.IConnectionHandler;
+import com.ib.controller.ApiController.IHistoricalDataHandler;
 import com.ib.controller.ApiController.IOrderHandler;
+import com.ib.controller.ApiController.IRealTimeBarHandler;
 import com.ib.controller.ApiController.ITimeHandler;
+import com.ib.controller.Types.BarSize;
+import com.ib.controller.Types.DurationUnit;
 import com.ib.controller.Types.NewsType;
 import com.ib.controller.Types.SecType;
+import com.ib.controller.Types.WhatToShow;
 import com.posttrade.main.CloseAllPositions;
 import com.reademail.main.OrderTemplate;
 import com.reademail.main.mailReader;
 import com.twitter.main.SendTweet;
+import com.web.request.GetHistoricMarketData;
 import com.web.server.WebServer;
 
 
 import apidemo.AccountInfoPanel;
+import apidemo.Chart;
 import apidemo.MarketDataPanel;
 import apidemo.TicketDlg;
 import apidemo.TradingPanel;
+
+
 import apidemo.util.HtmlButton;
 import apidemo.util.NewTabbedPanel;
 import apidemo.util.VerticalPanel;
+import apidemo.util.NewTabbedPanel.NewTabPanel;
 
 
 
@@ -102,12 +114,16 @@ public class IBTradingMain implements IConnectionHandler{
 	 	
 	private void run() throws UnknownHostException {
 		
-		new mailReader().start();
-		new SendTweet().start();
-		WebServer _webServer = new WebServer();
-		EoDClosePositions e = new	EoDClosePositions();
+	//	new mailReader().start();
+	//	new SendTweet().start();
+	//	WebServer _webServer = new WebServer();
+	//	EoDClosePositions e = new	EoDClosePositions();
 		//Timer for task to close all positions
 	//	e.run();
+		
+		//Listen for market data requests on new thread
+		//IOn Request Call new Class
+		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.HOUR_OF_DAY, 21);
 		calendar.set(Calendar.MINUTE, 35);
@@ -151,8 +167,15 @@ public class IBTradingMain implements IConnectionHandler{
         
         // make initial connection to local host, port 7496, client id 0
 		m_controller.connect( "127.0.0.1", 7496, 0);
+		
+	GetHistoricMarketData a = new GetHistoricMarketData();
+		a.get();
+		
     }
-	
+	public ApiController GetController()
+	{
+	return m_controller;	
+	}
 
 private class ConnectionPanel extends JPanel {
 	private final JTextField m_host = new JTextField(7);
@@ -166,6 +189,14 @@ private class ConnectionPanel extends JPanel {
 				onConnect();
 			}
 		};
+		
+		HtmlButton test = new HtmlButton("Test") {
+			@Override public void actionPerformed() {
+				
+			}
+		};
+		
+		
 
 		HtmlButton disconnect = new HtmlButton("Disconnect") {
 			@Override public void actionPerformed() {
@@ -181,6 +212,7 @@ private class ConnectionPanel extends JPanel {
 		JPanel p2 = new VerticalPanel();
 		p2.add( connect);
 		p2.add( disconnect);
+		p2.add(test);
 		p2.add( Box.createVerticalStrut(20));
 		
 		JPanel p3 = new VerticalPanel();
@@ -201,6 +233,11 @@ private class ConnectionPanel extends JPanel {
 		int clientId = Integer.parseInt( m_clientId.getText() );
 		m_controller.connect( m_host.getText(), port, clientId);
 	}
+	
+	
+	
+	
+	
 }
 
 
@@ -257,5 +294,7 @@ public void message(int id, int errorCode, String errorMsg) {
 	});
 }
 }
+
+
 
 

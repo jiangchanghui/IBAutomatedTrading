@@ -846,6 +846,11 @@ public class ApiController implements EWrapper {
 		sendEOM();
     }
 
+    public HashMap<Integer, IHistoricalDataHandler> GetHistoricalMap()
+    {
+		return m_historicalDataMap;
+    	
+    }
     public void cancelHistoricalData( IHistoricalDataHandler handler) {
     	Integer reqId = getAndRemoveKey( m_historicalDataMap, handler);
     	if (reqId != null) {
