@@ -33,6 +33,7 @@ import com.ib.controller.Types.MktDataType;
 import com.ib.controller.Types.NewsType;
 import com.ib.controller.Types.WhatToShow;
 import com.reademail.main.mailReader;
+import com.web.request.HistoricResultSet;
 
 public class ApiController implements EWrapper {
 	private static final Logger log = Logger.getLogger( ApiController.class.getName() );
@@ -57,6 +58,8 @@ public class ApiController implements EWrapper {
 	private final HashMap<Integer, IScannerHandler> m_scannerMap = new HashMap<Integer, IScannerHandler>();
 	private final HashMap<Integer, IRealTimeBarHandler> m_realTimeBarMap = new HashMap<Integer, IRealTimeBarHandler>();
 	private final HashMap<Integer, IHistoricalDataHandler> m_historicalDataMap = new HashMap<Integer, IHistoricalDataHandler>();
+	private final HashMap<Integer, HistoricResultSet> m_historicalDataMapWeb = new HashMap<Integer, HistoricResultSet>();
+	
 	private final HashMap<Integer, IFundamentalsHandler> m_fundMap = new HashMap<Integer, IFundamentalsHandler>();
 	private final HashMap<Integer, IOrderHandler> m_orderHandlers = new HashMap<Integer, IOrderHandler>();
 	private final HashMap<Integer,IAccountSummaryHandler> m_acctSummaryHandlers = new HashMap<Integer,IAccountSummaryHandler>();
@@ -838,15 +841,32 @@ public class ApiController implements EWrapper {
 
 	/** @param endDateTime format is YYYYMMDD HH:MM:SS [TMZ]
 	 *  @param duration is number of durationUnits */
+  
+	public int reqHistoricalData( NewContract contract, String endDateTime, int duration, DurationUnit durationUnit, BarSize barSize, WhatToShow whatToShow, boolean rthOnly, HistoricResultSet handler) {
+    	int reqId = m_reqId++;
+    	m_historicalDataMap.put( reqId, handler);
+    	m_historicalDataMapWeb.put( reqId, handler);
+    	String durationStr = duration + " " + durationUnit.toString().charAt( 0);
+    	m_client.reqHistoricalData(reqId, contract.getContract(), endDateTime, durationStr, barSize.toString(), whatToShow.toString(), rthOnly ? 1 : 0, 2);
+		sendEOM();
+		return reqId;
+    }
+   
     public void reqHistoricalData( NewContract contract, String endDateTime, int duration, DurationUnit durationUnit, BarSize barSize, WhatToShow whatToShow, boolean rthOnly, IHistoricalDataHandler handler) {
     	int reqId = m_reqId++;
     	m_historicalDataMap.put( reqId, handler);
+   // 	m_historicalDataMapWeb.put(reqId, handler);
     	String durationStr = duration + " " + durationUnit.toString().charAt( 0);
     	m_client.reqHistoricalData(reqId, contract.getContract(), endDateTime, durationStr, barSize.toString(), whatToShow.toString(), rthOnly ? 1 : 0, 2);
 		sendEOM();
     }
 
-    public HashMap<Integer, IHistoricalDataHandler> GetHistoricalMap()
+    public HashMap<Integer, HistoricResultSet> GetHistoricalMapWeb()
+    {
+		return m_historicalDataMapWeb;
+    	
+    }
+    public HashMap<Integer,  IHistoricalDataHandler> GetHistoricalMap()
     {
 		return m_historicalDataMap;
     	

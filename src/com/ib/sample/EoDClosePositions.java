@@ -24,7 +24,7 @@ public class EoDClosePositions extends TimerTask {
 			
 	//		ArrayList<apidemo.TradesPanel.FullExec> _Execs = new ArrayList<apidemo.TradesPanel.FullExec>();
 		//_Execs = m_tradesPanel.getExecutions();
-			
+		/**	
 			
 		IBTradingMain.INSTANCE.controller().reqPositions( m_model);
 	
@@ -59,7 +59,7 @@ public class EoDClosePositions extends TimerTask {
 		//	_delta = lDateTimeNow-lDateTime;
 			
 		}
-		
+		*/
 
 	}
 

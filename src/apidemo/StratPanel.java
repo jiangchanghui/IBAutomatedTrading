@@ -122,7 +122,7 @@ public class StratPanel extends StackPanel implements IHistoricalDataHandler, IR
 			QueryLength queryLength = getQueryLength( barSize);
 			String date = Bar.format( bar.time() * 1000);
 			int duration = m_bars.getInt() * queryLength.m_units;
-			IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, date, duration, queryLength.m_unit, barSize, WhatToShow.TRADES, false, this);
+		//	IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, date, duration, queryLength.m_unit, barSize, WhatToShow.TRADES, false, this);
 			m_req = true;
 		}
 		addBar( bar);

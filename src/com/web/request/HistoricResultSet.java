@@ -13,8 +13,17 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 
 	final ArrayList<Bar> m_rows = new ArrayList<Bar>();
 	final BarModel m_model = new BarModel();
-
 	
+	String Ticker ="";
+	
+	public HistoricResultSet(String ticker)
+	{
+		this.Ticker = ticker;
+	}
+	public String GetTicker()
+	{
+		return Ticker;
+	}
 
 	@Override public void historicalData(Bar bar, boolean hasGaps) {
 		m_rows.add( bar);

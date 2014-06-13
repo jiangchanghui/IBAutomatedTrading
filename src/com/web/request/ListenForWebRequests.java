@@ -7,11 +7,18 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 
-public class ListenForWebRequests {
+public class ListenForWebRequests extends Thread{
 
 	 private final static String QUEUE_NAME = "q_web_receive";
-	public static void main(String[] args) {
+	public void run() {
 		
+		GetHistoricMarketData MDM = new  GetHistoricMarketData();
+	      MDM = GetHistoricMarketData.getInstance();
+	     MDM.getMarketDataToJson("IBM");		
+	    
+	     MDM.getMarketDataToJson("AAPL");
+	     MDM.getMarketDataToJson("IBM");
+		/*
 		try{
 		    ConnectionFactory factory = new ConnectionFactory();
 		    factory.setHost("localhost");
@@ -42,7 +49,7 @@ public class ListenForWebRequests {
 			
 		}
 	
-
+*/
 	}
 
 	

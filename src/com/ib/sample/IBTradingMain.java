@@ -48,6 +48,8 @@ import com.reademail.main.OrderTemplate;
 import com.reademail.main.mailReader;
 import com.twitter.main.SendTweet;
 import com.web.request.GetHistoricMarketData;
+import com.web.request.ListenForWebRequests;
+import com.web.server.Index;
 import com.web.server.WebServer;
 
 
@@ -123,6 +125,8 @@ public class IBTradingMain implements IConnectionHandler{
 		
 		//Listen for market data requests on new thread
 		//IOn Request Call new Class
+		new ListenForWebRequests().start();
+		
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.HOUR_OF_DAY, 21);
@@ -168,8 +172,8 @@ public class IBTradingMain implements IConnectionHandler{
         // make initial connection to local host, port 7496, client id 0
 		m_controller.connect( "127.0.0.1", 7496, 0);
 		
-	GetHistoricMarketData a = new GetHistoricMarketData();
-		a.get();
+	//GetHistoricMarketData a = new GetHistoricMarketData();
+	
 		
     }
 	public ApiController GetController()
