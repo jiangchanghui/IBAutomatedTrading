@@ -16,6 +16,14 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	
 	String Ticker ="";
 	
+	public int GetCount()
+	{
+		return m_rows.size();
+	}
+	
+	
+	
+	
 	public HistoricResultSet(String ticker)
 	{
 		this.Ticker = ticker;

@@ -1,9 +1,15 @@
 package com.web.request;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 
+import com.benberg.struct.NewMarketDataRequest;
 import com.ib.controller.ApiController;
 import com.ib.controller.Bar;
 import com.ib.controller.NewContract;
@@ -50,7 +56,7 @@ public class GetHistoricMarketData {
 		System.out.println("Searching cache for : "+Ticker);
 		for (Entry<Integer, HistoricResultSet> m : MarketDataMapWeb.entrySet()) {
 			String Symbol = m.getValue().GetTicker();	
-			if (Symbol.equals(Ticker))
+			if (Symbol.equals(Ticker) && m.getValue().m_rows.size()>0)
 			{
 				System.out.println("Data in cache. Req ID : "+m.getKey());
 				return m.getKey();
@@ -66,12 +72,12 @@ public class GetHistoricMarketData {
 	}
 	
 	
-	public String getMarketDataToJson(String Ticker) {
+	public NewMarketDataRequest getMarketDataToJson(NewMarketDataRequest message) {
 		
-		int req_id = IsTickerInMap(Ticker);
+		int req_id = IsTickerInMap(message.GetTicker());
 		if(req_id != -1)
 		{
-		 return ConvertToJson(MarketDataMapWeb.get(req_id));	
+		 return ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId());	
 		 
 		}
 		else
@@ -79,18 +85,18 @@ public class GetHistoricMarketData {
 
 		
 		NewContract m_contract = new NewContract();
-		m_contract.symbol( Ticker); 
+		m_contract.symbol( message.GetTicker()); 
 		m_contract.secType( SecType.STK ); 
 		m_contract.exchange( "SMART" ); 
 		m_contract.currency( "USD" ); 
 				
-		HistoricResultSet dataSet = new HistoricResultSet(Ticker);
+		HistoricResultSet dataSet = new HistoricResultSet(message.GetTicker());
 	//	HistoricResultSet dataSet = new HistoricResultSet();
 		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, "20140613 21:00", 1, DurationUnit.DAY, BarSize._10_mins, WhatToShow.TRADES, false, dataSet);
 //		m_resultsPanel.addTab( "Historical " + m_contract.symbol(), panel, true, true);
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
 		MarketDataMap = m_controller.GetHistoricalMap();
-		return (ConvertToJson(MarketDataMapWeb.get(req_id)));
+		return (ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId()));
 		
 		
 		
@@ -99,23 +105,43 @@ public class GetHistoricMarketData {
 		
 		
 	}
-private String ConvertToJson(HistoricResultSet Data)
+private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String CorrelationId) 
 {
-	String result ="[";
+	String result ="";
+	
+	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+	format.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+	Date date; 
+	//long millis = date.getTime();
+	
 	for (Bar b : Data.m_rows)
 	{
-		result+= "{\"Time\":\""+b.formattedTime()+"\","+
+	//	date = format.parse(b.formattedTime());
+		
+		/**
+		result+= "{\"Time\":\""+b.time()+"\","+
 				 "\"Symbol\":\""+Data.Ticker+"\","+
 				 "\"High\":\""+b.high()+"\","+
 				 "\"Low\":\""+b.low()+"\","+
 				 "\"Open\":\""+b.open()+"\","+
 				 "\"Close\":\""+b.close()+"\""+
 				 "},";
+		*/
+		result+= b.time()+","+
+				 b.high()+",";
+			//	 b.low()+","+
+				// b.open()+","+
+				// b.close()+",";
+		
 	}
 	result = result.substring(0, result.length() - 1);
-	result +="]";
+	//result +="]";
 System.out.println(result);
-	return result;
+
+NewMarketDataRequest _response = new NewMarketDataRequest(Data.Ticker, CorrelationId,result);
+
+	return _response;
 }
 
 
