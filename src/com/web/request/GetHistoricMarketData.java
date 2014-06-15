@@ -49,14 +49,15 @@ public class GetHistoricMarketData {
 	   }
 
 	
-	private int IsTickerInMap(String Ticker)
+	private int IsTickerInMap(String Ticker,String TimeFrame)
 	{
 		
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
 		System.out.println("Searching cache for : "+Ticker);
 		for (Entry<Integer, HistoricResultSet> m : MarketDataMapWeb.entrySet()) {
-			String Symbol = m.getValue().GetTicker();	
-			if (Symbol.equals(Ticker) && m.getValue().m_rows.size()>0)
+			String _Ticker = m.getValue().GetTicker();
+			String _TimeFrame = m.getValue().GetTimeFrame();
+			if (_Ticker.equals(Ticker) && _TimeFrame.equals(TimeFrame) && m.getValue().m_rows.size()>0)
 			{
 				System.out.println("Data in cache. Req ID : "+m.getKey());
 				return m.getKey();
@@ -72,9 +73,9 @@ public class GetHistoricMarketData {
 	}
 	
 	
-	public NewMarketDataRequest getMarketDataToJson(NewMarketDataRequest message) {
+	public NewMarketDataRequest getMarketDataToJson(NewMarketDataRequest message) throws InterruptedException {
 		
-		int req_id = IsTickerInMap(message.GetTicker());
+		int req_id = IsTickerInMap(message.GetTicker(),message.GetTimeFrame());
 		if(req_id != -1)
 		{
 		 return ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId());	
@@ -90,10 +91,14 @@ public class GetHistoricMarketData {
 		m_contract.exchange( "SMART" ); 
 		m_contract.currency( "USD" ); 
 				
-		HistoricResultSet dataSet = new HistoricResultSet(message.GetTicker());
-	//	HistoricResultSet dataSet = new HistoricResultSet();
-		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, "20140613 21:00", 1, DurationUnit.DAY, BarSize._10_mins, WhatToShow.TRADES, false, dataSet);
-//		m_resultsPanel.addTab( "Historical " + m_contract.symbol(), panel, true, true);
+		HistoricResultSet dataSet = new HistoricResultSet(message.GetTicker(),message.GetTimeFrame());
+
+		
+		
+		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, "20140613 21:00", GetNumberDays(message.GetTimeFrame()), DurationUnit.DAY, GetBarSize(message.GetTimeFrame()), WhatToShow.TRADES, false, dataSet);
+
+			
+		
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
 		MarketDataMap = m_controller.GetHistoricalMap();
 		return (ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId()));
@@ -105,7 +110,56 @@ public class GetHistoricMarketData {
 		
 		
 	}
-private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String CorrelationId) 
+private BarSize GetBarSize(String TimeFrame) {
+	if (TimeFrame.equals("50Day1D"))
+		return BarSize._1_day;
+	if (TimeFrame.equals("1Day1Min"))
+		return BarSize._1_min;
+	if (TimeFrame.equals("3Day5Min"))
+		return BarSize._5_mins;
+	
+		return null;
+	}
+
+
+
+
+
+
+private int GetNumberDays(String TimeFrame) {
+		if (TimeFrame.equals("50Day1D"))
+			return 50;
+		if (TimeFrame.equals("1Day1Min"))
+			return 1;
+		if (TimeFrame.equals("3Day5Min"))
+			return 3;
+	
+			return 0;
+	}
+
+
+
+
+
+
+private DurationUnit GetDurationUnit(String TimeFrame) {
+		
+	if (TimeFrame.equals("50Day1D"))
+			return DurationUnit.DAY;
+	if (TimeFrame.equals("1Day1Min"))
+		return DurationUnit.DAY;
+	if (TimeFrame.equals("3Day5Min"))
+		return DurationUnit.DAY;
+	
+		return null;
+	}
+
+
+
+
+
+
+private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String CorrelationId) throws InterruptedException 
 {
 	String result ="";
 	
@@ -114,8 +168,19 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 
 	Date date; 
 	//long millis = date.getTime();
+	int _LoopCount=0;
+	System.out.println(Data.m_rows.size());
+	while(Data.m_rows.size()==0 && _LoopCount < 100)
+	{
+		Thread.sleep(500);
+		System.out.println(Data.m_rows.size());
+		_LoopCount++;
+	}
 	
-	for (Bar b : Data.m_rows)
+	System.out.println(Data.m_rows.size());
+	
+	//for (Bar b : Data.m_rows)
+	for( int i=0;i < Data.m_rows.size();i++)
 	{
 	//	date = format.parse(b.formattedTime());
 		
@@ -127,23 +192,38 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 				 "\"Open\":\""+b.open()+"\","+
 				 "\"Close\":\""+b.close()+"\""+
 				 "},";
-		*/
-		result+= b.time()+","+
-				 b.high()+",";
-			//	 b.low()+","+
-				// b.open()+","+
-				// b.close()+",";
+		
+		result+= "["+ConvertTime(b.time())+","+
+				 b.high()+","+
+				 b.low()+","+
+				 b.open()+","+
+				 b.close()+"],";
+				 */
+		
+	
+		result+= "["+ConvertTime(Data.m_rows.get(i).time())+","+
+				Data.m_rows.get(i).high()+","+
+				Data.m_rows.get(i).low()+","+
+				Data.m_rows.get(i).open()+","+
+				Data.m_rows.get(i).close()+"],";
+		
+		
 		
 	}
+	System.out.println(Data.m_rows.size());
 	result = result.substring(0, result.length() - 1);
 	//result +="]";
 System.out.println(result);
 
-NewMarketDataRequest _response = new NewMarketDataRequest(Data.Ticker, CorrelationId,result);
+NewMarketDataRequest _response = new NewMarketDataRequest(Data.Ticker, CorrelationId,result,true);
 
 	return _response;
 }
 
-
+private long ConvertTime(long l)
+{
+	return (l*1000)-14400000;
+	
+}
 
 }

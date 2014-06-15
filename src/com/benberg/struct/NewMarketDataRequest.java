@@ -10,17 +10,19 @@ public class NewMarketDataRequest implements Serializable{
 	private String Ticker;
 	private String CorrelationId;
 	private String MarketDataJson;
+	private String TimeFrame;
 	private static final long serialVersionUID = 1L;
-	public NewMarketDataRequest(String Ticker,String CorrId)
+	public NewMarketDataRequest(String Ticker,String CorrId, String TimeFrame)
 	{
 		this.Ticker = Ticker;
 		this.CorrelationId = CorrId;
+		this.TimeFrame = TimeFrame;
 	}
-	public NewMarketDataRequest(String Ticker,String CorrId,String MarketDataJson)
+	public NewMarketDataRequest(String Ticker,String CorrId, String MarketData,boolean hasData)
 	{
 		this.Ticker = Ticker;
 		this.CorrelationId = CorrId;
-		this.MarketDataJson = MarketDataJson;
+		this.MarketDataJson=MarketData;
 	}
 	public String GetTicker()
 	{
@@ -33,6 +35,10 @@ public class NewMarketDataRequest implements Serializable{
 	public String GetMarketDataJson()
 	{
 		return MarketDataJson;
+	}
+	public String GetTimeFrame()
+	{
+		return TimeFrame;
 	}
 	 public byte[] toBytes() {
 	      byte[]bytes; 

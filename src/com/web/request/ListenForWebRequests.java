@@ -21,6 +21,8 @@ public class ListenForWebRequests extends Thread{
 	 {
 		 factory = new ConnectionFactory();
 		    factory.setHost("localhost");
+		    factory.setUsername("Admin"); 
+			factory.setPassword("Typhoon1"); 
 		    connection = factory.newConnection();
 		    channel = connection.createChannel();
 
@@ -69,7 +71,7 @@ public class ListenForWebRequests extends Thread{
 		  }
 		catch (Exception e)
 		{
-			System.out.println(e.toString());
+			e.printStackTrace();
 			
 		}
 	

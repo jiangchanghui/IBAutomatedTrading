@@ -15,7 +15,7 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	final BarModel m_model = new BarModel();
 	
 	String Ticker ="";
-	
+	String TimeFrame;
 	public int GetCount()
 	{
 		return m_rows.size();
@@ -24,15 +24,19 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	
 	
 	
-	public HistoricResultSet(String ticker)
+	public HistoricResultSet(String ticker,String TimeFrame)
 	{
 		this.Ticker = ticker;
+		this.TimeFrame=TimeFrame;
 	}
 	public String GetTicker()
 	{
 		return Ticker;
 	}
-
+	public String GetTimeFrame()
+	{
+		return TimeFrame;
+	}
 	@Override public void historicalData(Bar bar, boolean hasGaps) {
 		m_rows.add( bar);
 	}
