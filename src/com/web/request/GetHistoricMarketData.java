@@ -113,7 +113,7 @@ public class GetHistoricMarketData {
 private BarSize GetBarSize(String TimeFrame) {
 	if (TimeFrame.equals("50Day1D"))
 		return BarSize._1_day;
-	if (TimeFrame.equals("1Day1Min"))
+	if (TimeFrame.equals("2Day1Min"))
 		return BarSize._1_min;
 	if (TimeFrame.equals("3Day5Min"))
 		return BarSize._5_mins;
@@ -128,9 +128,9 @@ private BarSize GetBarSize(String TimeFrame) {
 
 private int GetNumberDays(String TimeFrame) {
 		if (TimeFrame.equals("50Day1D"))
-			return 50;
-		if (TimeFrame.equals("1Day1Min"))
-			return 1;
+			return 60;
+		if (TimeFrame.equals("2Day1Min"))
+			return 2;
 		if (TimeFrame.equals("3Day5Min"))
 			return 3;
 	
