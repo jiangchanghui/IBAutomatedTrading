@@ -82,10 +82,11 @@ public class ListenForWebRequests extends Thread{
 	private  void SendReplyMessage(NewMarketDataRequest _message) throws IOException
 	{
 		
-	    
+	    if(_message != null)
+	    {
 	    channel.basicPublish("", QUEUE_OUT, null, _message.toBytes());
 	    System.out.println(" [x] Sent reply on topic  '" + QUEUE_OUT + "'");
-	    
+	    }
 	 //   channel.close();
 	  //  connection.close();
 	  

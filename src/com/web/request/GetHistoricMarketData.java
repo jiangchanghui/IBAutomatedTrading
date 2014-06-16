@@ -93,10 +93,14 @@ public class GetHistoricMarketData {
 				
 		HistoricResultSet dataSet = new HistoricResultSet(message.GetTicker(),message.GetTimeFrame());
 
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
+		System.out.println(sdf.format(date));
 		
-		
-		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, "20140613 21:00", GetNumberDays(message.GetTimeFrame()), DurationUnit.DAY, GetBarSize(message.GetTimeFrame()), WhatToShow.TRADES, false, dataSet);
-
+		if (nullcheck(message))
+			req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), GetNumberDays(message.GetTimeFrame()), DurationUnit.DAY, GetBarSize(message.GetTimeFrame()), WhatToShow.TRADES, true, dataSet);
+		else
+			return null;
 			
 		
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
@@ -110,10 +114,23 @@ public class GetHistoricMarketData {
 		
 		
 	}
+private boolean nullcheck(NewMarketDataRequest message) {
+
+	if (message.GetCorrelationId() != null && message.GetTicker().length()>1 && GetNumberDays(message.GetTimeFrame())>0 && GetBarSize(message.GetTimeFrame())!=null)
+		return true;
+	else
+		return false;
+	}
+
+
+
+
+
+
 private BarSize GetBarSize(String TimeFrame) {
 	if (TimeFrame.equals("50Day1D"))
 		return BarSize._1_day;
-	if (TimeFrame.equals("2Day1Min"))
+	if (TimeFrame.equals("3Day1Min"))
 		return BarSize._1_min;
 	if (TimeFrame.equals("3Day5Min"))
 		return BarSize._5_mins;
@@ -129,8 +146,8 @@ private BarSize GetBarSize(String TimeFrame) {
 private int GetNumberDays(String TimeFrame) {
 		if (TimeFrame.equals("50Day1D"))
 			return 60;
-		if (TimeFrame.equals("2Day1Min"))
-			return 2;
+		if (TimeFrame.equals("3Day1Min"))
+			return 3;
 		if (TimeFrame.equals("3Day5Min"))
 			return 3;
 	
@@ -139,20 +156,6 @@ private int GetNumberDays(String TimeFrame) {
 
 
 
-
-
-
-private DurationUnit GetDurationUnit(String TimeFrame) {
-		
-	if (TimeFrame.equals("50Day1D"))
-			return DurationUnit.DAY;
-	if (TimeFrame.equals("1Day1Min"))
-		return DurationUnit.DAY;
-	if (TimeFrame.equals("3Day5Min"))
-		return DurationUnit.DAY;
-	
-		return null;
-	}
 
 
 
@@ -170,7 +173,7 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 	//long millis = date.getTime();
 	int _LoopCount=0;
 	System.out.println(Data.m_rows.size());
-	while(Data.m_rows.size()==0 && _LoopCount < 100)
+	while(Data.m_rows.size()==0 && _LoopCount < 20)
 	{
 		Thread.sleep(500);
 		System.out.println(Data.m_rows.size());
@@ -180,6 +183,10 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 	System.out.println(Data.m_rows.size());
 	
 	//for (Bar b : Data.m_rows)
+	
+	if (Data.m_rows.size()==0)
+		return null;
+		
 	for( int i=0;i < Data.m_rows.size();i++)
 	{
 	//	date = format.parse(b.formattedTime());
@@ -202,9 +209,9 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 		
 	
 		result+= "["+ConvertTime(Data.m_rows.get(i).time())+","+
+				Data.m_rows.get(i).open()+","+
 				Data.m_rows.get(i).high()+","+
 				Data.m_rows.get(i).low()+","+
-				Data.m_rows.get(i).open()+","+
 				Data.m_rows.get(i).close()+"],";
 		
 		
