@@ -116,7 +116,7 @@ public class GetHistoricMarketData {
 	}
 private boolean nullcheck(NewMarketDataRequest message) {
 
-	if (message.GetCorrelationId() != null && message.GetTicker().length()>1 && GetNumberDays(message.GetTimeFrame())>0 && GetBarSize(message.GetTimeFrame())!=null)
+	if (message.GetCorrelationId() != null && message.GetTicker().length()>1 && GetNumberDays(message.GetTimeFrame())>0 && GetBarSize(message.GetTimeFrame())!=null &&message.GetTicker()!="undefined")
 		return true;
 	else
 		return false;
