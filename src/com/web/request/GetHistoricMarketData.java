@@ -76,13 +76,13 @@ public class GetHistoricMarketData {
 	public NewMarketDataRequest getMarketDataToJson(NewMarketDataRequest message) throws InterruptedException {
 		
 		int req_id = IsTickerInMap(message.GetTicker(),message.GetTimeFrame());
-		if(req_id != -1)
-		{
-		 return ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId());	
+//		if(req_id != -1)
+//		{
+//		 return ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId());	
 		 
-		}
-		else
-		{	
+	//	}
+//		else
+	//	{	
 
 		
 		NewContract m_contract = new NewContract();
@@ -98,7 +98,7 @@ public class GetHistoricMarketData {
 		System.out.println(sdf.format(date));
 		
 		if (nullcheck(message))
-			req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), GetNumberDays(message.GetTimeFrame()), DurationUnit.DAY, GetBarSize(message.GetTimeFrame()), WhatToShow.TRADES, true, dataSet);
+			req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), GetNumberDays(message.GetTimeFrame()), GetDurationUnit(message.GetTimeFrame()), GetBarSize(message.GetTimeFrame()), WhatToShow.TRADES,GetRTH(message.GetTimeFrame()), dataSet);
 		else
 			return null;
 			
@@ -109,11 +109,39 @@ public class GetHistoricMarketData {
 		
 		
 		
-		}
+	//	}
 		
 		
 		
 	}
+private boolean GetRTH(String TimeFrame) {
+	if (TimeFrame.equals("1Yr1D"))
+		return true;
+	else
+		return false;
+	
+	}
+
+
+
+
+
+
+private DurationUnit GetDurationUnit(String TimeFrame) {
+	if (TimeFrame.equals("1Yr1D"))
+		return DurationUnit.YEAR;
+	if (TimeFrame.equals("3Day1Min"))
+		return DurationUnit.DAY;
+	if (TimeFrame.equals("3Day5Min"))
+		return DurationUnit.DAY;
+		return null;
+	}
+
+
+
+
+
+
 private boolean nullcheck(NewMarketDataRequest message) {
 
 	if (message.GetCorrelationId() != null && message.GetTicker().length()>1 && GetNumberDays(message.GetTimeFrame())>0 && GetBarSize(message.GetTimeFrame())!=null &&message.GetTicker()!="undefined")
@@ -128,7 +156,7 @@ private boolean nullcheck(NewMarketDataRequest message) {
 
 
 private BarSize GetBarSize(String TimeFrame) {
-	if (TimeFrame.equals("50Day1D"))
+	if (TimeFrame.equals("1Yr1D"))
 		return BarSize._1_day;
 	if (TimeFrame.equals("3Day1Min"))
 		return BarSize._1_min;
@@ -144,8 +172,8 @@ private BarSize GetBarSize(String TimeFrame) {
 
 
 private int GetNumberDays(String TimeFrame) {
-		if (TimeFrame.equals("50Day1D"))
-			return 60;
+		if (TimeFrame.equals("1Yr1D"))
+			return 1;
 		if (TimeFrame.equals("3Day1Min"))
 			return 3;
 		if (TimeFrame.equals("3Day5Min"))
