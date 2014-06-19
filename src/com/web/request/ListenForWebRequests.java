@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 import com.benberg.struct.NewMarketDataRequest;
+import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -12,8 +13,8 @@ import com.rabbitmq.client.QueueingConsumer;
 
 public class ListenForWebRequests extends Thread{
 
-	 private final static String QUEUE_IN = "q_mdm_in";
-	 private final static String QUEUE_OUT = "q_web_in";
+	 private final static String QUEUE_IN = "rpc_queue";
+	// private final static String QUEUE_OUT = "q_web_in";
 	 ConnectionFactory factory;
 	 Connection connection;
 	 Channel channel;
@@ -26,9 +27,9 @@ public class ListenForWebRequests extends Thread{
 		    connection = factory.newConnection();
 		    channel = connection.createChannel();
 
-		    channel.queueDeclare(QUEUE_OUT, false, false, false, null);
+		//    channel.queueDeclare(QUEUE_OUT, false, false, false, null);
 		    channel.queueDeclare(QUEUE_IN, false, false, false, null);
-		 
+		    channel.basicQos(1);
 	 }
 	 
 	 
@@ -56,6 +57,13 @@ public class ListenForWebRequests extends Thread{
 		    
 		    while (true) {
 		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+		      
+		      BasicProperties props = delivery.getProperties();
+		      BasicProperties replyProps = new BasicProperties
+		                                       .Builder()
+		                                       .correlationId(props.getCorrelationId())
+		                                       .build();
+		      
 		      String message = new String(delivery.getBody());
 		      
 		      System.out.println(" [x] Received '" + message + "'");
@@ -65,7 +73,7 @@ public class ListenForWebRequests extends Thread{
 		      
 		      GetHistoricMarketData MDM = new  GetHistoricMarketData();
 		      MDM = GetHistoricMarketData.getInstance();
-		      SendReplyMessage (MDM.getMarketDataToJson(_message));
+		      SendReplyMessage (MDM.getMarketDataToJson(_message),props, replyProps);
 		      
 		    }
 		  }
@@ -79,13 +87,15 @@ public class ListenForWebRequests extends Thread{
 	}
 
 	
-	private  void SendReplyMessage(NewMarketDataRequest _message) throws IOException
+	private  void SendReplyMessage(NewMarketDataRequest _message, BasicProperties props, BasicProperties replyProps) throws IOException
 	{
 		
 	    if(_message != null)
 	    {
-	    channel.basicPublish("", QUEUE_OUT, null, _message.toBytes());
-	    System.out.println(" [x] Sent reply on topic  '" + QUEUE_OUT + "'");
+	 //   channel.basicPublish("", QUEUE_OUT, null, _message.toBytes());
+	    	 System.out.println("sending : "+_message.GetMarketDataJson());
+	    channel.basicPublish( "", props.getReplyTo(), replyProps, _message.toBytes());
+	    System.out.println(" [x] Sent reply on topic  '" + QUEUE_IN + "'");
 	    }
 	 //   channel.close();
 	  //  connection.close();
