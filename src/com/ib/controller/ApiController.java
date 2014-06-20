@@ -844,7 +844,7 @@ public class ApiController implements EWrapper {
   
 	public int reqHistoricalData( NewContract contract, String endDateTime, int duration, DurationUnit durationUnit, BarSize barSize, WhatToShow whatToShow, boolean rthOnly, HistoricResultSet handler) {
     	int reqId = m_reqId++;
-    	m_historicalDataMap.put( reqId, handler);
+    //	m_historicalDataMap.put( reqId, handler);
     	m_historicalDataMapWeb.put( reqId, handler);
     	String durationStr = duration + " " + durationUnit.toString().charAt( 0);
     	m_client.reqHistoricalData(reqId, contract.getContract(), endDateTime, durationStr, barSize.toString(), whatToShow.toString(), rthOnly ? 1 : 0, 2);
@@ -880,10 +880,14 @@ public class ApiController implements EWrapper {
     }
 
 	@Override public void historicalData(int reqId, String date, double open, double high, double low, double close, int volume, int count, double wap, boolean hasGaps) {
-		IHistoricalDataHandler handler = m_historicalDataMap.get( reqId);
+		//IHistoricalDataHandler handler = m_historicalDataMap.get( reqId);
+		HistoricResultSet handler = m_historicalDataMapWeb.get(reqId);
+			
+		
 		if (handler != null) {
 			if (date.startsWith( "finished")) {
 				handler.historicalDataEnd();
+				handler.SetLoadComplete();
 			}
 			else {
 				long longDate;

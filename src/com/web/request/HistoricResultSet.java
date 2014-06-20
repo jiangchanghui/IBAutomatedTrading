@@ -13,7 +13,7 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 
 	final ArrayList<Bar> m_rows = new ArrayList<Bar>();
 	final BarModel m_model = new BarModel();
-	
+	private volatile boolean complete =false;
 	String Ticker ="";
 	String TimeFrame;
 	public int GetCount()
@@ -37,6 +37,15 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	{
 		return TimeFrame;
 	}
+	public void SetLoadComplete()
+	{
+		complete = true;		
+	}
+	public boolean IsLoadComplete()
+	{
+		return complete;	
+	}
+	
 	@Override public void historicalData(Bar bar, boolean hasGaps) {
 		m_rows.add( bar);
 	}

@@ -199,8 +199,12 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 
 	Date date; 
 	//long millis = date.getTime();
+	
+	/*
 	int _LoopCount=0;
 	System.out.println(Data.m_rows.size());
+	//Loop until there is data
+	System.out.println(Data.IsLoadComplete());
 	while(Data.m_rows.size()==0 && _LoopCount < 20)
 	{
 		Thread.sleep(500);
@@ -210,31 +214,32 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 	
 	System.out.println(Data.m_rows.size());
 	
-	//for (Bar b : Data.m_rows)
+	int size = Data.m_rows.size();
+	boolean loading = true;
+	while(loading)
+	{
+		Thread.sleep(500);
+		if (size==Data.m_rows.size());
+			loading =false;
+	}
 	
 	if (Data.m_rows.size()==0)
 		return null;
-		
+	System.out.println(Data.IsLoadComplete());
+	
+	*/
+	int loop=0;
+	while(!Data.IsLoadComplete() && loop < 14)
+	{
+		Thread.sleep(500);
+		System.out.println(Data.IsLoadComplete());
+		loop++;
+	}
+	if (Data.m_rows.size()==0)
+		return null;
 	for( int i=0;i < Data.m_rows.size();i++)
 	{
-	//	date = format.parse(b.formattedTime());
-		
-		/**
-		result+= "{\"Time\":\""+b.time()+"\","+
-				 "\"Symbol\":\""+Data.Ticker+"\","+
-				 "\"High\":\""+b.high()+"\","+
-				 "\"Low\":\""+b.low()+"\","+
-				 "\"Open\":\""+b.open()+"\","+
-				 "\"Close\":\""+b.close()+"\""+
-				 "},";
-		
-		result+= "["+ConvertTime(b.time())+","+
-				 b.high()+","+
-				 b.low()+","+
-				 b.open()+","+
-				 b.close()+"],";
-				 */
-		
+			
 	
 		result+= "["+ConvertTime(Data.m_rows.get(i).time())+","+
 				Data.m_rows.get(i).open()+","+
@@ -248,9 +253,9 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 	System.out.println(Data.m_rows.size());
 	result = result.substring(0, result.length() - 1);
 	//result +="]";
-System.out.println(result);
+	System.out.println(result);
 
-NewMarketDataRequest _response = new NewMarketDataRequest(Data.Ticker, CorrelationId,result,true);
+	NewMarketDataRequest _response = new NewMarketDataRequest(Data.Ticker, CorrelationId,result,true);
 
 	return _response;
 }
