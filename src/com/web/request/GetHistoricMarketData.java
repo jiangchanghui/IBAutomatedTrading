@@ -9,8 +9,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
+
 import com.benberg.struct.NewMarketDataRequest;
 import com.ib.controller.ApiController;
+import com.ib.controller.ApiController.IRealTimeBarHandler;
 import com.ib.controller.Bar;
 import com.ib.controller.NewContract;
 import com.ib.controller.ApiController.IHistoricalDataHandler;
@@ -26,8 +28,10 @@ public class GetHistoricMarketData {
 	private static GetHistoricMarketData instance = null;
 	HashMap<Integer, HistoricResultSet> MarketDataMapWeb;
 	HashMap<Integer, IHistoricalDataHandler> MarketDataMap;
+	HashMap<Integer, HistoricResultSet> RTMarketDataMap;
 	ApiController m_controller;
 	IBTradingMain  IBMain;
+	
 	public GetHistoricMarketData()
 	{
 		 IBMain = IBTradingMain.INSTANCE;
@@ -73,7 +77,64 @@ public class GetHistoricMarketData {
 	}
 	
 	
-	public NewMarketDataRequest getMarketDataToJson(NewMarketDataRequest message) throws InterruptedException {
+	private int IsTickerInRTMap(String Ticker)
+	{
+		
+		RTMarketDataMap = m_controller.GetTRealTimeMap();
+		System.out.println("Searching cache for : "+Ticker);
+		for (Entry<Integer, HistoricResultSet> m : RTMarketDataMap.entrySet()) {
+			String _Ticker = m.getValue().GetTicker();
+			if (_Ticker.equals(Ticker))
+			{
+				System.out.println("Data in cache. Req ID : "+m.getKey());
+				return m.getKey();
+			}
+				
+				
+			
+			
+	}
+			System.out.println("Data not in cache. New Request");
+			return -1;
+			
+	}
+	
+	
+	
+	
+	public NewMarketDataRequest GetNewRealTimeDataRequest(NewMarketDataRequest message) throws InterruptedException
+	{
+		int req_id = IsTickerInRTMap(message.GetTicker());
+		if(req_id != -1)
+			 return ConvertToJson(RTMarketDataMap.get(req_id),message.GetCorrelationId());	
+		RTMarketDataMap = m_controller.GetTRealTimeMap();
+		NewContract m_contract = new NewContract();
+		m_contract.symbol( message.GetTicker()); 
+		m_contract.secType( SecType.STK ); 
+		m_contract.exchange( "SMART" ); 
+		m_contract.currency( "USD" ); 
+		
+		
+	//	BarResultsPanel panel = new BarResultsPanel( false);
+		
+		HistoricResultSet dataSet = new HistoricResultSet(message.GetTicker(),message.GetTimeFrame());
+
+		req_id =IBTradingMain.INSTANCE.controller().reqRealTimeBars(m_contract, WhatToShow.TRADES, false, dataSet);
+		//m_resultsPanel.addTab( "Real-time " + m_contract.symbol(), panel, true, true);
+		
+		 return ConvertToJson(RTMarketDataMap.get(req_id),message.GetCorrelationId());	
+			
+		
+		
+		
+	
+		
+		
+	}
+	
+	
+	
+	public NewMarketDataRequest GetMarketDataToJson(NewMarketDataRequest message) throws InterruptedException {
 		
 		int req_id = IsTickerInMap(message.GetTicker(),message.GetTimeFrame());
 //		if(req_id != -1)
@@ -229,12 +290,12 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 	
 	*/
 	int loop=0;
-	while(!Data.IsLoadComplete() && loop < 14)
-	{
-		Thread.sleep(500);
-		System.out.println(Data.IsLoadComplete());
-		loop++;
-	}
+	//while(!Data.IsLoadComplete() && loop < 14)
+//	{
+//		Thread.sleep(500);
+//		System.out.println(Data.IsLoadComplete());
+//		loop++;
+//	}
 	if (Data.m_rows.size()==0)
 		return null;
 	for( int i=0;i < Data.m_rows.size();i++)

@@ -16,19 +16,23 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	private volatile boolean complete =false;
 	String Ticker ="";
 	String TimeFrame;
+	
 	public int GetCount()
 	{
 		return m_rows.size();
 	}
 	
-	
+
 	
 	
 	public HistoricResultSet(String ticker,String TimeFrame)
 	{
 		this.Ticker = ticker;
 		this.TimeFrame=TimeFrame;
+	
 	}
+	
+	
 	public String GetTicker()
 	{
 		return Ticker;

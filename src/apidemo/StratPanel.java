@@ -113,7 +113,7 @@ public class StratPanel extends StackPanel implements IHistoricalDataHandler, IR
 	
 	protected void onStart() {
 		m_contractPanel.onOK();
-		IBTradingMain.INSTANCE.controller().reqRealTimeBars(m_contract, WhatToShow.TRADES, false, this);
+	//	IBTradingMain.INSTANCE.controller().reqRealTimeBars(m_contract, WhatToShow.TRADES, false, this);
 	}
 
 	@Override public void realtimeBar(Bar bar) {

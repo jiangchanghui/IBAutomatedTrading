@@ -376,7 +376,7 @@ public class MarketDataPanel extends JPanel {
 		protected void onRealTime() {
 			m_contractPanel.onOK();
 			BarResultsPanel panel = new BarResultsPanel( false);
-			IBTradingMain.INSTANCE.controller().reqRealTimeBars(m_contract, m_whatToShow.getSelectedItem(), m_rthOnly.isSelected(), panel);
+	//		IBTradingMain.INSTANCE.controller().reqRealTimeBars(m_contract, m_whatToShow.getSelectedItem(), m_rthOnly.isSelected(), panel);
 			m_resultsPanel.addTab( "Real-time " + m_contract.symbol(), panel, true, true);
 		}
 	}

@@ -57,6 +57,8 @@ public class ApiController implements EWrapper {
 	private final HashMap<Integer,IDeepMktDataHandler> m_deepMktDataMap = new HashMap<Integer,IDeepMktDataHandler>();
 	private final HashMap<Integer, IScannerHandler> m_scannerMap = new HashMap<Integer, IScannerHandler>();
 	private final HashMap<Integer, IRealTimeBarHandler> m_realTimeBarMap = new HashMap<Integer, IRealTimeBarHandler>();
+	private final HashMap<Integer, HistoricResultSet> m_realTimeBarMapWeb = new HashMap<Integer, HistoricResultSet>();
+
 	private final HashMap<Integer, IHistoricalDataHandler> m_historicalDataMap = new HashMap<Integer, IHistoricalDataHandler>();
 	private final HashMap<Integer, HistoricResultSet> m_historicalDataMapWeb = new HashMap<Integer, HistoricResultSet>();
 	
@@ -913,13 +915,24 @@ public class ApiController implements EWrapper {
 		void realtimeBar(Bar bar); // time is in seconds since epoch
 	}
 
-    public void reqRealTimeBars(NewContract contract, WhatToShow whatToShow, boolean rthOnly, IRealTimeBarHandler handler) {
+    public int reqRealTimeBars(NewContract contract, WhatToShow whatToShow, boolean rthOnly, HistoricResultSet handler) {
     	int reqId = m_reqId++;
-    	m_realTimeBarMap.put( reqId, handler);
+    	m_realTimeBarMapWeb.put( reqId, handler);
+    	//m_realTimeBarMap.put( reqId, handler);
     	m_client.reqRealTimeBars(reqId, contract.getContract(), 0, whatToShow.toString(), rthOnly);
 		sendEOM();
+		return reqId;
     }
 
+    public HashMap<Integer, HistoricResultSet> GetTRealTimeMap()
+    {
+		return m_realTimeBarMapWeb;
+    	
+    }
+    
+    
+    
+    
     public void cancelRealtimeBars( IRealTimeBarHandler handler) {
     	Integer reqId = getAndRemoveKey( m_realTimeBarMap, handler);
     	if (reqId != null) {
@@ -929,7 +942,7 @@ public class ApiController implements EWrapper {
     }
 
     @Override public void realtimeBar(int reqId, long time, double open, double high, double low, double close, long volume, double wap, int count) {
-    	IRealTimeBarHandler handler = m_realTimeBarMap.get( reqId);
+    	IRealTimeBarHandler handler = m_realTimeBarMapWeb.get( reqId);
 		if (handler != null) {
 			Bar bar = new Bar( time, high, low, open, close, wap, volume, count);
 			handler.realtimeBar( bar);
