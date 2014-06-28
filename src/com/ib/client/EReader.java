@@ -90,7 +90,7 @@ public class EReader extends Thread {
     /** Overridden in subclass. */
     protected boolean processMsg(int msgId) throws IOException{
         if( msgId == -1) return false;
-
+        System.out.println(msgId);
         switch( msgId) {
             case TICK_PRICE: {
                 int version = readInt();
@@ -385,6 +385,7 @@ public class EReader extends Thread {
             }
 
             case ERR_MSG: {
+            	System.out.println("error message");
                 int version = readInt();
                 if(version < 2) {
                     String msg = readStr();
