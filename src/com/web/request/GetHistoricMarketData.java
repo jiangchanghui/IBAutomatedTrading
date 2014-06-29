@@ -131,6 +131,47 @@ public class GetHistoricMarketData {
 		
 		
 	}
+public HistoricResultSet GetHistoricalMarketData(String Ticker) throws InterruptedException {
+		
+		int req_id = IsTickerInMap(Ticker,null);
+		if(req_id != -1)
+		{
+		 return MarketDataMapWeb.get(req_id);	
+		 
+		}
+		else
+		{	
+
+		
+		NewContract m_contract = new NewContract();
+		m_contract.symbol( Ticker); 
+		m_contract.secType( SecType.STK ); 
+		m_contract.exchange( "SMART" ); 
+		m_contract.currency( "USD" ); 
+				
+		HistoricResultSet dataSet = new HistoricResultSet(Ticker,null);
+
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
+		System.out.println(sdf.format(date));
+		
+	
+		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 2, DurationUnit.DAY, BarSize._5_mins, WhatToShow.TRADES,true, dataSet);
+		
+		
+		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
+		MarketDataMap = m_controller.GetHistoricalMap();
+		return MarketDataMapWeb.get(req_id);
+		}
+		
+		
+	
+		
+		
+		
+	}
+	
+	
 	
 	
 	

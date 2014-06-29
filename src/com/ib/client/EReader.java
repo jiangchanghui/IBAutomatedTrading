@@ -1034,6 +1034,7 @@ public class EReader extends Thread {
                 break;
             }
             case REAL_TIME_BARS: {
+            	
                 /*int version =*/ readInt();
                 int reqId = readInt();
                 long time = readLong();

@@ -11,18 +11,22 @@ import com.ib.controller.ApiController.IRealTimeBarHandler;
 
 public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarHandler {
 
-	final ArrayList<Bar> m_rows = new ArrayList<Bar>();
+	public final ArrayList<Bar> m_rows = new ArrayList<Bar>();
 	final BarModel m_model = new BarModel();
 	private volatile boolean complete =false;
 	String Ticker ="";
 	String TimeFrame;
-	
+	hft.main.Main hft_Class;
 	public int GetCount()
 	{
 		return m_rows.size();
 	}
 	
-
+	public HistoricResultSet(String ticker)
+	{
+		this.Ticker = ticker;
+		hft_Class = new hft.main.Main();
+	}
 	
 	
 	public HistoricResultSet(String ticker,String TimeFrame)
@@ -60,13 +64,27 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 
 	@Override public void realtimeBar(Bar bar) {
 		m_rows.add( bar); 
-		fire();
+		fire(bar);
 	}
-	
+	//historical fire
 	private void fire() {
+		
 		SwingUtilities.invokeLater( new Runnable() {
 			@Override public void run() {
 				m_model.fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
+				//	m_chart.repaint();
+			}
+		});
+	}
+	
+	private void fire(Bar bar) {
+		final double close = bar.close();
+		final long time = bar.time();
+		SwingUtilities.invokeLater( new Runnable() {
+			@Override public void run() {
+				m_model.fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
+				//This is when new amrket data arrives. Should call Rsi Function.
+				hft_Class.MarketDataTick(GetTicker(),time, close);
 			//	m_chart.repaint();
 			}
 		});
