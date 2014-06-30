@@ -1,6 +1,6 @@
 package hft.main;
 
-import analytics.calculations.RSICalculator;
+import analytics.RSICalculator;
 import apidemo.OrdersPanel.OrdersModel;
 
 import com.ib.controller.NewContract;
@@ -21,20 +21,20 @@ import com.ib.controller.Types.WhatToShow;
 import com.ib.sample.IBTradingMain;
 
 
-public class Main {
+public class Main extends Thread{
 	
-	RSICalculator RSICalc;
+	//RSICalculator RSICalc;
 	int _OverBought = 80;
 	int _OverSold = 20;
 	public void Main()
 	{
-		RSICalc = new RSICalculator();
+		
 	}
 	
 	
 	
-	public static void main(String[] args) {
-		
+	 public void run()
+		{	
 		
 		String _Ticker = "AAPL";
 		
@@ -64,14 +64,19 @@ public class Main {
 		
 	}
 
-	public void MarketDataTick(String _Ticker, long _time, double _close) {
+	public void MarketDataTick(double _RSI) {
 		
-	double _RSI = RSICalc.CalculateRsi(_Ticker, _time,_close);
+	
 		
 	if(_RSI > _OverBought)
-		
+	{
+		//Check if an order exists
 		OrdersModel m_model = new OrdersModel();
 		IBTradingMain.INSTANCE.controller().reqLiveOrders( m_model);
+		
+	}
+	//	OrdersModel m_model = new OrdersModel();
+	//	IBTradingMain.INSTANCE.controller().reqLiveOrders( m_model);
 		
 		
 		

@@ -1,5 +1,7 @@
 package com.ib.sample;
 
+import hft.main.Main;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -53,6 +55,7 @@ import com.web.server.Index;
 import com.web.server.WebServer;
 
 
+import analytics.AnalyticsCache;
 import apidemo.AccountInfoPanel;
 import apidemo.Chart;
 import apidemo.MarketDataPanel;
@@ -73,6 +76,8 @@ public class IBTradingMain implements IConnectionHandler{
 	private final NewTabbedPanel m_tabbedPanel = new NewTabbedPanel(true);
 	private final ConnectionPanel m_connectionPanel = new ConnectionPanel();
 	private final MarketDataPanel m_mktDataPanel = new MarketDataPanel();
+	
+
 	
 	private final JTextArea m_inLog = new JTextArea();
 	private final JTextArea m_outLog = new JTextArea();
@@ -116,6 +121,8 @@ public class IBTradingMain implements IConnectionHandler{
 	 	
 	private void run() throws UnknownHostException {
 		
+		hft.main.Main hft = new Main();
+		hft.start();
 	//	new mailReader().start();
 	//	new SendTweet().start();
 	//	WebServer _webServer = new WebServer();
@@ -125,7 +132,7 @@ public class IBTradingMain implements IConnectionHandler{
 		
 		//Listen for market data requests on new thread
 		//IOn Request Call new Class
-		new ListenForWebRequests().start();
+	//	new ListenForWebRequests().start();
 		
 		
 		Calendar calendar = Calendar.getInstance();
@@ -176,6 +183,8 @@ public class IBTradingMain implements IConnectionHandler{
 	
 		
     }
+	
+	
 	public ApiController GetController()
 	{
 	return m_controller;	

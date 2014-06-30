@@ -51,9 +51,30 @@ public class GetHistoricMarketData {
 	      }
 	      return instance;
 	   }
-
+	 private int IsTickerInMap(String Ticker)
+		{
+			
+			MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
+			System.out.println("Searching cache for : "+Ticker);
+			for (Entry<Integer, HistoricResultSet> m : MarketDataMapWeb.entrySet()) {
+				String _Ticker = m.getValue().GetTicker();
+				
+				if (_Ticker.equals(Ticker))
+				{
+					System.out.println("Data in cache. Req ID : "+m.getKey());
+					return m.getKey();
+				}
+					
+					
+				
+				
+		}
+				System.out.println("Data not in cache. New Request");
+				return -1;
+				
+		}
 	
-	private int IsTickerInMap(String Ticker,String TimeFrame)
+	private int IsTickerInMapWeb(String Ticker,String TimeFrame)
 	{
 		
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
@@ -133,7 +154,7 @@ public class GetHistoricMarketData {
 	}
 public HistoricResultSet GetHistoricalMarketData(String Ticker) throws InterruptedException {
 		
-		int req_id = IsTickerInMap(Ticker,null);
+		int req_id = IsTickerInMap(Ticker);
 		if(req_id != -1)
 		{
 		 return MarketDataMapWeb.get(req_id);	
@@ -177,7 +198,7 @@ public HistoricResultSet GetHistoricalMarketData(String Ticker) throws Interrupt
 	
 	public NewMarketDataRequest GetMarketDataToJson(NewMarketDataRequest message) throws InterruptedException {
 		
-		int req_id = IsTickerInMap(message.GetTicker(),message.GetTimeFrame());
+		int req_id = IsTickerInMapWeb(message.GetTicker(),message.GetTimeFrame());
 //		if(req_id != -1)
 //		{
 //		 return ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId());	

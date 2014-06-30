@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
+import analytics.RSICalculator;
+
 import com.ib.controller.Bar;
 import com.ib.controller.ApiController.IHistoricalDataHandler;
 import com.ib.controller.ApiController.IRealTimeBarHandler;
@@ -17,6 +19,7 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	String Ticker ="";
 	String TimeFrame;
 	hft.main.Main hft_Class;
+	RSICalculator _RSICalc;
 	public int GetCount()
 	{
 		return m_rows.size();
@@ -26,6 +29,7 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	{
 		this.Ticker = ticker;
 		hft_Class = new hft.main.Main();
+		RSICalculator _RSICalc = new RSICalculator();
 	}
 	
 	
@@ -83,8 +87,10 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 		SwingUtilities.invokeLater( new Runnable() {
 			@Override public void run() {
 				m_model.fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
+				
 				//This is when new amrket data arrives. Should call Rsi Function.
-				hft_Class.MarketDataTick(GetTicker(),time, close);
+				
+				hft_Class.MarketDataTick(_RSICalc.CalculateRsi(GetTicker(), time,close));
 			//	m_chart.repaint();
 			}
 		});

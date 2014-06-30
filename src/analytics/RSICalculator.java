@@ -1,4 +1,4 @@
-package analytics.calculations;
+package analytics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,12 +40,21 @@ public class RSICalculator {
 	private double RSIWorker(HistoricResultSet Data,long _time, double _close)
 	{
 		//is _time > 5 minutes from last time in Data
+		
+		AnalyticsCache _AnalyticsCache = AnalyticsCache.instance;
+		
 		int size = Data.m_rows.size();
 		long lastTime = Data.m_rows.get(size-1).time();
-		if (_time > lastTime+300000)
-		{
+		double CurrentRSI = _AnalyticsCache.GetRSI(Data.GetTicker());
+		System.out.println("Last : "+_close);
+		System.out.println((_time - lastTime));
+		if((_time < (lastTime+300)) && (CurrentRSI > 0))
+			return CurrentRSI;
+		else if (CurrentRSI > 0)
+			Data.historicalData(new Bar(_time, 0.0, 0.0,0.0, _close, 0, 0, 0), false);
+		
 			//more than 5 mins from last bae in Data, need new RSI.
-		Data.historicalData(new Bar(_time, 0.0, 0.0,0.0, _close, 0, 0, 0), false);
+		
 		
 		
 		
@@ -55,16 +64,14 @@ public class RSICalculator {
 		ArrayList<Double> _DownPeriods = new ArrayList<Double>();
 		if (Data.m_rows.size()==0)
 			return 0.0;
-		double _PreviousClose = Data.m_rows.get(0).close();
+		double _PreviousClose = Data.m_rows.get(size-15).close();
 		double _CurrentClose = 0.0;
-		
+		System.out.println("Running RSI calc");
 		for( int i=size-14;i < size;i++)
 		{
-		//	_histData.add(new HistDataCustom(Data.m_rows.get(i).time(),Data.m_rows.get(i).close()));
-		
-	//	Arrays.sort(_histData,HistDataCustom.SalaryComparator);
-		
+			
 			_CurrentClose = Data.m_rows.get(i).close();
+			System.out.println(_CurrentClose);
 			if (_CurrentClose > _PreviousClose) //Up bar
 				_UpPeriods.add(_CurrentClose-_PreviousClose);
 			else if (_CurrentClose < _PreviousClose) //down bar
@@ -78,14 +85,18 @@ public class RSICalculator {
 		}
 		
 		Double _MAUpPeriods = calculateAverage(_UpPeriods);
+		System.out.println("MA up "+_MAUpPeriods);
 		Double _MADownPeriods = calculateAverage(_DownPeriods);
+		System.out.println("MA down "+_MADownPeriods);
 		Double _RS = _MAUpPeriods / _MADownPeriods;
 		Double _RSI = 100- (100/(1+_RS));
+		System.out.println("End calc");
+		_AnalyticsCache.SetRSI(Data.GetTicker(), _RSI);
+		System.out.println("RSI new calc to be : "+_RSI);
 		return _RSI;
 		}
-		return -1;
 		
-}
+		
 	private double calculateAverage(ArrayList<Double> marks) {
 		  Double sum = 0.0;
 		  if(!marks.isEmpty()) {
