@@ -76,7 +76,7 @@ public class IBTradingMain implements IConnectionHandler{
 	private final NewTabbedPanel m_tabbedPanel = new NewTabbedPanel(true);
 	private final ConnectionPanel m_connectionPanel = new ConnectionPanel();
 	private final MarketDataPanel m_mktDataPanel = new MarketDataPanel();
-	
+	private final AnalyticsCache _AnalyticsCache = new AnalyticsCache().instance;
 
 	
 	private final JTextArea m_inLog = new JTextArea();
@@ -256,6 +256,7 @@ private class ConnectionPanel extends JPanel {
 
 @Override public void connected() {
 	show( "connected");
+	_AnalyticsCache.SetConnected(true);
 	m_connectionPanel.m_status.setText( "connected");
 	
 	m_controller.reqCurrentTime( new ITimeHandler() {
@@ -275,6 +276,7 @@ private class ConnectionPanel extends JPanel {
 
 @Override public void disconnected() {
 	show( "disconnected");
+	_AnalyticsCache.SetConnected(false);
 	m_connectionPanel.m_status.setText( "disconnected");
 }
 

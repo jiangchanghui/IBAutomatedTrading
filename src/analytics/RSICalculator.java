@@ -21,6 +21,7 @@ public class RSICalculator {
 
 	public double CalculateRsi(String _Ticker, long _time, double _close) {
 		try{
+			System.out.println("Here");
 		GetHistoricMarketData GetHistMarketData = new GetHistoricMarketData();
 		
 		
@@ -48,7 +49,7 @@ public class RSICalculator {
 		double CurrentRSI = _AnalyticsCache.GetRSI(Data.GetTicker());
 		System.out.println("Last : "+_close);
 		System.out.println((_time - lastTime));
-		if((_time < (lastTime+300)) && (CurrentRSI > 0))
+		if((_time < (lastTime+60)) && (CurrentRSI > 0))
 			return CurrentRSI;
 		else if (CurrentRSI > 0)
 			Data.historicalData(new Bar(_time, 0.0, 0.0,0.0, _close, 0, 0, 0), false);

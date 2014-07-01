@@ -7,6 +7,7 @@ import com.web.request.HistoricResultSet;
 public class AnalyticsCache {
 	public static AnalyticsCache instance = new AnalyticsCache();
 	HashMap<String, Double> _RSICache;
+	boolean IsApiConnected = false;
 	
 	public AnalyticsCache()
 	{
@@ -24,5 +25,14 @@ public class AnalyticsCache {
 		if(_RSICache.get(Ticker) != null)
 			return _RSICache.get(Ticker);
 		return 0.0;
+	}
+
+	public void SetConnected(boolean b) {
+		IsApiConnected = b;
+		
+	}
+
+	public boolean IsConnected() {
+		return IsApiConnected;
 	}
 }
