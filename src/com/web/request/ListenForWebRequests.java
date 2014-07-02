@@ -73,11 +73,18 @@ public class ListenForWebRequests extends Thread{
 		      
 		      GetHistoricMarketData MDM = new  GetHistoricMarketData();
 		      MDM = GetHistoricMarketData.getInstance();
-		      if(_message.IsRealTime())
-		    	  SendReplyMessage (MDM.GetNewRealTimeDataRequest(_message),props, replyProps);
-		      else
-		    	  SendReplyMessage (MDM.GetMarketDataToJson(_message),props, replyProps);
-		    } 
+		      if(_message.getType()==NewMarketDataRequest.MARKETDATA)
+		      {
+			      if(_message.IsRealTime())
+			    	  SendReplyMessage (MDM.GetNewRealTimeDataRequest(_message),props, replyProps);
+			      else
+			    	  SendReplyMessage (MDM.GetMarketDataToJson(_message),props, replyProps);
+		      }
+		      else //request for RSI data
+		      {
+		    	  
+		      }
+		      } 
 		  }
 		catch (Exception e)
 		{

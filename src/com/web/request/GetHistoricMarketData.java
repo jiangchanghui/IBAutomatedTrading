@@ -55,13 +55,13 @@ public class GetHistoricMarketData {
 		{
 			
 			MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
-			System.out.println("Searching cache for : "+Ticker);
+		//	System.out.println("Searching cache for : "+Ticker);
 			for (Entry<Integer, HistoricResultSet> m : MarketDataMapWeb.entrySet()) {
 				String _Ticker = m.getValue().GetTicker();
 				
 				if (_Ticker.equals(Ticker))
 				{
-					System.out.println("Data in cache. Req ID : "+m.getKey());
+			//		System.out.println("Data in cache. Req ID : "+m.getKey());
 					return m.getKey();
 				}
 					
@@ -174,10 +174,10 @@ public HistoricResultSet GetHistoricalMarketData(String Ticker) throws Interrupt
 
 		Date date = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
-		System.out.println(sdf.format(date));
+	//	System.out.println(sdf.format(date));
 		
 	
-		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 2, DurationUnit.DAY, BarSize._5_mins, WhatToShow.TRADES,true, dataSet);
+		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 2, DurationUnit.DAY, BarSize._1_min, WhatToShow.TRADES,true, dataSet);
 		
 		
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();

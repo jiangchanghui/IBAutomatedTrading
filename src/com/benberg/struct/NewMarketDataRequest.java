@@ -13,15 +13,23 @@ public class NewMarketDataRequest implements Serializable{
 	private String TimeFrame;
 	private boolean RealTime;
 	private static final long serialVersionUID = 1L;
+	public static int MARKETDATA = 1;
+	public  static int RSIDATA = 2;
+	private static int Type=0;		
 	//public static final int HISTORICAL = 1;
 //	public static final int LIVE = 2;
 //	private int type;
-	public NewMarketDataRequest(boolean Realtime,String Ticker,String CorrId, String TimeFrame)
+	public NewMarketDataRequest(boolean Realtime,String Ticker,String CorrId, String TimeFrame,int Type)
 	{
 		this.RealTime = Realtime;
 		this.Ticker = Ticker;
 		this.CorrelationId = CorrId;
 		this.TimeFrame = TimeFrame;
+		this.Type = Type;
+	}
+	public int getType()
+	{
+		return Type;
 	}
 	public boolean IsRealTime()
 	{

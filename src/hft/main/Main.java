@@ -42,40 +42,54 @@ public class Main extends Thread{
 	//	int req_id = IsTickerInRTMap(message.GetTicker());
 	
 	//	RTMarketDataMap = m_controller.GetTRealTimeMap();
-		NewContract m_contract = new NewContract();
-		m_contract.symbol( _Ticker); 
-		m_contract.secType( SecType.STK ); 
-		m_contract.exchange( "SMART" ); 
-		m_contract.currency( "USD" ); 
 		
 		
-		AnalyticsCache _AnalyticsCache = new AnalyticsCache().instance;
-		
-		HistoricResultSet dataSet = new HistoricResultSet(_Ticker);
-		//creates subscription for market data ticks every 2 seconds
-		int i=0;
-		while(!_AnalyticsCache.IsConnected() && i <20)
-		{
-			try {
-				Thread.sleep(1000);
-				i++;
-				} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		 AnalyticsCache _AnalyticsCache = new AnalyticsCache().instance;
+			//creates subscription for market data ticks every 2 seconds
+			int i=0;
+			while(!_AnalyticsCache.IsConnected() && i <20)
+			{
+				try {
+					Thread.sleep(1000);
+					i++;
+					} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-		}
-		if (i >=20)
-		{
-			System.out.println("Initialising HFT module... Failed : Api not connected");
-			return;
-		}
-		int req_id =IBTradingMain.INSTANCE.controller().reqRealTimeBars(m_contract, WhatToShow.TRADES, false, dataSet);
-		
+			if (i >=20)
+			{
+				System.out.println("Initialising HFT module... Failed : Api not connected");
+				return;
+			}
+			
+		RequestMarketData("AAPL");
+		RequestMarketData("TSLA");
+		RequestMarketData("FSLR");
+		RequestMarketData("IBM");
+		RequestMarketData("NFLX");
+		RequestMarketData("GOOGL");
+
 		System.out.println("Initialising HFT module... Complete");
+		
+		}
+	 private void RequestMarketData(String _Ticker)
+	 {
+		 NewContract m_contract = new NewContract();
+			m_contract.symbol( _Ticker); 
+			m_contract.secType( SecType.STK ); 
+			m_contract.exchange( "SMART" ); 
+			m_contract.currency( "USD" ); 
+		 
+		 
+		 HistoricResultSet dataSet = new HistoricResultSet(_Ticker);
+		int req_id =IBTradingMain.INSTANCE.controller().reqRealTimeBars(m_contract, WhatToShow.TRADES, false, dataSet);
 		
 		
 		// return ConvertToJson(RTMarketDataMap.get(req_id),message.GetCorrelationId());	
-			
+
+		System.out.println("Initialising HFT module... "+_Ticker+" Loaded");
+		
 		
 		
 		
