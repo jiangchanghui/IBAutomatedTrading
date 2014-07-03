@@ -1,5 +1,6 @@
 package com.ib.sample;
 
+import hft.main.CreateWebResponse;
 import hft.main.Main;
 
 import java.awt.BorderLayout;
@@ -121,6 +122,7 @@ public class IBTradingMain implements IConnectionHandler{
 	 	
 	private void run() throws UnknownHostException {
 		
+		
 		hft.main.Main hft = new Main();
 		hft.start();
 	//	new mailReader().start();
@@ -205,7 +207,9 @@ private class ConnectionPanel extends JPanel {
 		
 		HtmlButton test = new HtmlButton("Test") {
 			@Override public void actionPerformed() {
-				
+			//	CreateWebResponse c = new CreateWebResponse();
+			//	c.GetWeb();
+			//	c.GetPriceAndRsi();
 			}
 		};
 		

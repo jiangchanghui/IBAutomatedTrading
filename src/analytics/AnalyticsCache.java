@@ -31,7 +31,10 @@ public class AnalyticsCache {
 	else
 		_HistRSICache.put(Ticker, new HistoricalRsiCache(System.currentTimeMillis(),RSI));
 	}
-
+	public HistoricalRsiCache GethistoricalRsiMapByTicker(String Ticker)
+	{
+		return _HistRSICache.get(Ticker);
+	}
 
 	public Double GetRSI(String Ticker)
 	{

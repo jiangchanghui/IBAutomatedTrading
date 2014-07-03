@@ -19,14 +19,14 @@ public class RSICalculator {
 
 	}
 
-	public double CalculateRsi(String _Ticker, long _time, double _close) {
+	public double CalculateRsi(String _Ticker, Bar bar) {
 		try{
 		
 		GetHistoricMarketData GetHistMarketData = new GetHistoricMarketData();
 		
 		
 		
-		return RSIWorker(GetHistMarketData.GetHistoricalMarketData(_Ticker),_time,_close);
+		return RSIWorker(GetHistMarketData.GetHistoricalMarketData(_Ticker),bar);
 		
 			
 		
@@ -38,13 +38,14 @@ public class RSICalculator {
 		return 0;
 	}
 
-	private double RSIWorker(HistoricResultSet Data,long _time, double _close)
+	private double RSIWorker(HistoricResultSet Data,Bar bar)
 	{
 		//is _time > 5 minutes from last time in Data
 		
 		AnalyticsCache _AnalyticsCache = AnalyticsCache.instance;
 		
 		int size = Data.m_rows.size();
+		long _time = bar.time();
 		long lastTime = Data.m_rows.get(size-1).time();
 		double CurrentRSI = _AnalyticsCache.GetRSI(Data.GetTicker());
 	//	System.out.println("Last : "+_close);
@@ -52,9 +53,9 @@ public class RSICalculator {
 		if((_time < (lastTime+60)) && (CurrentRSI > 0))
 			return CurrentRSI;
 		else if (CurrentRSI > 0)
-			Data.historicalData(new Bar(_time, 0.0, 0.0,0.0, _close, 0, 0, 0), false);
+			Data.historicalData(bar, false);
 		
-			//more than 5 mins from last bae in Data, need new RSI.
+			//more than 5 mins from last bar in Data, need new RSI.
 		
 		
 		

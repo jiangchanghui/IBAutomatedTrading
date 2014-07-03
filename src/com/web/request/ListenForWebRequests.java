@@ -1,10 +1,13 @@
 package com.web.request;
 
+import hft.main.CreateWebResponse;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
 import com.benberg.struct.NewMarketDataRequest;
+import com.benberg.struct.RequestType;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -73,19 +76,28 @@ public class ListenForWebRequests extends Thread{
 		      
 		      GetHistoricMarketData MDM = new  GetHistoricMarketData();
 		      MDM = GetHistoricMarketData.getInstance();
-		      if(_message.getType()==NewMarketDataRequest.MARKETDATA)
-		      {
-			      if(_message.IsRealTime())
-			    	  SendReplyMessage (MDM.GetNewRealTimeDataRequest(_message),props, replyProps);
-			      else
-			    	  SendReplyMessage (MDM.GetMarketDataToJson(_message),props, replyProps);
+		      
+		      RequestType req = _message.getType();
+		      
+		      switch (req) {
+		      case AUTOTRADER: 
+		    	  CreateWebResponse c = new CreateWebResponse();
+		    	  ;
+
+		    	NewMarketDataRequest _response = new NewMarketDataRequest(_message.GetTicker(), _message.GetCorrelationId(),c.GetPriceAndRsi(_message.GetTicker()),true);
+
+		    	  SendReplyMessage (MDM.GetNewRealTimeDataRequest(_message),props, replyProps);
+		    	  break;
+		      case REALTIMEREQUEST: 
+		    	  SendReplyMessage (MDM.GetNewRealTimeDataRequest(_message),props, replyProps);
+		    	  break;
+		      case HISTORICALREQUEST: 
+		    	  SendReplyMessage (MDM.GetMarketDataToJson(_message),props, replyProps);
+		    	  break;
+		      
 		      }
-		      else //request for RSI data
-		      {
-		    	  
-		      }
-		      } 
 		  }
+		}
 		catch (Exception e)
 		{
 			e.printStackTrace();

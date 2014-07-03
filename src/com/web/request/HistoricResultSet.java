@@ -84,13 +84,14 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	private void fire(Bar bar) {
 		final double close = bar.close();
 		final long time = bar.time();
+		final Bar _bar = bar;
 		SwingUtilities.invokeLater( new Runnable() {
 			@Override public void run() {
 				m_model.fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
 				
 				//This is when new amrket data arrives. Should call Rsi Function.
 				System.out.println(GetTicker()+"  " +time+"   "+close+ "  "+hft_Class);
-				hft_Class.MarketDataTick(_RSICalc.CalculateRsi(GetTicker(), time,close));
+				hft_Class.MarketDataTick(_RSICalc.CalculateRsi(GetTicker(), _bar));
 			//	_RSICalc.CalculateRsi(GetTicker(), time,close);
 			//	m_chart.repaint();
 			}

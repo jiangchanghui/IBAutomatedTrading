@@ -15,11 +15,11 @@ public class NewMarketDataRequest implements Serializable{
 	private static final long serialVersionUID = 1L;
 	public static int MARKETDATA = 1;
 	public  static int RSIDATA = 2;
-	private static int Type=0;		
+	private static RequestType Type;		
 	//public static final int HISTORICAL = 1;
 //	public static final int LIVE = 2;
 //	private int type;
-	public NewMarketDataRequest(boolean Realtime,String Ticker,String CorrId, String TimeFrame,int Type)
+	public NewMarketDataRequest(boolean Realtime,String Ticker,String CorrId, String TimeFrame,RequestType Type)
 	{
 		this.RealTime = Realtime;
 		this.Ticker = Ticker;
@@ -27,7 +27,7 @@ public class NewMarketDataRequest implements Serializable{
 		this.TimeFrame = TimeFrame;
 		this.Type = Type;
 	}
-	public int getType()
+	public RequestType getType()
 	{
 		return Type;
 	}
