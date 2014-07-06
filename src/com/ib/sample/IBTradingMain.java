@@ -134,7 +134,7 @@ public class IBTradingMain implements IConnectionHandler{
 		
 		//Listen for market data requests on new thread
 		//IOn Request Call new Class
-	//	new ListenForWebRequests().start();
+		new ListenForWebRequests().start();
 		
 		
 		Calendar calendar = Calendar.getInstance();

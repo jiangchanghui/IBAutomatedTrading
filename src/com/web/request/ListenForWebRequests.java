@@ -1,6 +1,7 @@
 package com.web.request;
 
 import hft.main.CreateWebResponse;
+import hft.main.WebRequestHandler;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -78,21 +79,40 @@ public class ListenForWebRequests extends Thread{
 		      MDM = GetHistoricMarketData.getInstance();
 		      
 		      RequestType req = _message.getType();
-		      
+		      NewMarketDataRequest _response;
+		      hft.main.WebRequestHandler _handler;
 		      switch (req) {
 		      case AUTOTRADER: 
 		    	  CreateWebResponse c = new CreateWebResponse();
-		    	  ;
+		    	  
 
-		    	NewMarketDataRequest _response = new NewMarketDataRequest(_message.GetTicker(), _message.GetCorrelationId(),c.GetPriceAndRsi(_message.GetTicker()),true);
+		    	_response = new NewMarketDataRequest(_message.GetTicker(), _message.GetCorrelationId(),c.GetPriceAndRsi(_message.GetTicker()),true);
 
-		    	  SendReplyMessage (MDM.GetNewRealTimeDataRequest(_message),props, replyProps);
+		    	  SendReplyMessage (_response,props, replyProps);
 		    	  break;
 		      case REALTIMEREQUEST: 
 		    	  SendReplyMessage (MDM.GetNewRealTimeDataRequest(_message),props, replyProps);
 		    	  break;
 		      case HISTORICALREQUEST: 
 		    	  SendReplyMessage (MDM.GetMarketDataToJson(_message),props, replyProps);
+		    	  break;
+		      case PNL:
+		    	   _handler = new WebRequestHandler();
+		    	   _response = _handler.GetPNL(_message.GetTicker());
+
+		    	  SendReplyMessage (_response,props, replyProps);
+		    	  break;
+		      case ORDERS:
+		    	   _handler = new WebRequestHandler();
+		    	   _response = _handler.GetOrders(_message.GetTicker());
+		    	  
+		    	  SendReplyMessage (_response,props, replyProps);
+		    	  break;
+		      case RSI:
+		    	  _handler = new WebRequestHandler();
+		    	   _response = _handler.GetRSI(_message.GetTicker());
+		    	   
+		    	  SendReplyMessage (_response,props, replyProps);
 		    	  break;
 		      
 		      }

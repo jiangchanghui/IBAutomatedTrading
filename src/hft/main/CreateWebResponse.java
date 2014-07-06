@@ -117,7 +117,7 @@ public class CreateWebResponse {
 		format.setTimeZone(TimeZone.getTimeZone("UTC"));
 
 		if (Data.m_rows.size()==0)
-			return null;
+			return "";
 		for( int i=0;i < Data.m_rows.size();i++)
 		{
 				
@@ -132,13 +132,13 @@ public class CreateWebResponse {
 			
 		}
 		System.out.println(Data.m_rows.size());
-		result = result.substring(0, result.length() - 1)+"},";
+		result = result.substring(0, result.length() - 1)+"};";
 		System.out.println(result);
 		
 		
 		HistoricalRsiCache _H = _AnalyticsCache.GethistoricalRsiMapByTicker(Ticker);
 		if (_H==null)
-			return "-1";
+			return "NoRSIData";
 		 for (Entry<Long, Double> e : _H.GetHistMap().entrySet()) {
 		
 			  rsi_result="["+e.getKey()+","+String.valueOf(e.getValue())+"],";
