@@ -91,7 +91,7 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 				
 				//This is when new amrket data arrives. Should call Rsi Function.
 				System.out.println(GetTicker()+"  " +time+"   "+close+ "  "+hft_Class);
-				hft_Class.MarketDataTick(_RSICalc.CalculateRsi(GetTicker(), _bar));
+				hft_Class.MarketDataTick(GetTicker(),_RSICalc.CalculateRsi(GetTicker(), _bar));
 			//	_RSICalc.CalculateRsi(GetTicker(), time,close);
 			//	m_chart.repaint();
 			}

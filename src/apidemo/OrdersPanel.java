@@ -3,6 +3,8 @@
 
 package apidemo;
 
+import hft.main.Cache;
+
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -173,7 +175,7 @@ public class OrdersPanel extends JPanel {
 	public static class OrdersModel extends AbstractTableModel implements ILiveOrderHandler {
 		private HashMap<Long,OrderRow> m_map = new HashMap<Long,OrderRow>();
 		private ArrayList<OrderRow> m_orders = new ArrayList<OrderRow>();
-
+		
 		@Override public int getRowCount() {
 			return m_orders.size();
 		}
@@ -188,8 +190,13 @@ public class OrdersPanel extends JPanel {
 		}
 
 		@Override public void openOrder(NewContract contract, NewOrder order, NewOrderState orderState) {
+			Cache c = new Cache().instance;
+			c.IsLoadingOrders(true);//makes sure its set , true when orders are being loaded
+			//fires when order changes or is added
 			OrderRow full = m_map.get( order.permId() );
 			
+			
+			c.OrderHandler(order,orderState,contract);
 			if (full != null) {
 				full.m_order = order;
 				full.m_state = orderState;
@@ -212,6 +219,9 @@ public class OrdersPanel extends JPanel {
 		}
 
 		@Override public void openOrderEnd() {
+			System.out.println("Order END");
+			Cache c = new Cache().instance;
+			c.IsLoadingOrders(false);
 		}
 		
 		@Override public void orderStatus(int orderId, OrderStatus status, int filled, int remaining, double avgFillPrice, long permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
@@ -262,10 +272,10 @@ public class OrdersPanel extends JPanel {
 	
 	public static class OrderRow {
 		NewContract m_contract;
-		NewOrder m_order;
-		NewOrderState m_state;
+		public NewOrder m_order;
+		public NewOrderState m_state;
 
-		OrderRow( NewContract contract, NewOrder order, NewOrderState state) {
+		public OrderRow( NewContract contract, NewOrder order, NewOrderState state) {
 			m_contract = contract;
 			m_order = order;
 			m_state = state;
