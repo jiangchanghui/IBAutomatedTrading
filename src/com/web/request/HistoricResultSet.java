@@ -1,5 +1,7 @@
 package com.web.request;
 
+import hft.main.QueueHandler;
+
 import java.util.ArrayList;
 
 import javax.swing.SwingUtilities;
@@ -7,6 +9,7 @@ import javax.swing.table.AbstractTableModel;
 
 import analytics.RSICalculator;
 
+import com.benberg.struct.MarketDataTick;
 import com.ib.controller.Bar;
 import com.ib.controller.ApiController.IHistoricalDataHandler;
 import com.ib.controller.ApiController.IRealTimeBarHandler;
@@ -91,12 +94,23 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 				
 				//This is when new amrket data arrives. Should call Rsi Function.
 				System.out.println(GetTicker()+"  " +time+"   "+close+ "  "+hft_Class);
-				hft_Class.MarketDataTick(GetTicker(),_RSICalc.CalculateRsi(GetTicker(), _bar));
+				//Add to queue
+				QueueHandler.instance.SendToMarketDataTickQueue(new MarketDataTick(GetTicker(), _bar));
+			//	hft_Class.MarketDataTick(GetTicker(),_RSICalc.CalculateRsi(GetTicker(), _bar));
 			//	_RSICalc.CalculateRsi(GetTicker(), time,close);
 			//	m_chart.repaint();
 			}
 		});
 	}
+	
+	private void AddTickToTickQueue(Bar bar)
+	{
+		
+		
+		
+		
+	}
+	
 	class BarModel extends AbstractTableModel {
 		@Override public int getRowCount() {
 			return m_rows.size();

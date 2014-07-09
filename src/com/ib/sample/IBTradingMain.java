@@ -2,6 +2,7 @@ package com.ib.sample;
 
 import hft.main.CreateWebResponse;
 import hft.main.Main;
+import hft.main.QueueHandler;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -57,6 +58,7 @@ import com.web.server.WebServer;
 
 
 import analytics.AnalyticsCache;
+import analytics.RSICalculator;
 import apidemo.AccountInfoPanel;
 import apidemo.Chart;
 import apidemo.MarketDataPanel;
@@ -125,6 +127,12 @@ public class IBTradingMain implements IConnectionHandler{
 		
 		hft.main.Main hft = new Main();
 		hft.start();
+		QueueHandler Q = new QueueHandler().instance;
+		Q.setup();
+		RSICalculator r = new RSICalculator();
+		r.start();
+		RSICalculator q = new RSICalculator();
+		q.start();
 	//	new mailReader().start();
 	//	new SendTweet().start();
 	//	WebServer _webServer = new WebServer();

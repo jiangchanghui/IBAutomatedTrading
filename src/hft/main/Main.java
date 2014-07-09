@@ -10,6 +10,7 @@ import analytics.RSICalculator;
 import apidemo.TradesPanel;
 import apidemo.OrdersPanel.OrderRow;
 import apidemo.OrdersPanel.OrdersModel;
+import apidemo.PositionsPanel.PositionModel;
 
 import com.ib.client.ExecutionFilter;
 import com.ib.controller.NewContract;
@@ -77,12 +78,12 @@ public class Main extends Thread{
 				return;
 			}
 			
-	//	RequestMarketData("AAPL");
-	//	RequestMarketData("TSLA");
-	//	RequestMarketData("FSLR");
-	//	RequestMarketData("IBM");
-	//	RequestMarketData("NFLX");
-	//	RequestMarketData("GOOGL");
+		RequestMarketData("AAPL");
+		RequestMarketData("TSLA");
+		RequestMarketData("FSLR");
+		RequestMarketData("IBM");
+		RequestMarketData("NFLX");
+		RequestMarketData("GOOGL");
 
 		System.out.println("Initialising HFT module... Complete");
 		
@@ -140,12 +141,15 @@ public class Main extends Thread{
 			
 		if (_order ==null)
 		{
-			CreateOrder(Ticker,c.OrderSizeCalc(Ticker),Action.SELL,0.0);
 			//order does not exist 
 			//place order
+			CreateOrder(Ticker,c.OrderSizeCalc(Ticker),Action.SELL,0.0);
 			
-			
-			
+			//Create corresponding scalp order
+			//get exec price
+			_order = c.GetOrderDetails(Ticker);
+		//	PositionModel _positions = new PositionModel();
+		//	IBTradingMain.INSTANCE.controller().reqPositions( _positions);
 		}
 		
 	}

@@ -3,10 +3,11 @@
 
 package com.ib.controller;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Bar {
+public class Bar  implements Serializable{
 	private static final SimpleDateFormat FORMAT = new SimpleDateFormat( "yyyyMMdd HH:mm:ss"); // format for historical query
 
 	private final long m_time;
