@@ -10,18 +10,32 @@ public class AnalyticsCache {
 	public static AnalyticsCache instance = new AnalyticsCache();
 	HashMap<String, Double> _RSICache;
 	HashMap<String, HistoricalRsiCache> _HistRSICache;
+	HashMap<String,HistoricalStochasticsCache>  _StochasticsCache;
 	boolean IsApiConnected = false;
 	
 	public AnalyticsCache()
 	{
 		_RSICache = new HashMap<String,Double>();
 		_HistRSICache = new HashMap<String, HistoricalRsiCache>();
+		_StochasticsCache = new HashMap<String,HistoricalStochasticsCache>();
 	}
 	public HashMap<String, HistoricalRsiCache> GetHistoricalRSIMap()
 	{
 		return _HistRSICache;
-		
+	
 	}
+	public HistoricalStochasticsCache GetHistoricalStochasticMap(String Ticker)
+	{
+		HistoricalStochasticsCache _tmp = _StochasticsCache.get(Ticker);
+		if(_tmp != null)
+			return _tmp;
+		else
+			_StochasticsCache.put(Ticker, new HistoricalStochasticsCache());
+		return _StochasticsCache.get(Ticker);
+	
+	}
+	
+	
 	public void SetRSI(String Ticker, Double RSI) {
 	_RSICache.put(Ticker, RSI);
 	
@@ -43,6 +57,20 @@ public class AnalyticsCache {
 		return 0.0;
 	}
 
+	public void SetStochastics(String ticker, double SignalLine, double SlowSto, double A, double B)
+	{
+		HistoricalStochasticsCache _tmp = _StochasticsCache.get(ticker);
+		if(_tmp != null)
+			
+			_tmp.SetHistStochastics(System.currentTimeMillis(), new StochasticsStruct(SignalLine, SlowSto,A,B));
+		else
+			_StochasticsCache.put(ticker, new HistoricalStochasticsCache(System.currentTimeMillis(), new StochasticsStruct(SignalLine, SlowSto,A,B)));
+	}
+	
+	
+	
+	
+	
 	public void SetConnected(boolean b) {
 		IsApiConnected = b;
 		

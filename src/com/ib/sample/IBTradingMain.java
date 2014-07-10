@@ -59,6 +59,7 @@ import com.web.server.WebServer;
 
 import analytics.AnalyticsCache;
 import analytics.RSICalculator;
+import analytics.SlowStochasticsCalculator;
 import apidemo.AccountInfoPanel;
 import apidemo.Chart;
 import apidemo.MarketDataPanel;
@@ -129,10 +130,15 @@ public class IBTradingMain implements IConnectionHandler{
 		hft.start();
 		QueueHandler Q = new QueueHandler().instance;
 		Q.setup();
-		RSICalculator r = new RSICalculator();
-		r.start();
-		RSICalculator q = new RSICalculator();
-		q.start();
+	//	RSICalculator r = new RSICalculator();
+	//	r.start();
+	//	RSICalculator q = new RSICalculator();
+	//	q.start();
+		
+		SlowStochasticsCalculator s = new SlowStochasticsCalculator();
+		s.start();
+		
+		
 	//	new mailReader().start();
 	//	new SendTweet().start();
 	//	WebServer _webServer = new WebServer();

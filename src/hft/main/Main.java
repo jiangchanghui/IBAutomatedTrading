@@ -79,11 +79,11 @@ public class Main extends Thread{
 			}
 			
 		RequestMarketData("AAPL");
-		RequestMarketData("TSLA");
-		RequestMarketData("FSLR");
-		RequestMarketData("IBM");
-		RequestMarketData("NFLX");
-		RequestMarketData("GOOGL");
+//		RequestMarketData("TSLA");
+//		RequestMarketData("FSLR");
+//		RequestMarketData("IBM");
+//		RequestMarketData("NFLX");
+//		RequestMarketData("GOOGL");
 
 		System.out.println("Initialising HFT module... Complete");
 		
