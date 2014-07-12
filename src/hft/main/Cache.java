@@ -10,13 +10,15 @@ import java.util.logging.Handler;
 import javax.swing.table.AbstractTableModel;
 
 import com.ib.controller.AccountSummaryTag;
+import com.ib.controller.Bar;
 import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
 import com.ib.controller.NewOrder;
 import com.ib.controller.NewOrderState;
 import com.ib.controller.ApiController.IAccountSummaryHandler;
 import com.ib.controller.ApiController.IPositionHandler;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
+
 import analytics.AnalyticsCache;
 import analytics.HistoricalRsiCache;
 import apidemo.AccountInfoPanel;
@@ -26,6 +28,8 @@ import apidemo.PositionsPanel.PositionModel;
 public class Cache {
 	public static Cache instance = new Cache();
 	private HashMap<String,OrderRow> orders_map = new HashMap<String,OrderRow>();
+	private ArrayList<String> Tickers_list = new ArrayList<>();
+	private HashMap<String,ArrayList<Double>> AverageBarSize_Map = new HashMap<String,ArrayList<Double>>();
 	PositionModel _positions;
 	private volatile boolean _isloading=false;
 	boolean IsApiConnected = false;
@@ -34,8 +38,54 @@ public class Cache {
 	{
 		_positions = new PositionModel();
 		IBTradingMain.INSTANCE.controller().reqPositions( _positions);		
+		Tickers_list.add("AAPL");
 	}
 
+	public  ArrayList<String> GetTickersList()
+	{
+		return Tickers_list;
+		
+	}
+	
+	public void CalcAverageBarSize(String Ticker,Bar bar) {
+		//new bar arrived
+		ArrayList<Double> tmp =AverageBarSize_Map.get(Ticker);
+		double range = bar.high()-bar.low();
+		if (tmp ==null)
+			tmp = new ArrayList<Double>();
+			
+		if(tmp.size()<5)
+			tmp.add(tmp.size()-1,range);
+		else
+		{
+		tmp.add(bar.high()-bar.low());
+		tmp.add(0,tmp.get(1));
+		tmp.add(1,tmp.get(2));
+		tmp.add(2,tmp.get(3));
+		tmp.add(3,tmp.get(4));
+		tmp.add(4, range);
+		}
+		
+		AverageBarSize_Map.put(Ticker, tmp);
+				
+			
+	}
+		
+	public double GetAverageBarSize(String Ticker)
+	{
+	ArrayList<Double> tmp =AverageBarSize_Map.get(Ticker);
+	double average=0.0;
+	for(double value : tmp)
+	{
+		average+=value;
+		
+	}
+	average = average/tmp.size();
+	
+	return average;
+		
+	}
+	
 	public OrderRow GetOrderDetails(String Ticker)
 	{
 		if (orders_map.keySet().contains(Ticker))
@@ -290,6 +340,8 @@ private static class PositionRow {
 		} 
 	}
 }
+
+
 }
 
 

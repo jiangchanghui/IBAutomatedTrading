@@ -7,6 +7,7 @@ import javax.swing.SwingUtilities;
 
 import analytics.AnalyticsCache;
 import analytics.RSICalculator;
+import analytics.SlowStochasticsCalculator;
 import apidemo.TradesPanel;
 import apidemo.OrdersPanel.OrderRow;
 import apidemo.OrdersPanel.OrdersModel;
@@ -16,7 +17,6 @@ import com.ib.client.ExecutionFilter;
 import com.ib.controller.NewContract;
 import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.WhatToShow;
-import com.ib.sample.IBTradingMain;
 import com.web.request.HistoricResultSet;
 import com.benberg.struct.NewMarketDataRequest;
 import com.ib.controller.ApiController;
@@ -34,7 +34,7 @@ import com.ib.controller.Types.DurationUnit;
 import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.TimeInForce;
 import com.ib.controller.Types.WhatToShow;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 
 public class Main extends Thread{
@@ -77,8 +77,22 @@ public class Main extends Thread{
 				System.out.println("Initialising HFT module... Failed : Api not connected");
 				return;
 			}
-			
-		RequestMarketData("AAPL");
+		
+		Cache _HftCache = new Cache();
+		
+	for (int j=0;j<2;j++)
+	{
+		for(String ticker : _HftCache.GetTickersList())
+		{
+		RequestMarketData(ticker);
+		SlowStochasticsCalculator s = new SlowStochasticsCalculator();
+		s.SetTicker(ticker);
+		s.start();
+		System.out.println("Initialising HFT module for "+ticker);
+		}
+	}
+		
+		
 //		RequestMarketData("TSLA");
 //		RequestMarketData("FSLR");
 //		RequestMarketData("IBM");
@@ -86,6 +100,8 @@ public class Main extends Thread{
 //		RequestMarketData("GOOGL");
 
 		System.out.println("Initialising HFT module... Complete");
+		
+				
 		
 		}
 	 private void RequestMarketData(String _Ticker)

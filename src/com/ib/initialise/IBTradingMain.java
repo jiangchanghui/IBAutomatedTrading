@@ -1,4 +1,4 @@
-package com.ib.sample;
+package com.ib.initialise;
 
 import hft.main.CreateWebResponse;
 import hft.main.Main;
@@ -135,8 +135,7 @@ public class IBTradingMain implements IConnectionHandler{
 	//	RSICalculator q = new RSICalculator();
 	//	q.start();
 		
-		SlowStochasticsCalculator s = new SlowStochasticsCalculator();
-		s.start();
+	
 		
 		
 	//	new mailReader().start();

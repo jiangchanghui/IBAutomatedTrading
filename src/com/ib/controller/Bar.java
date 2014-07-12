@@ -11,10 +11,10 @@ public class Bar  implements Serializable{
 	private static final SimpleDateFormat FORMAT = new SimpleDateFormat( "yyyyMMdd HH:mm:ss"); // format for historical query
 
 	private final long m_time;
-	private final double m_high;
-	private final double m_low;
-	private final double m_open;
-	private final double m_close;
+	private double m_high;
+	private double m_low;
+	private double m_open;
+	private double m_close;
 	private final double m_wap;
 	private final long m_volume;
 	private final int m_count;
@@ -48,7 +48,34 @@ public class Bar  implements Serializable{
 		return FORMAT.format( new Date( ms) );
 	}
 
+	public void SetHigh(double value)
+	{
+		m_high=value;
+	}
+	public void SetLow(double value)
+	{
+		m_low=value;
+	}
+	public void SetOpen(double value)
+	{
+		m_open=value;
+	}
+	public void SetClose(double value)
+	{
+		m_close=value;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	@Override public String toString() {
 		return String.format( "%s %s %s %s %s", formattedTime(), m_open, m_high, m_low, m_close);
 	}
+	
 }

@@ -66,7 +66,7 @@ import com.ib.controller.ApiController.IAccountSummaryHandler;
 import com.ib.controller.ApiController.IPositionHandler;
 import com.ib.controller.Types.Action;
 import com.ib.controller.Types.SecType;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;

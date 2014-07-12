@@ -27,7 +27,7 @@ import com.ib.controller.ApiController.IFundamentalsHandler;
 import com.ib.controller.NewContract;
 import com.ib.controller.NewContractDetails;
 import com.ib.controller.Types.FundamentalType;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 public class ContractInfoPanel extends JPanel {
 	private final NewContract m_contract = new NewContract();

@@ -16,7 +16,7 @@ import apidemo.util.NewTabbedPanel.NewTabPanel;
 
 import com.ib.controller.ApiController.IMarketValueSummaryHandler;
 import com.ib.controller.MarketValueTag;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 public class MarketValueSummaryPanel extends NewTabPanel implements IMarketValueSummaryHandler {
 	private MktValModel m_model = new MktValModel();
 

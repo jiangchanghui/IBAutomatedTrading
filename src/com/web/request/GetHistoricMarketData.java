@@ -20,7 +20,7 @@ import com.ib.controller.Types.BarSize;
 import com.ib.controller.Types.DurationUnit;
 import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.WhatToShow;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 
 public class GetHistoricMarketData {
@@ -64,9 +64,6 @@ public class GetHistoricMarketData {
 			//		System.out.println("Data in cache. Req ID : "+m.getKey());
 					return m.getKey();
 				}
-					
-					
-				
 				
 		}
 				System.out.println("Data not in cache. New Request");

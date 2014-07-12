@@ -9,7 +9,7 @@ import apidemo.OrdersPanel.OrdersModel;
 import apidemo.PositionsPanel.PositionModel;
 
 import com.ib.controller.Types.Action;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 public class MarketDataTickHandler extends Thread{
 	

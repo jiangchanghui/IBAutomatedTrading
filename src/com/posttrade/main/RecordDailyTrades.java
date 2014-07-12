@@ -5,7 +5,7 @@ import java.util.TimerTask;
 import apidemo.TradesPanel;
 
 import com.ib.client.ExecutionFilter;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 public class RecordDailyTrades extends TimerTask {
     public void run() {

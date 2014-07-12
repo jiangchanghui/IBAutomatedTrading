@@ -42,7 +42,7 @@ import com.ib.controller.ApiController.IContractDetailsHandler;
 import com.ib.controller.ApiController.IEfpHandler;
 import com.ib.controller.Types.Action;
 import com.ib.controller.Types.SecType;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 
 public class ComboPanel extends JPanel implements INewTab {

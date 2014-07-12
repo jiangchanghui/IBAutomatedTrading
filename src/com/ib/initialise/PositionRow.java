@@ -1,4 +1,4 @@
-package com.ib.sample;
+package com.ib.initialise;
 
 import com.ib.controller.NewContract;
 

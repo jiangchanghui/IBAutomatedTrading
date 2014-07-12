@@ -41,7 +41,7 @@ import com.ib.controller.NewContractDetails;
 import com.ib.controller.NewTickType;
 import com.ib.controller.Types.Right;
 import com.ib.controller.Types.SecType;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 public class OptionChainsPanel extends JPanel {
 	private NewContract m_underContract = new NewContract();
 	private NewTabbedPanel m_tabbedPanel = new NewTabbedPanel();

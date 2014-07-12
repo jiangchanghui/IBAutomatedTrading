@@ -13,6 +13,7 @@ public class QueueHandler {
 	public static QueueHandler instance = new QueueHandler();
 	 private final static String Q_create_new_order = "Q_create_new_order";
 	 private final static String Q_marketdata_tick = "Q_marketdata_tick";
+	 private final static String Ex_marketdata_routing="Ex_marketdata_routing";
 	 // private final static String QUEUE_OUT = "q_web_in";
 	 ConnectionFactory factory;
 	 Connection connection;
@@ -27,6 +28,8 @@ public class QueueHandler {
 			factory.setPassword("Admin"); 
 		    connection = factory.newConnection();
 		    channel = connection.createChannel();
+		    channel.exchangeDeclare(Ex_marketdata_routing, "direct");
+		    
 		    channel_order = connection.createChannel();
 		    channel.queueDeclare(Q_marketdata_tick, false, false, false, null);
 		    channel_order.queueDeclare(Q_create_new_order, false, false, false, null);
@@ -42,9 +45,9 @@ public class QueueHandler {
 	 public synchronized void SendToMarketDataTickQueue(MarketDataTick _message)
 	 { 
 		 try {
-			   
-				channel.basicPublish("", Q_marketdata_tick, null, toBytes(_message));
-				System.out.println(" [x] Sent Tick for '" + _message.getTicker() + "'");
+			 channel.basicPublish(Ex_marketdata_routing, _message.getTicker(), null, toBytes(_message));
+			//	channel.basicPublish("", Q_marketdata_tick, null, toBytes(_message));
+				System.out.println(" [x] Sent Tick for '" + _message.getTicker() + "' to exchange "+Ex_marketdata_routing);
 			
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

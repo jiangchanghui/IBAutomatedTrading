@@ -21,7 +21,7 @@ import apidemo.util.NewTabbedPanel.NewTabPanel;
 import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
 import com.ib.controller.ApiController.IPositionHandler;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 public class PositionsPanel extends NewTabPanel {
 	private PositionModel m_model = new PositionModel();

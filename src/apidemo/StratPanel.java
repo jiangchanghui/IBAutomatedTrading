@@ -33,7 +33,7 @@ import com.ib.controller.ApiController.IRealTimeBarHandler;
 import com.ib.controller.Types.BarSize;
 import com.ib.controller.Types.DurationUnit;
 import com.ib.controller.Types.WhatToShow;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 public class StratPanel extends StackPanel implements IHistoricalDataHandler, IRealTimeBarHandler {
 	final private NewContract m_contract = new NewContract();

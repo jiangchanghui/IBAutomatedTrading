@@ -47,7 +47,7 @@ import com.ib.controller.Types.DeepType;
 import com.ib.controller.Types.DurationUnit;
 import com.ib.controller.Types.MktDataType;
 import com.ib.controller.Types.WhatToShow;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
  
 public class MarketDataPanel extends JPanel {
 	private final NewContract m_contract = new NewContract();

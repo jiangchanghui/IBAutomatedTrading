@@ -27,7 +27,7 @@ import com.ib.controller.NewOrderState;
 import com.ib.controller.OrderStatus;
 import com.ib.controller.OrderType;
 import com.ib.controller.ApiController.ILiveOrderHandler;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 public class OrdersPanel extends JPanel {
 	public OrdersModel m_model = new OrdersModel();
 	private JTable m_table = new JTable( m_model);

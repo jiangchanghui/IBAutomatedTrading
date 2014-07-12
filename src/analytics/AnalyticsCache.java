@@ -24,6 +24,9 @@ public class AnalyticsCache {
 		return _HistRSICache;
 	
 	}
+	//calcualte average size of bars for all Ticerks
+	
+	
 	public HistoricalStochasticsCache GetHistoricalStochasticMap(String Ticker)
 	{
 		HistoricalStochasticsCache _tmp = _StochasticsCache.get(Ticker);
