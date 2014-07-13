@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Map.Entry;
 
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -17,12 +18,14 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.gson.JsonObject;
+import com.twitter.main.SendTweet;
 import com.web.request.GetHistoricMarketData;
 import com.web.request.HistoricResultSet;
 
@@ -30,7 +33,7 @@ import analytics.AnalyticsCache;
 import analytics.HistoricalRsiCache;
 
 public class CreateWebResponse {
-
+	private  Logger log = Logger.getLogger( this.getClass() );
 	public String GetWeb(){
 		try {
 		 AnalyticsCache _AnalyticsCache = new AnalyticsCache().instance;

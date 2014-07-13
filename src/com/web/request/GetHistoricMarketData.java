@@ -7,7 +7,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import java.util.TimeZone;
+
+import org.apache.log4j.Logger;
 
 
 import com.benberg.struct.NewMarketDataRequest;
@@ -21,10 +24,11 @@ import com.ib.controller.Types.DurationUnit;
 import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.WhatToShow;
 import com.ib.initialise.IBTradingMain;
+import com.twitter.main.SendTweet;
 
 
 public class GetHistoricMarketData {
-	
+	private  Logger log = Logger.getLogger( this.getClass() );
 	private static GetHistoricMarketData instance = null;
 	HashMap<Integer, HistoricResultSet> MarketDataMapWeb;
 	HashMap<Integer, IHistoricalDataHandler> MarketDataMap;
@@ -55,18 +59,18 @@ public class GetHistoricMarketData {
 		{
 			
 			MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
-		//	System.out.println("Searching cache for : "+Ticker);
+		//	log.info("Searching cache for : "+Ticker);
 			for (Entry<Integer, HistoricResultSet> m : MarketDataMapWeb.entrySet()) {
 				String _Ticker = m.getValue().GetTicker();
 				
 				if (_Ticker.equals(Ticker))
 				{
-			//		System.out.println("Data in cache. Req ID : "+m.getKey());
+			//		log.info("Data in cache. Req ID : "+m.getKey());
 					return m.getKey();
 				}
 				
 		}
-				System.out.println("Data not in cache. New Request");
+				log.info("Data not in cache. New Request");
 				return -1;
 				
 		}
@@ -75,13 +79,13 @@ public class GetHistoricMarketData {
 	{
 		
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
-		System.out.println("Searching cache for : "+Ticker);
+		log.info("Searching cache for : "+Ticker);
 		for (Entry<Integer, HistoricResultSet> m : MarketDataMapWeb.entrySet()) {
 			String _Ticker = m.getValue().GetTicker();
 			String _TimeFrame = m.getValue().GetTimeFrame();
 			if (_Ticker.equals(Ticker) && _TimeFrame.equals(TimeFrame) && m.getValue().m_rows.size()>0)
 			{
-				System.out.println("Data in cache. Req ID : "+m.getKey());
+				log.info("Data in cache. Req ID : "+m.getKey());
 				return m.getKey();
 			}
 				
@@ -89,7 +93,7 @@ public class GetHistoricMarketData {
 			
 			
 	}
-			System.out.println("Data not in cache. New Request");
+			log.info("Data not in cache. New Request");
 			return -1;
 			
 	}
@@ -99,12 +103,12 @@ public class GetHistoricMarketData {
 	{
 		
 		RTMarketDataMap = m_controller.GetTRealTimeMap();
-		System.out.println("Searching cache for : "+Ticker);
+		log.info("Searching cache for : "+Ticker);
 		for (Entry<Integer, HistoricResultSet> m : RTMarketDataMap.entrySet()) {
 			String _Ticker = m.getValue().GetTicker();
 			if (_Ticker.equals(Ticker))
 			{
-				System.out.println("Data in cache. Req ID : "+m.getKey());
+				log.info("Data in cache. Req ID : "+m.getKey());
 				return m.getKey();
 			}
 				
@@ -112,7 +116,7 @@ public class GetHistoricMarketData {
 			
 			
 	}
-			System.out.println("Data not in cache. New Request");
+			log.info("Data not in cache. New Request");
 			return -1;
 			
 	}
@@ -171,7 +175,7 @@ public HistoricResultSet GetHistoricalMarketData(String Ticker) throws Interrupt
 
 		Date date = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
-	//	System.out.println(sdf.format(date));
+	//	log.info(sdf.format(date));
 		
 	
 		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 2, DurationUnit.DAY, BarSize._1_min, WhatToShow.TRADES,true, dataSet);
@@ -215,7 +219,7 @@ public HistoricResultSet GetHistoricalMarketData(String Ticker) throws Interrupt
 
 		Date date = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
-		System.out.println(sdf.format(date));
+		log.info(sdf.format(date));
 		
 		if (nullcheck(message))
 			req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), GetNumberDays(message.GetTimeFrame()), GetDurationUnit(message.GetTimeFrame()), GetBarSize(message.GetTimeFrame()), WhatToShow.TRADES,GetRTH(message.GetTimeFrame()), dataSet);
@@ -332,9 +336,10 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 		
 		
 	}
-	System.out.println(Data.m_rows.size());
+	log.info(Data.m_rows.size());
+	
 	price_result = price_result.substring(0, price_result.length() - 1);
-	System.out.println(price_result);
+	log.info(price_result);
 	
 		
 	

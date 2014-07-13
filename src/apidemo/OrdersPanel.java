@@ -175,6 +175,7 @@ public class OrdersPanel extends JPanel {
 	public static class OrdersModel extends AbstractTableModel implements ILiveOrderHandler {
 		private HashMap<Long,OrderRow> m_map = new HashMap<Long,OrderRow>();
 		private ArrayList<OrderRow> m_orders = new ArrayList<OrderRow>();
+		private HashMap<String,OrderRow> m_orders_byticker = new HashMap<String,OrderRow>();
 		
 		@Override public int getRowCount() {
 			return m_orders.size();
@@ -183,16 +184,27 @@ public class OrdersPanel extends JPanel {
 		public void clear() {
 			m_orders.clear();
 			m_map.clear();
+			m_orders_byticker.clear();
 		}
 
 		public OrderRow get(int i) {
 			return m_orders.get( i);
 		}
 
+		//created so that LivePositionHandler can search for an order by ticker.
+		public OrderRow getOrderByTicker(String Ticker)
+		{
+			return m_orders_byticker.get(Ticker);
+		}
+		
+		
 		@Override public void openOrder(NewContract contract, NewOrder order, NewOrderState orderState) {
 			Cache c = new Cache().instance;
 			c.IsLoadingOrders(true);//makes sure its set , true when orders are being loaded
+			
+			String Ticker = contract.symbol();
 			//fires when order changes or is added
+					
 			OrderRow full = m_map.get( order.permId() );
 			
 			
@@ -200,12 +212,15 @@ public class OrdersPanel extends JPanel {
 			if (full != null) {
 				full.m_order = order;
 				full.m_state = orderState;
+				m_orders_byticker.put(Ticker,full);
+				
 				fireTableDataChanged();
 			}
 			else if (shouldAdd(contract, order, orderState) ) {
 				full = new OrderRow( contract, order, orderState);
 				add( full);
 				m_map.put( order.permId(), full);
+				m_orders_byticker.put(Ticker,full);
 				fireTableDataChanged();
 			}
 		}

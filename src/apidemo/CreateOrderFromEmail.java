@@ -27,7 +27,7 @@ import com.ib.controller.OrderType;
 import com.ib.controller.Types.Action;
 import com.ib.controller.Types.SecType;
 import com.ib.initialise.IBTradingMain;
-import com.reademail.main.mailReader;
+
 
 public class CreateOrderFromEmail {
 	private static final Logger log = Logger.getLogger( CreateOrderFromEmail.class.getName() );

@@ -4,18 +4,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
+import org.apache.log4j.Logger;
+
+
 import apidemo.OrdersPanel.OrderRow;
 import apidemo.OrdersPanel.OrdersModel;
 import apidemo.PositionsPanel.PositionModel;
 
 import com.ib.controller.Types.Action;
 import com.ib.initialise.IBTradingMain;
+import com.twitter.main.SendTweet;
 
 public class MarketDataTickHandler extends Thread{
-	
-	
+	private  Logger log = Logger.getLogger( this.getClass() );
 		 
-	
+	//deprecated
 	public void MarketDataTick(String Ticker,double _RSI) {
 		
 		

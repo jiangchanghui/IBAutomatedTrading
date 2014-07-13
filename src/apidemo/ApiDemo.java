@@ -31,7 +31,7 @@ import com.ib.controller.ApiController.IConnectionHandler;
 import com.ib.controller.ApiController.ITimeHandler;
 import com.ib.controller.Formats;
 import com.ib.controller.Types.NewsType;
-import com.reademail.main.mailReader;
+
 
 public class ApiDemo implements IConnectionHandler {
 	static { NewLookAndFeel.register(); }

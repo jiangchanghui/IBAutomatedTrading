@@ -3,6 +3,8 @@
 
 package com.ib.client;
 
+import hft.main.Common;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Vector;
@@ -385,7 +387,7 @@ public class EReader extends Thread {
             }
 
             case ERR_MSG: {
-            	System.out.println("error message");
+            	
                 int version = readInt();
                 if(version < 2) {
                     String msg = readStr();
@@ -395,7 +397,9 @@ public class EReader extends Thread {
                     int errorCode    = readInt();
                     String errorMsg = readStr();
                     m_parent.error(id, errorCode, errorMsg);
+                    Common.instance.WriteToLog(errorMsg);
                 }
+                
                 break;
             }
 

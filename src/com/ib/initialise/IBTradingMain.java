@@ -28,6 +28,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 
+import org.apache.log4j.Logger;
+
 
 import com.ib.controller.ApiController;
 import com.ib.controller.Bar;
@@ -47,14 +49,10 @@ import com.ib.controller.Types.DurationUnit;
 import com.ib.controller.Types.NewsType;
 import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.WhatToShow;
-import com.posttrade.main.CloseAllPositions;
-import com.reademail.main.OrderTemplate;
-import com.reademail.main.mailReader;
+
 import com.twitter.main.SendTweet;
 import com.web.request.GetHistoricMarketData;
 import com.web.request.ListenForWebRequests;
-import com.web.server.Index;
-import com.web.server.WebServer;
 
 
 import analytics.AnalyticsCache;
@@ -75,6 +73,8 @@ import apidemo.util.NewTabbedPanel.NewTabPanel;
 
 
 public class IBTradingMain implements IConnectionHandler{
+
+	
 	public static IBTradingMain INSTANCE = new IBTradingMain();
 	private final JFrame m_frame = new JFrame();
 	private final NewTabbedPanel m_tabbedPanel = new NewTabbedPanel(true);
@@ -96,7 +96,7 @@ public class IBTradingMain implements IConnectionHandler{
 	public JFrame frame() 					{ return m_frame; }
 	private final AccountInfoPanel m_acctInfoPanel = new AccountInfoPanel();
 	
-	public Map<String,OrderTemplate> m_ordersMap = new HashMap<String,OrderTemplate>();
+	//public Map<String,OrderTemplate> m_ordersMap = new HashMap<String,OrderTemplate>();
 	public Map<String,String> m_errorMap = new HashMap<String,String>();	
 	
 	public static void main(String[] args) throws UnknownHostException {
@@ -121,15 +121,14 @@ public class IBTradingMain implements IConnectionHandler{
 			});
 		}
 	}
-
 	 	
 	private void run() throws UnknownHostException {
 		
 		
 		hft.main.Main hft = new Main();
 		hft.start();
-		QueueHandler Q = new QueueHandler().instance;
-		Q.setup();
+	//	QueueHandler Q = new QueueHandler().instance;
+	//	Q.setup();
 	//	RSICalculator r = new RSICalculator();
 	//	r.start();
 	//	RSICalculator q = new RSICalculator();
@@ -147,7 +146,7 @@ public class IBTradingMain implements IConnectionHandler{
 		
 		//Listen for market data requests on new thread
 		//IOn Request Call new Class
-		new ListenForWebRequests().start();
+	//	new ListenForWebRequests().start();
 		
 		
 		Calendar calendar = Calendar.getInstance();

@@ -1,9 +1,11 @@
 package hft.main;
 
 import java.util.Date;
-import java.util.logging.Level;
+
 
 import javax.swing.SwingUtilities;
+
+import org.apache.log4j.Logger;
 
 import analytics.AnalyticsCache;
 import analytics.RSICalculator;
@@ -17,6 +19,7 @@ import com.ib.client.ExecutionFilter;
 import com.ib.controller.NewContract;
 import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.WhatToShow;
+import com.twitter.main.SendTweet;
 import com.web.request.HistoricResultSet;
 import com.benberg.struct.NewMarketDataRequest;
 import com.ib.controller.ApiController;
@@ -38,20 +41,50 @@ import com.ib.initialise.IBTradingMain;
 
 
 public class Main extends Thread{
-	
-	//RSICalculator RSICalc;
-	int _OverBought = 80;
-	int _OverSold = 20;
-	public void Main()
-	{
+	private  Logger log = Logger.getLogger( this.getClass() );
 		
-	}
 	
 	
 	
 	 public void run()
 		{	
-		System.out.println("Initialising HFT module... ");
+		 PrintStartup();
+		 StartQueueHandler();//Initialise the singleton for queues used for market data and new orders. 
+		 
+		 StartNewOrderHandler(); //New thread to continuously listen for new orders created from analytics workers
+		 
+		 StartStochasticsWorkers(); //starts 2 stochastic workers per ticker 
+		}
+	 
+	 private void PrintStartup() {
+		 String[] Diamond =
+			   {"      /\\    ",
+			    "     /  \\   ",
+			    "    /    \\  ",
+			    "    \\    /  ",
+			    "     \\  /   ",
+			    "      \\/    "};
+		 for (int i = 0; i < Diamond.length; ++i) 
+			{
+				log.info(Diamond[i]);
+			}
+		 log.info("Startup....Free memory : "+Runtime.getRuntime().freeMemory());
+		 log.info("Initialising HFT module... ");
+	}
+
+	private void StartQueueHandler()
+	 {
+		 QueueHandler Q = new QueueHandler().instance;
+		 Q.setup();
+	 }
+	 private void StartNewOrderHandler()
+	 {
+		 OrderHandler O = new OrderHandler();
+		 O.start();
+	 }
+	 private void StartStochasticsWorkers()
+	 {
+		log.info("Initialising HFT module... ");
 		String _Ticker = "AAPL";
 		
 	//	int req_id = IsTickerInRTMap(message.GetTicker());
@@ -74,24 +107,25 @@ public class Main extends Thread{
 			}
 			if (i >=20)
 			{
-				System.out.println("Initialising HFT module... Failed : Api not connected");
+				log.info("Initialising HFT module... Failed : Api not connected");
 				return;
 			}
 		
-		Cache _HftCache = new Cache();
+		Cache _HftCache = new Cache().instance;
 		
-	for (int j=0;j<2;j++)
+	for (int j=1;j<3;j++)
 	{
 		for(String ticker : _HftCache.GetTickersList())
 		{
 		RequestMarketData(ticker);
 		SlowStochasticsCalculator s = new SlowStochasticsCalculator();
 		s.SetTicker(ticker);
+		s.setThreadName("Stochastics Worker "+ticker+j);
 		s.start();
-		System.out.println("Initialising HFT module for "+ticker);
+	//	log.info("Initialised HFT module for "+ticker);
 		}
 	}
-		
+	log.info("Initialising HFT module... Complete");	
 		
 //		RequestMarketData("TSLA");
 //		RequestMarketData("FSLR");
@@ -99,13 +133,14 @@ public class Main extends Thread{
 //		RequestMarketData("NFLX");
 //		RequestMarketData("GOOGL");
 
-		System.out.println("Initialising HFT module... Complete");
+		
 		
 				
 		
 		}
 	 private void RequestMarketData(String _Ticker)
 	 {
+		 log.info("New Market Data request for "+_Ticker);
 		 NewContract m_contract = new NewContract();
 			m_contract.symbol( _Ticker); 
 			m_contract.secType( SecType.STK ); 
@@ -119,14 +154,14 @@ public class Main extends Thread{
 		
 		// return ConvertToJson(RTMarketDataMap.get(req_id),message.GetCorrelationId());	
 
-		System.out.println("Initialising HFT module... "+_Ticker+" Loaded");
+		log.info("Initialising HFT module... "+_Ticker+" Loaded");
 		
 		
-		TradesPanel m_tradesPanel = new TradesPanel();
-		IBTradingMain.INSTANCE.controller().reqExecutions(new ExecutionFilter(), m_tradesPanel);
+	//	TradesPanel m_tradesPanel = new TradesPanel();
+	//	IBTradingMain.INSTANCE.controller().reqExecutions(new ExecutionFilter(), m_tradesPanel);
 		
 	}
-
+//deprecated
 	public void MarketDataTick(String Ticker,double _RSI) {
 		
 	
@@ -170,7 +205,7 @@ public class Main extends Thread{
 		
 	}
 	
-		
+	//deprecated	
 	public void CreateOrder(String Symbol, int Quantity, Action Side, Double FFLimit)
 	{
 		if (Symbol==null  || Quantity == 0 || Side == null)

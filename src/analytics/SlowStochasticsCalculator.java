@@ -6,40 +6,49 @@ import hft.main.QueueHandler;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.apache.log4j.Logger;
+
+
 
 import com.benberg.struct.MarketDataTick;
 import com.benberg.struct.NewMarketDataRequest;
+import com.benberg.struct.NewOrderRequest;
 import com.ib.controller.Bar;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
+import com.twitter.main.SendTweet;
 import com.web.request.GetHistoricMarketData;
 import com.web.request.HistoricResultSet;
 
 public class SlowStochasticsCalculator extends Thread{
-
+	private  Logger log = Logger.getLogger( this.getClass() );
 	 private final static String Q_marketdata_tick = "Q_marketdata_tick";
 	// private final static String QUEUE_OUT = "q_web_in";
 	 private final static String Ex_marketdata_routing = "Ex_marketdata_routing";
-	 private static String QueueName;
-	 ConnectionFactory factory;
-	 Connection connection;
-	 Channel channel;
-	 GetHistoricMarketData GetHistMarketData;
-	 QueueHandler _QueueHandler;
-	 String Ticker;
-	 Cache _HftCache;
-	 Bar _TempIntraMinuteBar;
+	 private String QueueName;
+	 private ConnectionFactory factory;
+	 private Connection connection;
+	 private Channel channel;
+	 private GetHistoricMarketData GetHistMarketData;
+	 private QueueHandler _QueueHandler;
+	 private String Ticker;
+	 private Cache _HftCache;
+	 private Bar _TempIntraMinuteBar;
+	 private String ThreadName;
 	 double _overbought =0.0;
 	 double _oversold = 0.0;
 	private void setup()
 	{
 		try{
+			_TempIntraMinuteBar = new Bar();
 			_TempIntraMinuteBar.SetOpen(0);//clears temp bar
 			_TempIntraMinuteBar.SetHigh(0);
 			_TempIntraMinuteBar.SetLow(999);		
@@ -52,21 +61,25 @@ public class SlowStochasticsCalculator extends Thread{
 			factory.setPassword("Admin"); 
 		    connection = factory.newConnection();
 		    channel = connection.createChannel();
-		    channel.exchangeDeclare(Ex_marketdata_routing, "direct");
-	        String QueueName = channel.queueDeclare().getQueue();
-	        
-	        channel.queueBind(QueueName, Ex_marketdata_routing, Ticker);
+		    channel.exchangeDeclare(Ex_marketdata_routing, "topic");
+	    //    QueueName = channel.queueDeclare().getQueue();
+		 //   QueueName = Thread.currentThread().getName();
+		    QueueName = Q_marketdata_tick+"_"+Ticker;
+	        channel.queueDeclare(QueueName, false, false, false, null);
+		    channel.queueBind(QueueName, Ex_marketdata_routing, Ticker);
 	        
 	        
 		//    channel.queueDeclare(Q_marketdata_tick, false, false, false, null);
-		    System.out.println("Initiliased lisener thread "+ this.getId());
+		    log.info("Initiliased lisener thread for "+ ThreadName);
 		_overbought = SDM.overbought;
 		_oversold = SDM.oversold;
 		_QueueHandler = new QueueHandler().instance;
 		}
 		catch(Exception e)
 		{
-		e.printStackTrace();	
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+		log.fatal(sw.toString());
 		}
 		
 		
@@ -74,30 +87,34 @@ public class SlowStochasticsCalculator extends Thread{
 
 	public void run()
 	{
+		
+		 log.info(ThreadName+" Starting worker");
 		try{
 			setup();
 			GetHistMarketData = new GetHistoricMarketData();
-			SlowStoWorkerHistorical(GetHistMarketData.GetHistoricalMarketData("AAPL"));
+		//	SlowStoWorkerHistorical(GetHistMarketData.GetHistoricalMarketData(Ticker));
 		QueueingConsumer consumer = new QueueingConsumer(channel);
 	    channel.basicConsume(QueueName, true, consumer);
 
 		    while (true) {
-		      System.out.println("SlowSto worker "+ this.getId()+"Waiting for data");
+		      log.info(ThreadName+" Waiting for data");
 		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 		      
 		      MarketDataTick _message = fromBytes( delivery.getBody());
 		      String routingKey = delivery.getEnvelope().getRoutingKey();
 		      
-		     System.out.println(" [x] Received '" + _message + "', calculating SlowSto");
+		     log.info(ThreadName+" received '" + _message + "'. Calculating SlowSto");
 		     if(routingKey.equals(Ticker))
 		    	 CalculatSlowSto(_message);
 		     else
-		    	 System.out.println("Received routing key :"+routingKey+", Expected : "+Ticker);
+		    	 log.info("Received routing key :"+routingKey+", Expected : "+Ticker);
 		    }
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			StringWriter sw = new StringWriter();
+				e.printStackTrace(new PrintWriter(sw));
+			log.fatal(sw.toString());
 		}
 		
 		
@@ -112,12 +129,10 @@ public  MarketDataTick fromBytes(byte[] body) {
 	        ois.close();
 	        bis.close();
 	    }
-	    catch (IOException e) {
-	        e.printStackTrace();
+	    catch (Exception e) {
+	    	log.fatal(e.toString());
 	    }
-	    catch (ClassNotFoundException ex) {
-	        ex.printStackTrace();
-	    }
+	  
 	   
 	    return obj;     
 	}
@@ -137,7 +152,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			log.fatal(e.toString());
 		}
 	
 	}
@@ -179,7 +194,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 		{
 			// not enough data
 		//	_cache.GetHistMap().add(new StochasticsStruct(0,0,A,B));
-			System.out.println("Array too small - skipping calc");
+			log.info("Not enough data yet ("+_size+")- skipping calc for "+_Ticker);
 			_AnalyticsCache.SetStochastics(_Ticker,0, 0,A,B);
 			return null;
 		}
@@ -196,7 +211,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 		double SlowSto= ((A1+A2+A3)/(B1+B2+B3))*100;
 		if (_size < 6)
 		{
-			System.out.println("Not enough data yet (size)- skipping calc");
+			log.info("Not enough data yet ("+_size+")- skipping calc for "+_Ticker);
 			//not enough data still
 			_AnalyticsCache.SetStochastics(_Ticker,0, SlowSto,A,B);
 			return null;
@@ -209,8 +224,8 @@ public  MarketDataTick fromBytes(byte[] body) {
 		double SignalLine = (S1+S2+S3)/3;
 		_AnalyticsCache.SetStochastics(_Ticker,SignalLine, SlowSto,A,B);
 		
-		System.out.println("End calc");
-		System.out.println("Stochastics Calc to be:Time : "+bar.formattedTime()+" Slo Stow : "+SlowSto+" , Signal Line : "+SignalLine);
+		log.info("End calc for "+_Ticker);
+		log.info("Stochastics Calc to be: Time : "+bar.formattedTime()+" Slo Stow : "+SlowSto+" , Signal Line : "+SignalLine);
 	
 	//	a.FileWriter(bar.formattedTime()+","+bar.high()+","+bar.low()+","+bar.open()+","+bar.close()+","+A+","+B+","+SlowSto+","+SignalLine);
 		
@@ -243,7 +258,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 		
 		if((_time < (lastTime+60)))
 		{
-			System.out.println(lastTime - _time);
+			log.info(lastTime - _time);
 			return;
 		}
 			
@@ -258,18 +273,18 @@ public  MarketDataTick fromBytes(byte[] body) {
 		double SignalLine = result[1];
 			//more than 5 mins from last bar in Data, need new RSI.
 			
-		System.out.println("Stochastics Calc to be: Slo Stow : "+SlowSto+" , Signal Line : "+SignalLine);
+		log.info("Stochastics Calc to be: Slo Stow : "+SlowSto+" , Signal Line : "+SignalLine);
 		
-		
+		_HftCache.CalcAverageBarSize(_Ticker, _TempIntraMinuteBar);
 		//if signal line has moved above Slow sto and slow sto is below 20.
 		if (SlowSto < 20 && SignalLine > SlowSto)
 		{
-			_QueueHandler.SendToNewOrderQueue(_Ticker);
+			_QueueHandler.SendToNewOrderQueue(new NewOrderRequest(_Ticker));
 		}
 		
 		//Add bar into average bar size calc
 		
-		_HftCache.CalcAverageBarSize(_Ticker, _TempIntraMinuteBar);
+		
 		
 		_TempIntraMinuteBar.SetOpen(0);//clears temp bar
 		_TempIntraMinuteBar.SetHigh(0);
@@ -339,5 +354,10 @@ public  MarketDataTick fromBytes(byte[] body) {
 		this.Ticker = ticker;
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void setThreadName(String name) {
+		// TODO Auto-generated method stub
+		this.ThreadName = name;
 	}
 	}

@@ -3,10 +3,13 @@ package analytics;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
+import com.twitter.main.SendTweet;
 import com.web.request.HistoricResultSet;
 
 public class AnalyticsCache {
+	private static final Logger log = Logger.getLogger( SendTweet.class.getName() );
 	public static AnalyticsCache instance = new AnalyticsCache();
 	HashMap<String, Double> _RSICache;
 	HashMap<String, HistoricalRsiCache> _HistRSICache;

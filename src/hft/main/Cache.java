@@ -9,6 +9,8 @@ import java.util.logging.Handler;
 
 import javax.swing.table.AbstractTableModel;
 
+import org.apache.log4j.Logger;
+
 import com.ib.controller.AccountSummaryTag;
 import com.ib.controller.Bar;
 import com.ib.controller.Formats;
@@ -18,6 +20,7 @@ import com.ib.controller.NewOrderState;
 import com.ib.controller.ApiController.IAccountSummaryHandler;
 import com.ib.controller.ApiController.IPositionHandler;
 import com.ib.initialise.IBTradingMain;
+import com.twitter.main.SendTweet;
 
 import analytics.AnalyticsCache;
 import analytics.HistoricalRsiCache;
@@ -26,6 +29,7 @@ import apidemo.OrdersPanel.OrderRow;
 import apidemo.PositionsPanel.PositionModel;
 
 public class Cache {
+	private  Logger log = Logger.getLogger( this.getClass() );
 	public static Cache instance = new Cache();
 	private HashMap<String,OrderRow> orders_map = new HashMap<String,OrderRow>();
 	private ArrayList<String> Tickers_list = new ArrayList<>();
@@ -39,6 +43,9 @@ public class Cache {
 		_positions = new PositionModel();
 		IBTradingMain.INSTANCE.controller().reqPositions( _positions);		
 		Tickers_list.add("AAPL");
+	//	Tickers_list.add("TSLA");
+	//	Tickers_list.add("GOOGL");
+	//	Tickers_list.add("CSIQ");
 	}
 
 	public  ArrayList<String> GetTickersList()
@@ -46,7 +53,10 @@ public class Cache {
 		return Tickers_list;
 		
 	}
-	
+	public PositionModel GetAllPositions()
+	{
+		return _positions;
+	}
 	public void CalcAverageBarSize(String Ticker,Bar bar) {
 		//new bar arrived
 		ArrayList<Double> tmp =AverageBarSize_Map.get(Ticker);
@@ -230,7 +240,7 @@ private static class PositionKey {
 	}
 }
 
-private static class PositionRow {
+public static class PositionRow {
 	String m_account;
 	NewContract m_contract;
 	int m_position;

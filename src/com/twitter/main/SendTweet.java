@@ -14,9 +14,9 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
-import com.reademail.main.*;
+
 public class SendTweet extends Thread{
-	private static final Logger log = Logger.getLogger( mailReader.class.getName() );
+	private static final Logger log = Logger.getLogger( SendTweet.class.getName() );
 	 private static String queue_send_tweet = "";
 
 	 private static String QUsername="";

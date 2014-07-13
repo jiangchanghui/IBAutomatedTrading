@@ -1,9 +1,12 @@
 package hft.main;
 
+import org.apache.log4j.Logger;
+
 import com.benberg.struct.NewMarketDataRequest;
+import com.twitter.main.SendTweet;
 
 public class WebRequestHandler {
-
+	private  Logger log = Logger.getLogger( this.getClass() );
 	public NewMarketDataRequest GetPNL(String getTicker) {
 		
 		//get PNL

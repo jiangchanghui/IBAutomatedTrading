@@ -3,6 +3,7 @@ package analytics;
 import java.util.HashMap;
 
 public class HistoricalRsiCache {
+	
 		public HashMap<Long, Double> _HistRSICache = new HashMap<Long,Double>();
 		
 		public HistoricalRsiCache(long time, Double RSI) {

@@ -32,7 +32,7 @@ import com.ib.controller.Types.FundamentalType;
 import com.ib.controller.Types.MktDataType;
 import com.ib.controller.Types.NewsType;
 import com.ib.controller.Types.WhatToShow;
-import com.reademail.main.mailReader;
+
 import com.web.request.HistoricResultSet;
 
 public class ApiController implements EWrapper {
