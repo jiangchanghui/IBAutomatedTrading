@@ -65,7 +65,7 @@ public class Cache {
 			tmp = new ArrayList<Double>();
 			
 		if(tmp.size()<5)
-			tmp.add(tmp.size()-1,range);
+			tmp.add(tmp.size(),range);
 		else
 		{
 		tmp.add(bar.high()-bar.low());

@@ -47,7 +47,7 @@ public class OrderHandler extends Thread{
 			    channel = connection.createChannel();
 
 			    channel.queueDeclare(Q_create_new_order, false, false, false, null);
-			    log.info("Initiliased Order listener for Q_create_new_order");
+			    log.info("Initiliased Order listener for Q_create_new_order - DISABLED");
 			
 			
 			}
@@ -72,7 +72,7 @@ public class OrderHandler extends Thread{
 			    String _message =  new String(delivery.getBody());
 			      
 			     log.info(" [x] Received '" + _message + "', for new order creation");
-			     NewOrderRequest(_message);
+			   //  NewOrderRequest(_message);
 			  
 			    }
 			}
@@ -109,7 +109,7 @@ public class OrderHandler extends Thread{
 			
 		log.info("SEND new order creation for "+order.action()+" "+order.totalQuantity()+" "+order.orderType()+" "+order.tif()+" "+contract.toString());
 			//log.log(Level.INFO ,"Order being executed for {0} {1} {2} at {3}",new Object[]{Side,Quantity,Symbol,order.orderType().toString()});
-			IBTradingMain.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
+	/*		IBTradingMain.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 				@Override public void orderState(NewOrderState orderState) {
 					SwingUtilities.invokeLater( new Runnable() {
 						@Override public void run() {
@@ -146,7 +146,7 @@ public class OrderHandler extends Thread{
 				}
 			});
 		
-			
+			*/
 		}
 		
 		

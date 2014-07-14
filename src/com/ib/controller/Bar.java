@@ -10,7 +10,7 @@ import java.util.Date;
 public class Bar  implements Serializable{
 	private static final SimpleDateFormat FORMAT = new SimpleDateFormat( "yyyyMMdd HH:mm:ss"); // format for historical query
 
-	private final long m_time;
+	private long m_time;
 	private double m_high;
 	private double m_low;
 	private double m_open;
@@ -74,7 +74,10 @@ public class Bar  implements Serializable{
 	{
 		m_close=value;
 	}
-	
+	public void SetTime(long value)
+	{
+		m_time=value;
+	}
 	
 	
 	

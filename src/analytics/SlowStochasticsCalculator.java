@@ -38,13 +38,14 @@ public class SlowStochasticsCalculator extends Thread{
 	 private Connection connection;
 	 private Channel channel;
 	 private GetHistoricMarketData GetHistMarketData;
-	 private QueueHandler _QueueHandler;
+	// private QueueHandler _QueueHandler;
 	 private String Ticker;
-	 private Cache _HftCache;
+	// private Cache _HftCache;
 	 private Bar _TempIntraMinuteBar;
 	 private String ThreadName;
 	 double _overbought =0.0;
 	 double _oversold = 0.0;
+	 HistoricResultSet Data;
 	private void setup()
 	{
 		try{
@@ -52,7 +53,7 @@ public class SlowStochasticsCalculator extends Thread{
 			_TempIntraMinuteBar.SetOpen(0);//clears temp bar
 			_TempIntraMinuteBar.SetHigh(0);
 			_TempIntraMinuteBar.SetLow(999);		
-			
+			Data = new HistoricResultSet(Ticker);
 			
 			
 		   factory = new ConnectionFactory();
@@ -73,7 +74,7 @@ public class SlowStochasticsCalculator extends Thread{
 		    log.info("Initiliased lisener thread for "+ ThreadName);
 		_overbought = SDM.overbought;
 		_oversold = SDM.oversold;
-		_QueueHandler = new QueueHandler().instance;
+	//	_QueueHandler = new QueueHandler().instance;
 		}
 		catch(Exception e)
 		{
@@ -145,7 +146,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 		
 		
 		
-		SlowStoWorker(GetHistMarketData.GetHistoricalMarketData(_Ticker),bar);
+		SlowStoWorker(Data,bar);
 		
 		
 		
@@ -245,9 +246,9 @@ public  MarketDataTick fromBytes(byte[] body) {
 		AnalyticsCache _AnalyticsCache = AnalyticsCache.instance;
 		String _Ticker = Data.GetTicker();
 		int size = Data.m_rows.size();
+		
 		long _time = bar.time();
-		long lastTime = Data.m_rows.get(size-1).time();
-	
+		//_TempIntraMinuteBar = new Bar();
 		_TempIntraMinuteBar.SetClose(bar.close());
 		if(_TempIntraMinuteBar.open()==0)
 			_TempIntraMinuteBar.SetOpen(bar.open());
@@ -255,15 +256,28 @@ public  MarketDataTick fromBytes(byte[] body) {
 			_TempIntraMinuteBar.SetHigh(bar.high());
 		if(_TempIntraMinuteBar.low()>bar.low())
 			_TempIntraMinuteBar.SetLow(bar.low());
-		
-		if((_time < (lastTime+60)))
+		_TempIntraMinuteBar.SetTime(bar.time());
+		log.info("Bar time = "+_time);
+		if (size !=0)
 		{
-			log.info(lastTime - _time);
-			return;
-		}
+		long lastTime = Data.m_rows.get(size-1).time();
+		
+		log.info("Last current time = "+lastTime);
 			
-		else 
-			Data.historicalData(_TempIntraMinuteBar, false);
+		
+			if((_time < (lastTime+60)))
+			{
+			log.info("No calc, delta = "+(lastTime - _time));
+			return;
+			}
+		}
+		Bar b = new Bar();
+		b.SetOpen(_TempIntraMinuteBar.open());
+		b.SetClose(_TempIntraMinuteBar.close());
+		b.SetHigh(_TempIntraMinuteBar.high());
+		b.SetLow(_TempIntraMinuteBar.low());
+		b.SetTime(_TempIntraMinuteBar.time());
+		Data.historicalData(b, false);
 		
 
 		
@@ -275,11 +289,13 @@ public  MarketDataTick fromBytes(byte[] body) {
 			
 		log.info("Stochastics Calc to be: Slo Stow : "+SlowSto+" , Signal Line : "+SignalLine);
 		
-		_HftCache.CalcAverageBarSize(_Ticker, _TempIntraMinuteBar);
+		Cache.instance.CalcAverageBarSize(_Ticker, _TempIntraMinuteBar);
 		//if signal line has moved above Slow sto and slow sto is below 20.
 		if (SlowSto < 20 && SignalLine > SlowSto)
 		{
-			_QueueHandler.SendToNewOrderQueue(new NewOrderRequest(_Ticker));
+			log.info("Routing order for execution for : "+_Ticker);
+			QueueHandler.instance.SendToNewOrderQueue(new NewOrderRequest(_Ticker));
+			
 		}
 		
 		//Add bar into average bar size calc

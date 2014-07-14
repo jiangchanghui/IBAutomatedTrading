@@ -113,7 +113,7 @@ public class Main extends Thread{
 		
 		Cache _HftCache = new Cache().instance;
 		
-	for (int j=1;j<3;j++)
+	for (int j=1;j<2;j++)
 	{
 		for(String ticker : _HftCache.GetTickersList())
 		{
