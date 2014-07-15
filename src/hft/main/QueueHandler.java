@@ -75,7 +75,7 @@ public class QueueHandler {
 		 try {
 			   
 				channel_order.basicPublish("", Q_create_new_order, null, toBytes(newOrderRequest));
-				log.info(" [x] Sent Order creation request for '" + newOrderRequest.toString() + "'");
+				log.info(" [x] Sent Order creation request for '" + newOrderRequest.toString() + "' ");
 			
 				
 			} catch (IOException e) {

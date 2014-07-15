@@ -295,7 +295,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 		{
 			log.info("Routing order for execution for : "+_Ticker);
 			QueueHandler.instance.SendToNewOrderQueue(new NewOrderRequest(_Ticker));
-			
+			log.info("Average Bar size is currently :"+Cache.instance.GetAverageBarSize(_Ticker));
 		}
 		
 		//Add bar into average bar size calc
