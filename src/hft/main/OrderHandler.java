@@ -73,7 +73,7 @@ public class OrderHandler extends Thread{
 			      
 			     log.info(" [x] Received '" + _message + "', for new order creation");
 			   //  NewOrderRequest(_message);
-			  
+			     PositionCheck(_message);
 			    }
 			}
 			catch(Exception e)
@@ -81,6 +81,24 @@ public class OrderHandler extends Thread{
 				log.fatal(e.getStackTrace().toString());
 			}
 	}
+	
+	private void PositionCheck(String Ticker)
+	{
+		if(hft.main.Cache.instance.IsPosiitonExist(Ticker)== null)
+		{
+			//check if a position in the security already exists. If not create one
+			NewOrderRequest(Ticker);
+		return;
+		}
+		//else position already, do nothing.
+		
+		
+		
+		
+		
+	}
+	
+	
 	
 	private void NewOrderRequest(String Ticker)
 	{
@@ -109,7 +127,7 @@ public class OrderHandler extends Thread{
 			
 		log.info("SEND new order creation for "+order.action()+" "+order.totalQuantity()+" "+order.orderType()+" "+order.tif()+" "+contract.toString());
 			//log.log(Level.INFO ,"Order being executed for {0} {1} {2} at {3}",new Object[]{Side,Quantity,Symbol,order.orderType().toString()});
-	/*		IBTradingMain.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
+			IBTradingMain.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 				@Override public void orderState(NewOrderState orderState) {
 					SwingUtilities.invokeLater( new Runnable() {
 						@Override public void run() {
@@ -146,7 +164,7 @@ public class OrderHandler extends Thread{
 				}
 			});
 		
-			*/
+			
 		}
 		
 		
