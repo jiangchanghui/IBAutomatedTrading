@@ -4,6 +4,7 @@
 package com.ib.client;
 
 import hft.main.Common;
+import hft.main.LivePositionHandler;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -162,8 +163,12 @@ public class EReader extends Thread {
                 if (version >= 3) {
                 	avgCost = readDouble();
                 }
-
+                LivePositionHandler.instance.OnPositionChanged(contract,pos,avgCost);
                 eWrapper().position( account, contract, pos, avgCost);
+                //This is called each time a position changes.
+                
+                
+                
                 break;
             }
 

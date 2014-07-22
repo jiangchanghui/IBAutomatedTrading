@@ -11,33 +11,26 @@ import apidemo.OrdersPanel.OrderRow;
 import apidemo.OrdersPanel.OrdersModel;
 
 import com.benberg.struct.NewOrderRequest;
+import com.ib.client.Contract;
 import com.ib.controller.OrderType;
 import com.ib.controller.Types.Action;
 import com.ib.initialise.IBTradingMain;
 import com.twitter.main.SendTweet;
 
 public class LivePositionHandler extends Thread{
+	public static LivePositionHandler instance = new LivePositionHandler();
 	private  Logger log = Logger.getLogger( this.getClass() );
-	Cache _Cache;
-	
-	public LivePositionHandler()
-	{
-		_Cache = Cache.instance;
 		
-		
-		
-	}
-	
 	
 	//somehow call this each time a position changes.
-	public void OnPositionChanged()
+	public void OnPositionChanged(Contract contract, int pos, double avgCost)
 	{
-		_Cache.IsLoadingOrders(true); //set to true so that we know when positions are finished loading. Order End sets to false
+		Cache.instance.IsLoadingOrders(true); //set to true so that we know when positions are finished loading. Order End sets to false
 		OrdersModel _OpenOrders = new OrdersModel();
-		IBTradingMain.INSTANCE.controller().reqLiveOrders( _OpenOrders);
-		PositionModel _positions = _Cache.GetAllPositions();
+		/*
+		PositionModel _positions = Cache.instance.GetAllPositions();
 		int timeout = 0;
-		while(_Cache.IsLoadingOrders() && timeout < 100)
+		while(Cache.instance.IsLoadingOrders() && timeout < 100)
 		{
 			try {
 				Thread.sleep(100);
@@ -55,8 +48,12 @@ public class LivePositionHandler extends Thread{
 			return;
 		}
 		//all orders loaded 
-		
+	
 		//Check all open positions have associated orders.
+		
+				
+		
+		
 		for(PositionRow _position :_positions.m_list)
 		{
 			//iterate over each position and see if there is a corresponding close order. Create one if not.
@@ -82,6 +79,8 @@ public class LivePositionHandler extends Thread{
 			}
 			
 		}
+			*/
+		//check order exists for contract and size.
 		
 		
 				
