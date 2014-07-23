@@ -174,7 +174,7 @@ public class OrdersPanel extends JPanel {
 	
 	public static class OrdersModel extends AbstractTableModel implements ILiveOrderHandler {
 		private HashMap<Long,OrderRow> m_map = new HashMap<Long,OrderRow>();
-		private ArrayList<OrderRow> m_orders = new ArrayList<OrderRow>();
+		public ArrayList<OrderRow> m_orders = new ArrayList<OrderRow>();
 		private HashMap<String,OrderRow> m_orders_byticker = new HashMap<String,OrderRow>();
 		
 		@Override public int getRowCount() {
@@ -286,7 +286,7 @@ public class OrdersPanel extends JPanel {
 	}
 	
 	public static class OrderRow {
-		NewContract m_contract;
+		public NewContract m_contract;
 		public NewOrder m_order;
 		public NewOrderState m_state;
 
