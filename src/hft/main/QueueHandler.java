@@ -63,6 +63,9 @@ public class QueueHandler {
 			//	channel.basicPublish("", Q_marketdata_tick, null, toBytes(_message));
 				log.info(" [x] Sent Tick for '" + _message.getTicker() + "' to exchange "+Ex_marketdata_routing);
 			
+			Cache.instance.MarketDataTick(_message);	
+				
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				log.fatal(e.getStackTrace().toString());
@@ -70,12 +73,12 @@ public class QueueHandler {
 		  
 		 
 	 }
-	 public synchronized void SendToNewOrderQueue(NewOrderRequest newOrderRequest)
+	 public synchronized void SendToNewOrderQueue(NewOrderRequest _message)
 	 { 
 		 try {
 			   
-				channel_order.basicPublish("", Q_create_new_order, null, toBytes(newOrderRequest));
-				log.info(" [x] Sent Order creation request for '" + newOrderRequest.toString() + "' ");
+				channel_order.basicPublish("", Q_create_new_order, null, toBytes(_message));
+				log.info(" [x] Sent Order creation request for '" + _message.toString() + "' ");
 			
 				
 			} catch (IOException e) {

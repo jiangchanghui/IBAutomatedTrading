@@ -22,15 +22,43 @@ public class LivePositionHandler extends Thread{
 	private  Logger log = Logger.getLogger( this.getClass() );
 		
 	
-	//somehow call this each time a position changes.
+	//Call this every 30 seconds to handle position changes
+	public void run()
+	{
+		while(true){
+			try {
+				Thread.sleep(3000);
+				CheckPositions();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		
+	}
+	
+	
+	
+	private void CheckPositions() {
+		
+		for(PositionRow _position : Cache.instance.GetAllPositions().m_list)
+		{
+			CheckIfHasCLoseOrder(_position.m_contract.symbol(),_position.m_position,_position.m_avgCost);
+		}
+		
+	}
+
+
+
 	public void OnPositionChanged(Contract contract, int pos, double avgCost)
 	{
-		Cache.instance.IsLoadingOrders(true); //set to true so that we know when positions are finished loading. Order End sets to false
-		OrdersModel _OpenOrders = new OrdersModel();
-		
-		IBTradingMain.INSTANCE.controller().reqLiveOrders( _OpenOrders);
-		
+		if(pos==0)
+			return;
+		log.info("Poisiton CHange for :"+contract.m_symbol+", Position : "+pos+", AvCost : "+avgCost);
+			
 		int timeout = 0;
+		//this happens so that theres time for the orders to be processed and read before continuing. Prevent race condition.
 		while(Cache.instance.IsLoadingOrders() && timeout < 100)
 		{
 			try {
@@ -47,7 +75,15 @@ public class LivePositionHandler extends Thread{
 		
 		
 		String Ticker = contract.m_symbol;
-		for (OrderRow row : _OpenOrders.m_orders)
+		
+	}
+	private void CheckIfHasCLoseOrder(String Ticker,int pos,double AvgPx)
+	{
+	
+		log.info("Poisiton CHange for :"+Ticker+", Position : "+pos+", AvCost : "+AvgPx);
+		if(pos==0)
+			return;
+		for (OrderRow row : Cache.instance.GetOpenOrders().m_orders)
 		{
 			log.info("Checking if close order exists for "+ row.m_contract.symbol());	
 			if(row.m_contract.symbol().equals(Ticker))
@@ -61,8 +97,8 @@ public class LivePositionHandler extends Thread{
 					
 					IBTradingMain.INSTANCE.controller().cancelOrder( row.m_order.orderId());
 					//create new order for position size.
-					log.info("Replacing order for "+ Ticker + " with quantity : "+pos+". Average execution cost : "+avgCost);	
-					CreateNewClosePositionOrder(Ticker,pos,avgCost);
+					log.info("Replacing order for "+ Ticker + " with quantity : "+pos+". Average execution cost : "+AvgPx);	
+					CreateNewClosePositionOrder(Ticker,pos,AvgPx);
 					return;
 				}
 				else
@@ -71,8 +107,8 @@ public class LivePositionHandler extends Thread{
 			}
 		}
 		// if we get here there is no order, so need to create one
-		log.info("No close order found for  "+ Ticker + ". Creating order with quantity : "+pos+". Average execution cost : "+avgCost);	
-		CreateNewClosePositionOrder(Ticker,pos,avgCost);
+		log.info("No close order found for  "+ Ticker + ". Creating order with quantity : "+pos+". Average execution cost : "+AvgPx);	
+		CreateNewClosePositionOrder(Ticker,pos,AvgPx);
 		
 	
 		

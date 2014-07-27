@@ -11,6 +11,7 @@ import javax.swing.table.AbstractTableModel;
 
 import org.apache.log4j.Logger;
 
+import com.benberg.struct.MarketDataTick;
 import com.ib.controller.AccountSummaryTag;
 import com.ib.controller.Bar;
 import com.ib.controller.Formats;
@@ -26,6 +27,7 @@ import analytics.AnalyticsCache;
 import analytics.HistoricalRsiCache;
 import apidemo.AccountInfoPanel;
 import apidemo.OrdersPanel.OrderRow;
+import apidemo.OrdersPanel.OrdersModel;
 import apidemo.PositionsPanel.PositionModel;
 
 public class Cache {
@@ -34,20 +36,24 @@ public class Cache {
 	private HashMap<String,OrderRow> orders_map = new HashMap<String,OrderRow>();
 	private ArrayList<String> Tickers_list = new ArrayList<>();
 	private HashMap<String,ArrayList<Double>> AverageBarSize_Map = new HashMap<String,ArrayList<Double>>();
-	PositionModel _positions;
+	private HashMap<String,MarketDataTuple> LastPx_Map = new HashMap<String,MarketDataTuple>();
+	PositionModel _positions = new PositionModel();
 	private volatile boolean _isloading=false;
 	boolean IsApiConnected = false;
-	
+	private OrdersModel _OpenOrders = new OrdersModel();
 	public Cache()
 	{
-		_positions = new PositionModel();
-		IBTradingMain.INSTANCE.controller().reqPositions( _positions);		
+		
+		IBTradingMain.INSTANCE.controller().reqPositions( _positions);		//Needed to store live position updates
 		Tickers_list.add("AAPL");
-	//	Tickers_list.add("TSLA");
-	//	Tickers_list.add("GOOGL");
-	//	Tickers_list.add("CSIQ");
+		IBTradingMain.INSTANCE.controller().takeFutureTwsOrders( _OpenOrders); //Pushes order updates live. 
 	}
-
+	public OrdersModel GetOpenOrders()
+	{
+		return _OpenOrders;
+	}
+	
+	
 	public  ArrayList<String> GetTickersList()
 	{
 		return Tickers_list;
@@ -64,18 +70,16 @@ public class Cache {
 		if (tmp ==null)
 			tmp = new ArrayList<Double>();
 			
-		if(tmp.size()<5)
+		if(tmp.size()<20)
 			tmp.add(tmp.size(),range);
 		else
 		{
-		tmp.add(bar.high()-bar.low());
-		tmp.add(0,tmp.get(1));
-		tmp.add(1,tmp.get(2));
-		tmp.add(2,tmp.get(3));
-		tmp.add(3,tmp.get(4));
-		tmp.add(4, range);
+			for (int i=0;i<20;i++)
+			{
+			tmp.add(i,tmp.get(i+1));
+			}
+			tmp.add(20, range);
 		}
-		
 		AverageBarSize_Map.put(Ticker, tmp);
 				
 			
@@ -84,6 +88,9 @@ public class Cache {
 	public double GetAverageBarSize(String Ticker)
 	{
 	ArrayList<Double> tmp =AverageBarSize_Map.get(Ticker);
+	
+	if(tmp==null)//not really possible, did for testing
+		return 1.0;
 	double average=0.0;
 	for(double value : tmp)
 	{
@@ -252,7 +259,12 @@ public static class PositionRow {
 		m_position = position;
 		m_avgCost = avgCost;
 	}
-
+	
+	public String ToString()
+	{
+		return m_contract.symbol()+"/"+m_position+"/@"+m_avgCost;
+	}
+	
  private void AttachLogHandler()
  {
 	 try
@@ -352,6 +364,48 @@ public static class PositionRow {
 }
 
 
+
+public void MarketDataTick(MarketDataTick _message) {
+	
+	
+		LastPx_Map.put(_message.getTicker(), new MarketDataTuple(_message.getBar().close(), System.currentTimeMillis()));
+	
+	
+	
+}
+public double GetLastPx(String Ticker)
+{
+	MarketDataTuple tmp = LastPx_Map.get(Ticker);
+	if (tmp == null)
+		return 0.0;
+	else
+	{
+		long LastUpdateTime = tmp.LastUpdateTime;
+		long delta = System.currentTimeMillis() - LastUpdateTime;
+		if (delta > 60000 );
+			log.warn("STALE MARKET DATA : Last Update time for "+Ticker+"+is over "+delta/1000+" seconds old");
+		return tmp.LastPx;
+	}
+	
+	
+}
+
+private class MarketDataTuple
+{
+	double LastPx = 0.0;
+	long LastUpdateTime=0;
+	
+	public MarketDataTuple (double LastPx, long LastUpdateTime)
+	{
+		this.LastPx = LastPx;
+		this.LastUpdateTime = LastUpdateTime;
+	}
+	
+	
+	
+	
+	
+}
 }
 
 

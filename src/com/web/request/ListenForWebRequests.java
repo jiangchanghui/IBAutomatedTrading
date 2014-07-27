@@ -1,7 +1,5 @@
 package com.web.request;
 
-import hft.main.CreateWebResponse;
-import hft.main.WebRequestHandler;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -80,7 +78,7 @@ public class ListenForWebRequests extends Thread{
 		      
 		      RequestType req = _message.getType();
 		      NewMarketDataRequest _response;
-		      hft.main.WebRequestHandler _handler;
+		      com.web.request.WebRequestHandler _handler;
 		      switch (req) {
 		      case AUTOTRADER: 
 		    	  CreateWebResponse c = new CreateWebResponse();

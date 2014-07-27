@@ -1,4 +1,4 @@
-package hft.main;
+package com.web.request;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -26,8 +26,6 @@ import org.w3c.dom.Element;
 
 import com.google.gson.JsonObject;
 import com.twitter.main.SendTweet;
-import com.web.request.GetHistoricMarketData;
-import com.web.request.HistoricResultSet;
 
 import analytics.AnalyticsCache;
 import analytics.HistoricalRsiCache;

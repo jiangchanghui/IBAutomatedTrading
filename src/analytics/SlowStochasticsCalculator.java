@@ -1,6 +1,7 @@
 package analytics;
 
 import hft.main.Cache;
+import hft.main.Cache.PositionRow;
 import hft.main.QueueHandler;
 
 import java.io.ByteArrayInputStream;
@@ -20,6 +21,8 @@ import com.benberg.struct.MarketDataTick;
 import com.benberg.struct.NewMarketDataRequest;
 import com.benberg.struct.NewOrderRequest;
 import com.ib.controller.Bar;
+import com.ib.controller.OrderType;
+import com.ib.controller.Types.Action;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -63,11 +66,10 @@ public class SlowStochasticsCalculator extends Thread{
 		    connection = factory.newConnection();
 		    channel = connection.createChannel();
 		    channel.exchangeDeclare(Ex_marketdata_routing, "topic");
-	    //    QueueName = channel.queueDeclare().getQueue();
-		 //   QueueName = Thread.currentThread().getName();
-		    QueueName = Q_marketdata_tick+"_"+Ticker;
+	   
+		    QueueName = Q_marketdata_tick+"_"+Ticker; //Ticker for the thread is set before thread started
 	        channel.queueDeclare(QueueName, false, false, false, null);
-		    channel.queueBind(QueueName, Ex_marketdata_routing, Ticker);
+		    channel.queueBind(QueueName, Ex_marketdata_routing, Ticker); //Bind quque to exchange with routing key of Ticker.
 	        
 	        
 		//    channel.queueDeclare(Q_marketdata_tick, false, false, false, null);
@@ -293,10 +295,20 @@ public  MarketDataTick fromBytes(byte[] body) {
 		//if signal line has moved above Slow sto and slow sto is below 20.
 		if (SlowSto < 20 && SignalLine > SlowSto)
 		{
-			log.info("Routing order for execution for : "+_Ticker);
-			QueueHandler.instance.SendToNewOrderQueue(new NewOrderRequest(_Ticker));
+			log.info("Stock is marketable. Routing order for execution : "+_Ticker);
+			PositionRow tmp = hft.main.Cache.instance.IsPosiitonExist(_Ticker);
+			if(tmp== null)
+			{
+			QueueHandler.instance.SendToNewOrderQueue(new NewOrderRequest(_Ticker,100,OrderType.MKT,0.0,Action.BUY));
 			log.info("Average Bar size is currently :"+Cache.instance.GetAverageBarSize(_Ticker));
-		}
+			}
+			else
+			{
+				log.info("Position in "+_Ticker+" already exists : "+tmp.ToString());
+			}
+			
+			
+			}
 		
 		//Add bar into average bar size calc
 		

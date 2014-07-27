@@ -1,6 +1,5 @@
 package com.ib.initialise;
 
-import hft.main.CreateWebResponse;
 import hft.main.Main;
 import hft.main.QueueHandler;
 
@@ -51,6 +50,7 @@ import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.WhatToShow;
 
 import com.twitter.main.SendTweet;
+import com.web.request.CreateWebResponse;
 import com.web.request.GetHistoricMarketData;
 import com.web.request.ListenForWebRequests;
 

@@ -75,6 +75,7 @@ public class EReader extends Thread {
             while( !isInterrupted() && processMsg(readInt()));
         }
         catch ( Exception ex ) {
+        	Common.instance.WriteToLog("API error"+ex.toString());
         	if (parent().isConnected()) {
         		eWrapper().error( ex);
         	}
@@ -163,7 +164,7 @@ public class EReader extends Thread {
                 if (version >= 3) {
                 	avgCost = readDouble();
                 }
-                LivePositionHandler.instance.OnPositionChanged(contract,pos,avgCost);
+        //        LivePositionHandler.instance.OnPositionChanged(contract,pos,avgCost);
                 eWrapper().position( account, contract, pos, avgCost);
                 //This is called each time a position changes.
                 
@@ -175,6 +176,7 @@ public class EReader extends Thread {
             case POSITION_END:{
                 int version = readInt();
                 eWrapper().positionEnd();
+                System.out.println("Position End");
                 break;
             }
 
@@ -402,7 +404,7 @@ public class EReader extends Thread {
                     int errorCode    = readInt();
                     String errorMsg = readStr();
                     m_parent.error(id, errorCode, errorMsg);
-                    Common.instance.WriteToLog(errorMsg);
+                    Common.instance.WriteToLog("ERR_MSG "+errorMsg);
                 }
                 
                 break;

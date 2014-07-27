@@ -13,5 +13,19 @@ public class Common {
 		log.info(message);
 
 	}
-
+	 void PrintStartup() {
+		 String[] Diamond =
+			   {"      /\\    ",
+			    "     /  \\   ",
+			    "    /    \\  ",
+			    "    \\    /  ",
+			    "     \\  /   ",
+			    "      \\/    "};
+		 for (int i = 0; i < Diamond.length; ++i) 
+			{
+				log.info(Diamond[i]);
+			}
+		 log.info("Startup....Free memory : "+Runtime.getRuntime().freeMemory());
+		 log.info("Initialising HFT module... ");
+	}
 }

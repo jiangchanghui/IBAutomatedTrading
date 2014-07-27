@@ -1,9 +1,11 @@
 package com.benberg.struct;
 
+import java.io.Serializable;
+
 import com.ib.controller.OrderType;
 import com.ib.controller.Types.Action;
 
-public class NewOrderRequest {
+public class NewOrderRequest implements Serializable{
 
 	String Ticker;
 	int Quantity;
@@ -29,8 +31,26 @@ public class NewOrderRequest {
 	public String toString()
 	{
 		return Side+" "+Quantity+ " "+Ticker+" "+OrdType.toString()+" "+LimitPx;
-		
-		
-		
+	}
+	
+	public String Ticker()
+	{
+		return Ticker;
+	}
+	public int Quantity()
+	{
+		return Quantity;
+	}
+	public OrderType OrderType()
+	{
+		return OrdType;
+	}
+	public Action Side()
+	{
+		return Side;
+	}
+	public double LimitPx()
+	{
+		return LimitPx;
 	}
 }

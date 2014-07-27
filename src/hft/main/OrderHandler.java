@@ -1,5 +1,7 @@
 package hft.main;
 
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
 import java.util.logging.Level;
 
 import javax.swing.SwingUtilities;
@@ -24,6 +26,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import com.twitter.main.SendTweet;
 import com.web.request.GetHistoricMarketData;
+import com.benberg.struct.NewOrderRequest;
 
 public class OrderHandler extends Thread{
 	private  Logger log = Logger.getLogger( this.getClass() );
@@ -69,12 +72,18 @@ public class OrderHandler extends Thread{
 			      log.info("Order listener waiting for data");
 			      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 			      
-			    String _message =  new String(delivery.getBody());
+			    NewOrderRequest _message =  fromBytes(delivery.getBody());
 			      
 			     log.info(" [x] Received '" + _message + "', for new order creation");
-			   //  NewOrderRequest(_message);
-			     PositionCheck(_message);
-			    }
+			   
+			     try{
+			     NewOrderRequest(_message);
+			     }
+			     catch (Exception e)
+			     {
+			    	 log.fatal(e.getStackTrace().toString()); 
+			     }
+			   }
 			}
 			catch(Exception e)
 			{
@@ -82,50 +91,61 @@ public class OrderHandler extends Thread{
 			}
 	}
 	
-	private void PositionCheck(String Ticker)
-	{
-		if(hft.main.Cache.instance.IsPosiitonExist(Ticker)== null)
-		{
-			//check if a position in the security already exists. If not create one
-			NewOrderRequest(Ticker);
-		return;
+	public  NewOrderRequest fromBytes(byte[] body) {
+		
+		NewOrderRequest obj = null;
+		    try {
+		        ByteArrayInputStream bis = new ByteArrayInputStream (body);
+		        ObjectInputStream ois = new ObjectInputStream (bis);
+		        obj = (NewOrderRequest)ois.readObject();
+		        ois.close();
+		        bis.close();
+		    }
+		    catch (Exception e) {
+		    	log.fatal(e.toString());
+		    }
+		  
+		   
+		    return obj;     
 		}
-		//else position already, do nothing.
-		
-		
-		
-		
-		
-	}
 	
-	
-	
-	private void NewOrderRequest(String Ticker)
+	private void NewOrderRequest(NewOrderRequest _message)
 	{
-		
-			if (Ticker==null)
+			String Ticker = _message.Ticker();
+			Action side = _message.Side();
+			int Quantity = _message.Quantity();
+			OrderType OrdType = _message.OrderType();
+			double LimitPx = RountToTick(_message.LimitPx());
+			
+			if (Ticker==null || side ==null || Quantity <=0.0 || OrdType==null)
 			{
-				log.error("Ticker = "+Ticker+". Order creation Failed. ");
-			//	 log.log(Level.WARNING ,"Order Create failed with Symbol : {0}, Quantity : {1}, Side : {2}, FFLimit :{3}",new Object[]{Symbol,Quantity,Side.toString(),FFLimit});
-				return;
+				log.error("Ticker = "+Ticker+". Order creation Failed. "+ Ticker+"/"+side+"/"+Quantity+"/"+OrdType);
+				 return;
 			}
 			
 			NewContract contract = new NewContract();
 			NewOrder order = new NewOrder();
 			contract.symbol(Ticker);
-			order.totalQuantity(100);
-			order.action(Action.BUY);
-			
-				
-			order.orderType(OrderType.MKT);
-			order.tif(TimeInForce.FOK);//prevents blocked shorts hanging around.
-			//order.lmtPrice(FarPrice);
-			
+			order.totalQuantity(Quantity);
+			order.action(side);
 			contract.secType(SecType.STK);
 			contract.exchange("SMART");
 			contract.currency("USD");
 			
-		log.info("SEND new order creation for "+order.action()+" "+order.totalQuantity()+" "+order.orderType()+" "+order.tif()+" "+contract.toString());
+			if (OrdType.equals(OrderType.MKT))
+			{
+			order.orderType(OrdType);
+			order.tif(TimeInForce.FOK);//prevents blocked shorts hanging around.
+			}
+			else
+			{
+				order.orderType(OrderType.LMT);
+				order.lmtPrice(LimitPx);	
+			}
+						
+			
+			
+		log.info("SEND new order creation for "+order.action()+"/"+order.totalQuantity()+"/"+order.orderType()+"/"+order.lmtPrice()+"/"+order.tif());
 			//log.log(Level.INFO ,"Order being executed for {0} {1} {2} at {3}",new Object[]{Side,Quantity,Symbol,order.orderType().toString()});
 			IBTradingMain.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 				@Override public void orderState(NewOrderState orderState) {
@@ -152,12 +172,8 @@ public class OrderHandler extends Thread{
 							}
 							if (errorMsg.contains("not be placed"))
 							{
-								IBTradingMain.INSTANCE.controller().cancelAllOrders();
+						//		IBTradingMain.INSTANCE.controller().cancelAllOrders();
 							}
-							
-							
-							
-							
 							
 						}
 					});
@@ -166,6 +182,14 @@ public class OrderHandler extends Thread{
 		
 			
 		}
+
+
+	private double RountToTick(double limitPx) {
+		
+		double roundedlimitPx = Math.round(limitPx*100)/100.0d;
+		log.info("LimitPx rounded from "+limitPx+" to "+roundedlimitPx);
+		return roundedlimitPx;
+	}
 		
 		
 	

@@ -48,29 +48,23 @@ public class Main extends Thread{
 	
 	 public void run()
 		{	
-		 PrintStartup();
+		 Common.instance.PrintStartup();
+		 
+		
 		 StartQueueHandler();//Initialise the singleton for queues used for market data and new orders. 
 		 
 		 StartNewOrderHandler(); //New thread to continuously listen for new orders created from analytics workers
 		 
 		 StartStochasticsWorkers(); //starts 2 stochastic workers per ticker 
+		 
+		 CentralRiskControl C = new CentralRiskControl(); //starts Central risk process.
+		 C.start();  
+		 
+		 LivePositionHandler H = new LivePositionHandler();
+		 H.start();
 		}
 	 
-	 private void PrintStartup() {
-		 String[] Diamond =
-			   {"      /\\    ",
-			    "     /  \\   ",
-			    "    /    \\  ",
-			    "    \\    /  ",
-			    "     \\  /   ",
-			    "      \\/    "};
-		 for (int i = 0; i < Diamond.length; ++i) 
-			{
-				log.info(Diamond[i]);
-			}
-		 log.info("Startup....Free memory : "+Runtime.getRuntime().freeMemory());
-		 log.info("Initialising HFT module... ");
-	}
+	
 
 	private void StartQueueHandler()
 	 {
@@ -85,17 +79,16 @@ public class Main extends Thread{
 	 private void StartStochasticsWorkers()
 	 {
 		log.info("Initialising HFT module... ");
-		String _Ticker = "AAPL";
-		
+			
 	//	int req_id = IsTickerInRTMap(message.GetTicker());
 	
 	//	RTMarketDataMap = m_controller.GetTRealTimeMap();
 		
 		
-		 AnalyticsCache _AnalyticsCache = new AnalyticsCache().instance;
+		 
 			//creates subscription for market data ticks every 2 seconds
 			int i=0;
-			while(!_AnalyticsCache.IsConnected() && i <20)
+			while(!AnalyticsCache.instance.IsConnected() && i <20)
 			{
 				try {
 					Thread.sleep(1000);
@@ -127,11 +120,6 @@ public class Main extends Thread{
 	}
 	log.info("Initialising HFT module... Complete");	
 		
-//		RequestMarketData("TSLA");
-//		RequestMarketData("FSLR");
-//		RequestMarketData("IBM");
-//		RequestMarketData("NFLX");
-//		RequestMarketData("GOOGL");
 
 		
 		
