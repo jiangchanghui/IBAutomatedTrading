@@ -27,7 +27,7 @@ public class LivePositionHandler extends Thread{
 	{
 		while(true){
 			try {
-				Thread.sleep(3000);
+				Thread.sleep(10000);
 				CheckPositions();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -53,8 +53,8 @@ public class LivePositionHandler extends Thread{
 
 	public void OnPositionChanged(Contract contract, int pos, double avgCost)
 	{
-		if(pos==0)
-			return;
+	//	if(pos==0)
+		//	return;
 		log.info("Poisiton CHange for :"+contract.m_symbol+", Position : "+pos+", AvCost : "+avgCost);
 			
 		int timeout = 0;
@@ -81,8 +81,7 @@ public class LivePositionHandler extends Thread{
 	{
 	
 		log.info("Poisiton CHange for :"+Ticker+", Position : "+pos+", AvCost : "+AvgPx);
-		if(pos==0)
-			return;
+		
 		for (OrderRow row : Cache.instance.GetOpenOrders().m_orders)
 		{
 			log.info("Checking if close order exists for "+ row.m_contract.symbol());	
@@ -90,6 +89,7 @@ public class LivePositionHandler extends Thread{
 			{//order pending already
 				//check quantity on order
 				log.info("Found order for "+ row.m_contract.symbol());	
+			
 				if(row.m_order.totalQuantity()!=pos)
 				{
 					//cancel order
