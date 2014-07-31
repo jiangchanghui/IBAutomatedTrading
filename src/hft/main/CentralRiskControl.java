@@ -31,7 +31,7 @@ private double ThresholdLoss = -45;
 			
 			try 
 			{
-				Thread.sleep(60000);
+				Thread.sleep(10000);
 				CheckPositions();
 				
 			} catch (InterruptedException e) 
@@ -47,6 +47,7 @@ private double ThresholdLoss = -45;
 	{
 		
 		int timeout = 0;
+		/*
 		while(m_model.IsLoadingPositions() && timeout < 100)
 		{
 			try {
@@ -60,7 +61,7 @@ private double ThresholdLoss = -45;
 	//	log.info("");
 		if (m_model.IsLoadingPositions())
 			return;
-		
+		*/
 		//positions loaded, check each one.
 		
 		for (PositionRow _position : m_model.m_list)

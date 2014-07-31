@@ -12,6 +12,7 @@ import apidemo.OrdersPanel.OrdersModel;
 
 import com.benberg.struct.NewOrderRequest;
 import com.ib.client.Contract;
+import com.ib.controller.OrderStatus;
 import com.ib.controller.OrderType;
 import com.ib.controller.Types.Action;
 import com.ib.initialise.IBTradingMain;
@@ -84,6 +85,8 @@ public class LivePositionHandler extends Thread{
 		
 		for (OrderRow row : Cache.instance.GetOpenOrders().m_orders)
 		{
+			if (row.m_state.status() ==OrderStatus.Submitted)
+			{
 			log.info("Checking if close order exists for "+ row.m_contract.symbol());	
 			if(row.m_contract.symbol().equals(Ticker))
 			{//order pending already
@@ -99,11 +102,15 @@ public class LivePositionHandler extends Thread{
 					//create new order for position size.
 					log.info("Replacing order for "+ Ticker + " with quantity : "+pos+". Average execution cost : "+AvgPx);	
 					CreateNewClosePositionOrder(Ticker,pos,AvgPx);
-					return;
+					break;
 				}
+				
+				else if (row.m_order.action()==Action.BUY)
+					break;
 				else
 					return; //order placed is equal to pending order therefore nothing to be done.
 					
+			}
 			}
 		}
 		// if we get here there is no order, so need to create one
