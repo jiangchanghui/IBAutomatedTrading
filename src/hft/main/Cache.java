@@ -179,9 +179,10 @@ public class PositionModel extends AbstractTableModel implements IPositionHandle
 			row = new PositionRow();
 			m_map.put( key, row);
 			m_list.add( row);
+		//	System.out.println("Added new position for "+row.ToString());
 		}
 		row.update( account, contract, position, avgCost);
-		
+		System.out.println("Updated position for "+row.ToString());
 		
 	}
 
@@ -368,10 +369,16 @@ public static class PositionRow {
 public void MarketDataTick(MarketDataTick _message) {
 	
 	
+	log.info("Updated last price for "+_message.getTicker()+" to "+_message.getBar().close());
 		LastPx_Map.put(_message.getTicker(), new MarketDataTuple(_message.getBar().close(), System.currentTimeMillis()));
 	
 	
 	
+}
+public void SetLastPx(String Ticker, double LastPx)
+{
+	log.info("Updated last price for "+Ticker+" to "+LastPx);
+	LastPx_Map.put(Ticker,new MarketDataTuple(LastPx,System.currentTimeMillis()));
 }
 public double GetLastPx(String Ticker)
 {

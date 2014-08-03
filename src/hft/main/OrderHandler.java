@@ -168,7 +168,7 @@ public class OrderHandler extends Thread{
 							if (errorMsg.contains("Order held"))
 							{
 							//	log.log(Level.SEVERE ,"Order is held, cancelling all open orders");
-								IBTradingMain.INSTANCE.controller().cancelAllOrders();
+						//		IBTradingMain.INSTANCE.controller().cancelAllOrders();
 							}
 							if (errorMsg.contains("not be placed"))
 							{

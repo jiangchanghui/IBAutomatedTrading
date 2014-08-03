@@ -12,6 +12,7 @@ import apidemo.OrdersPanel.OrdersModel;
 
 import com.benberg.struct.NewOrderRequest;
 import com.ib.client.Contract;
+import com.ib.controller.OrderStatus;
 import com.ib.controller.OrderType;
 import com.ib.controller.Types.Action;
 import com.ib.initialise.IBTradingMain;
@@ -80,11 +81,15 @@ public class LivePositionHandler extends Thread{
 	private void CheckIfHasCLoseOrder(String Ticker,int pos,double AvgPx)
 	{
 	
-		log.info("Poisiton CHange for :"+Ticker+", Position : "+pos+", AvCost : "+AvgPx);
+		log.info("Checking Position  :"+Ticker+", Position : "+pos+", AvCost : "+AvgPx);
 		
 		for (OrderRow row : Cache.instance.GetOpenOrders().m_orders)
 		{
-			log.info("Checking if close order exists for "+ row.m_contract.symbol());	
+			log.info("Checking order ticker :  "+ row.m_contract.symbol()+" for position  "+Ticker);	
+			log.info("Order state is : "+row.m_state.status());
+			OrderStatus state = row.m_state.status();
+			if (state ==OrderStatus.Submitted || state==OrderStatus.PreSubmitted)
+			{
 			if(row.m_contract.symbol().equals(Ticker))
 			{//order pending already
 				//check quantity on order
@@ -99,17 +104,20 @@ public class LivePositionHandler extends Thread{
 					//create new order for position size.
 					log.info("Replacing order for "+ Ticker + " with quantity : "+pos+". Average execution cost : "+AvgPx);	
 					CreateNewClosePositionOrder(Ticker,pos,AvgPx);
-					return;
+					break;
 				}
 				else
-					return; //order placed is equal to pending order therefore nothing to be done.
+					break; //order placed is equal to pending order therefore nothing to be done.
 					
+			}
 			}
 		}
 		// if we get here there is no order, so need to create one
+		if(pos!=0)
+		{
 		log.info("No close order found for  "+ Ticker + ". Creating order with quantity : "+pos+". Average execution cost : "+AvgPx);	
 		CreateNewClosePositionOrder(Ticker,pos,AvgPx);
-		
+		}
 	
 		
 	}

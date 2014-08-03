@@ -29,6 +29,8 @@ import javax.swing.table.AbstractTableModel;
 
 import org.apache.log4j.Logger;
 
+import testing.TestPanel;
+
 
 import com.ib.controller.ApiController;
 import com.ib.controller.Bar;
@@ -81,7 +83,7 @@ public class IBTradingMain implements IConnectionHandler{
 	private final ConnectionPanel m_connectionPanel = new ConnectionPanel();
 	private final MarketDataPanel m_mktDataPanel = new MarketDataPanel();
 	private final AnalyticsCache _AnalyticsCache = new AnalyticsCache().instance;
-
+	private final TestPanel m_testPanel = new TestPanel();
 	
 	private final JTextArea m_inLog = new JTextArea();
 	private final JTextArea m_outLog = new JTextArea();
@@ -90,6 +92,7 @@ public class IBTradingMain implements IConnectionHandler{
 	private final ApiController m_controller = new ApiController( this, m_inLogger, m_outLogger);
 	private final JTextArea m_msg = new JTextArea();
 	private final TradingPanel m_tradingPanel = new TradingPanel();
+	
 	private final ArrayList<String> m_acctList = new ArrayList<String>();
 	public ArrayList<String> accountList() 	{ return m_acctList; }
 	public ApiController controller() 		{ return m_controller; }
@@ -163,6 +166,8 @@ public class IBTradingMain implements IConnectionHandler{
 		
 		
 		m_tabbedPanel.addTab( "Connection", m_connectionPanel);
+		m_tabbedPanel.addTab( "Testing", m_testPanel);
+		
 		m_tabbedPanel.addTab( "Market Data", m_mktDataPanel);
 		m_tabbedPanel.addTab( "Trading", m_tradingPanel);
 		m_tabbedPanel.addTab( "Account Info", m_acctInfoPanel);

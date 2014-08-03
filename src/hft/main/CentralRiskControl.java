@@ -1,5 +1,7 @@
 package hft.main;
 
+import hft.main.Cache.PositionRow;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -18,20 +20,19 @@ import com.ib.initialise.IBTradingMain;
 
 public class CentralRiskControl extends Thread{
 	
-private PositionModel m_model = new PositionModel();
+
 private  Logger log = Logger.getLogger( this.getClass() );
 
 private double ThresholdLoss = -45;
 	public void run()
 	{
-		subscribe();
-		
+				
 		while(true)
 		{
 			
 			try 
 			{
-				Thread.sleep(60000);
+				Thread.sleep(10000);
 				CheckPositions();
 				
 			} catch (InterruptedException e) 
@@ -46,25 +47,12 @@ private double ThresholdLoss = -45;
 	private void CheckPositions()
 	{
 		
-		int timeout = 0;
-		while(m_model.IsLoadingPositions() && timeout < 100)
-		{
-			try {
-				Thread.sleep(100);
-				timeout++;
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	//	log.info("");
-		if (m_model.IsLoadingPositions())
-			return;
-		
+	
+				
 		//positions loaded, check each one.
-		
-		for (PositionRow _position : m_model.m_list)
+		for(hft.main.Cache.PositionRow _position : Cache.instance.GetAllPositions().m_list)
 		{
+		
 			String Ticker = _position.m_contract.symbol();
 			int Quantity = _position.m_position;
 			double AvgPx = _position.m_avgCost;
@@ -101,13 +89,7 @@ private double ThresholdLoss = -45;
 	}
 	
 
-	private void subscribe()
-	{
-		
-		IBTradingMain.INSTANCE.controller().reqPositions( m_model);	//to get position updates
-		
-		
-	}
+	
 	
 	public class PositionModel extends AbstractTableModel implements IPositionHandler {
 		HashMap<PositionKey,PositionRow> m_map = new HashMap<PositionKey,PositionRow>();

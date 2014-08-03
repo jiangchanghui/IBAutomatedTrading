@@ -30,7 +30,7 @@ public class ContractPanel extends JPanel {
 
 	private NewContract m_contract;
 
-	ContractPanel(NewContract c) {
+	public ContractPanel(NewContract c) {
 		m_contract = c;
 
 		if (c.secType() == SecType.None) {
