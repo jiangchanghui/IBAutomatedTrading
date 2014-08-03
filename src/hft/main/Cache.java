@@ -368,8 +368,12 @@ public static class PositionRow {
 
 public void MarketDataTick(MarketDataTick _message) {
 	
+<<<<<<< HEAD
 	
 	log.info("Updated last price for "+_message.getTicker()+" to "+_message.getBar().close());
+=======
+	log.info("Updating last price for "+_message.getTicker()+" , LastPx : "+_message.getBar().close());
+>>>>>>> 323a762996a36211c9570c6fe7b7fbe7a5f6b876
 		LastPx_Map.put(_message.getTicker(), new MarketDataTuple(_message.getBar().close(), System.currentTimeMillis()));
 	
 	

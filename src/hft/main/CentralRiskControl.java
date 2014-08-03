@@ -47,8 +47,27 @@ private double ThresholdLoss = -45;
 	private void CheckPositions()
 	{
 		
+<<<<<<< HEAD
 	
 				
+=======
+		int timeout = 0;
+		/*
+		while(m_model.IsLoadingPositions() && timeout < 100)
+		{
+			try {
+				Thread.sleep(100);
+				timeout++;
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	//	log.info("");
+		if (m_model.IsLoadingPositions())
+			return;
+		*/
+>>>>>>> 323a762996a36211c9570c6fe7b7fbe7a5f6b876
 		//positions loaded, check each one.
 		for(hft.main.Cache.PositionRow _position : Cache.instance.GetAllPositions().m_list)
 		{
