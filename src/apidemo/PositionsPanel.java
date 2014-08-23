@@ -132,11 +132,11 @@ public class PositionsPanel extends NewTabPanel {
 		}
 	}
 	
-	private static class PositionKey {
+	public static class PositionKey {
 		String m_account;
 		int m_conid;
 
-		PositionKey( String account, int conid) {
+		public PositionKey( String account, int conid) {
 			m_account = account;
 			m_conid = conid;
 		}
@@ -151,13 +151,13 @@ public class PositionsPanel extends NewTabPanel {
 		}
 	}
 
-	private static class PositionRow {
-		String m_account;
-		NewContract m_contract;
-		int m_position;
-		double m_avgCost;
+	public static class PositionRow {
+		public String m_account;
+		public NewContract m_contract;
+		public int m_position;
+		public double m_avgCost;
 
-		void update(String account, NewContract contract, int position, double avgCost) {
+		public void update(String account, NewContract contract, int position, double avgCost) {
 			m_account = account;
 			m_contract = contract;
 			m_position = position;

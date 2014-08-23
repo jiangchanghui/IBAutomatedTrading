@@ -87,7 +87,7 @@ import apidemo.TopModel.TopRow;
 
 @WebService 
 public class Index extends Thread{
-	private static final Logger log = Logger.getLogger( mailReader.class.getName() );
+	private static final Logger log = Logger.getLogger( Index.class.getName() );
 	 private static String queue_web_request = "";
 	 private static String queue_web_response = "";
 	 private static String RPC_QUEUE_NAME = "rpc_queue";

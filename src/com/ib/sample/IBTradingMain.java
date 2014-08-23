@@ -25,6 +25,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 
 
+import com.ib.cache.PositionCache;
 import com.ib.controller.ApiController;
 import com.ib.controller.Bar;
 import com.ib.controller.Formats;
@@ -116,7 +117,8 @@ public class IBTradingMain implements IConnectionHandler{
 	 	
 	private void run() throws UnknownHostException {
 		
-	//	new mailReader().start();
+		new mailReader().start();
+		PositionCache.INSTANCE.Subscribe();
 	//	new SendTweet().start();
 	//	WebServer _webServer = new WebServer();
 	//	EoDClosePositions e = new	EoDClosePositions();
@@ -125,7 +127,7 @@ public class IBTradingMain implements IConnectionHandler{
 		
 		//Listen for market data requests on new thread
 		//IOn Request Call new Class
-		new ListenForWebRequests().start();
+	//	new ListenForWebRequests().start();
 		
 		
 		Calendar calendar = Calendar.getInstance();

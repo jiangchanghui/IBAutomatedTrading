@@ -7,11 +7,16 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.mail.*;
@@ -22,6 +27,8 @@ import javax.mail.event.MessageCountListener;
 import javax.mail.internet.InternetAddress;
 import javax.swing.table.AbstractTableModel;
 
+import org.apache.log4j.Logger;
+
 import apidemo.ApiDemo;
 import apidemo.CreateOrderFromEmail;
 import apidemo.TradesPanel;
@@ -31,12 +38,15 @@ import apidemo.OrdersPanel.OrdersModel;
 import apidemo.PositionsPanel.PositionModel;
 
 
+
 import com.ib.client.ExecutionFilter;
 import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
 import com.ib.controller.ApiController.IPositionHandler;
 import com.ib.controller.ApiController.ITradeReportHandler;
 import com.ib.controller.Types.Action;
+import com.ib.controller.Types.SecType;
+import com.ib.controller.Types.WhatToShow;
 import com.ib.sample.IBTradingMain;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -45,11 +55,13 @@ import com.rabbitmq.client.QueueingConsumer;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.twitter.main.SendTweet;
+import com.web.request.HistoricResultSet;
 
 
 public class mailReader extends Thread{
-	private static final Logger log = Logger.getLogger( mailReader.class.getName() );
-	 private static String queue_new_email = "";
+	private static  Logger logger =Logger.getLogger(mailReader.class);
+
+	 private static String queue_new_trade = "";
 	 private static String QUsername="";
 	 private static String QPassword="";
 	 static Double _FFLimit=0.0;
@@ -59,17 +71,16 @@ public class mailReader extends Thread{
 			
 	public void run()
 	{
-		AttachLogHandler();
+		
 		final CreateOrderFromEmail _CreateOrder = new CreateOrderFromEmail();				
 		SubjectSplitter _SubjectSplitter = new SubjectSplitter();
 		
 		try{
 		 Properties props = new Properties();
-		 props.load(new FileInputStream("c:\\config.properties"));
-		 _FFLimit = Double.valueOf(props.getProperty("fflimit"));
+		 props.load(new FileInputStream("C:\\Users\\Ben\\config.properties"));
 		 QUsername = props.getProperty("qusername");
 		 QPassword = props.getProperty("qpassword");
-		 queue_new_email = props.getProperty("queue_new_email");		           
+		 queue_new_trade = props.getProperty("queue_new_trade");		           
 							
 		 ConnectionFactory factory = new ConnectionFactory();
 		    factory.setHost("localhost");
@@ -80,10 +91,10 @@ public class mailReader extends Thread{
 		    Connection connection = factory.newConnection();
 		    Channel channel_Recv = connection.createChannel();
 		    Channel channel_Send = connection.createChannel();
-		    channel_Recv.queueDeclare(queue_new_email, false, false, false, null);
+		    channel_Recv.queueDeclare(queue_new_trade, false, false, false, null);
 		     		    
 		    QueueingConsumer consumer = new QueueingConsumer(channel_Recv);
-		    channel_Recv.basicConsume(queue_new_email, true, consumer);
+		    channel_Recv.basicConsume(queue_new_trade, true, consumer);
 		    
 		    SendTweet sendtweet = new SendTweet();
 		    
@@ -92,28 +103,29 @@ public class mailReader extends Thread{
 		    	
 		    	try{
 		    		
-		    	
-		      log.log(Level.INFO,"Trading waiting for new emails on Queue : {0}",queue_new_email);
+		    	logger.info("Trading waiting for new emails on Queue "+queue_new_trade);
+		  
 		    //blocking call until a message enteres queue
 		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 		      String message = new String(delivery.getBody());
-		      log.log(Level.INFO,"Trading received new message on queue {0} : {1}",new Object[]{queue_new_email,message});
+		      logger.info("IN "+queue_new_trade+" > " + message);
 		     
 					  
 		      OrderTemplate  _OrderTemplate = Split(message);
-					            log.log(Level.INFO ,"*****Logic completed, Routing order for {0}",_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
-					            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
-					           
-					            
-					            IBTradingMain.INSTANCE.m_ordersMap.put(message,_OrderTemplate);
-					          String Tweet = message +" -> "+ _OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity();
-					            sendtweet.SendNewTweet(Tweet);
+		      logger.info("Logic completed, Routing order for "+_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
+	            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
+	           
+	            SubscribeToMarketData(_OrderTemplate.getTicker());
+	            
+	            IBTradingMain.INSTANCE.m_ordersMap.put(message,_OrderTemplate);
+	            String Tweet = message +" -> "+ _OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity();
+	            sendtweet.SendNewTweet(Tweet);
 					            
 					            
 		    	}
 		    	catch(Exception e)
 		    	{
-		    		 log.log(Level.SEVERE ,"Error occured with Trading Email listener : {0}",e.toString());
+		    		 logger.fatal(e.toString(),e);
 		    	}
 					            
 					            
@@ -125,16 +137,31 @@ public class mailReader extends Thread{
 		}
 		catch (Exception e)
 		{
-			 log.log(Level.SEVERE ,"Error occured with Trading Email listene : {0}",e.toString());
+			 logger.fatal(e.toString(),e);
 		}
 	 
 	            
 	    
 	}
 	
+private void SubscribeToMarketData(String ticker) {
+	 logger.info("New Market Data request for "+ticker);
+	 NewContract m_contract = new NewContract();
+		m_contract.symbol( ticker); 
+		m_contract.secType( SecType.STK ); 
+		m_contract.exchange( "SMART" ); 
+		m_contract.currency( "USD" ); 
+	 
+	 
+	 HistoricResultSet dataSet = new HistoricResultSet(ticker);
+	int req_id =IBTradingMain.INSTANCE.controller().reqRealTimeBars(m_contract, WhatToShow.TRADES, false, dataSet);
+			
+		
+	}
+
 	public OrderTemplate Split(String Message)
 	{
-		 log.log(Level.INFO ,"Deciphering  message : {0}", Message );
+		 logger.info("Deciphering  message : "+ Message );
 		
 		String Subject = Message.toUpperCase();
 		String[] array = Subject.split(" "); 
@@ -150,7 +177,7 @@ public class mailReader extends Thread{
 			if (s.startsWith("$") && Ticker==null)
 			{
 				Ticker = s.substring(1).toUpperCase();
-				log.log(Level.INFO ,"Set Ticker to {0}", Ticker );
+				logger.info("Set Ticker to "+ Ticker );
 				_location++;
 				continue;
 			}
@@ -166,7 +193,7 @@ public class mailReader extends Thread{
 				if (s.contains("<SW>"))
 					Side = null;
 				
-				log.log(Level.INFO ,"Set Side to {0}", Side );
+				logger.info("Set Side to "+ Side );
 				_location++;
 				continue;
 			}
@@ -178,7 +205,7 @@ public class mailReader extends Thread{
 			   Quantity = Integer.parseInt(s);
 			
 			   
-			   log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
+			   logger.info("Set quantity to "+Quantity+" becuase message contains "+s);
 			   _location++;
 			   continue;
 			}
@@ -187,7 +214,7 @@ public class mailReader extends Thread{
 			if (s.contains("SHORT") && Subject.contains("<S>"))
 			{
 				Side = Action.SELL;
-				log.log(Level.INFO ,"Set Ticker to SELL becuase message continas SHORT and <S>");
+				logger.info("Set Ticker to SELL becuase message continas SHORT and <S>");
 				_location++;
 				continue;
 			}
@@ -208,7 +235,7 @@ public class mailReader extends Thread{
 				{
 					Side=null;
 				}
-				log.log(Level.INFO ,"Set Side to {0} becuase Position is {1} and this is a cover/sell long",new Object[]{Side,Position});
+				logger.info("Set Side to "+Side+" becuase Position is "+Position+" and this is a cover/sell long");
 				
 				 				
 				
@@ -232,8 +259,8 @@ public class mailReader extends Thread{
 				{
 					Side=Action.SELL;
 				}
-				log.log(Level.INFO ,"Set quantity to {0} becuase message contains OUT", Quantity);
-				log.log(Level.INFO ,"Set Side to {0} becuase Position is {1} and this is a cover/sell long",new Object[]{Side,Position});
+				logger.info("Set quantity to "+Quantity+" becuase message contains OUT");
+				logger.info("Set Side to "+Side+" becuase Position is "+Position+" and this is a cover/sell long");
 				_location++;
 				continue;
 			}
@@ -246,12 +273,12 @@ public class mailReader extends Thread{
 				if(Position>0)
 				{
 					Quantity = (Position/number);
-				log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1} and position is{2}", new Object[]{Quantity,s,Position});
+				logger.info("Set quantity to "+Quantity+" becuase message contains "+s+" and position is "+Position+"");
 				}
 				else 
 				{
 				Quantity=0;
-				log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1} and position is{2}", new Object[]{Quantity,s,Position});
+				logger.info("Set quantity to "+Quantity+" becuase message contains "+s+" and position is "+Position+"");
 				}
 				_location++;
 				
@@ -262,7 +289,7 @@ public class mailReader extends Thread{
 				int number = Integer.parseInt(s.substring(0,1));
 				
 				Quantity = number*1000;
-				log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}", new Object[]{Quantity,s});
+				logger.info("Set quantity to "+Quantity+" becuase message contains "+s+"");
 				_location++;
 			}
 			
@@ -270,35 +297,35 @@ public class mailReader extends Thread{
 			if (s.contains("1K"))
 			{
 			Quantity = 1000;
-			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
+			logger.info("Set quantity to "+Quantity+" becuase message contains "+s+"");
 			_location++;
 			continue;
 			}	
 			if (s.contains("1.5K"))
 			{
 			Quantity = 1500;
-			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
+			logger.info("Set quantity to "+Quantity+" becuase message contains "+s+"");
 			_location++;
 			continue;
 			}	
 			if (s.contains("2K"))
 			{
 			Quantity = 2000;
-			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
+			logger.info("Set quantity to "+Quantity+" becuase message contains "+s+"");
 			_location++;
 			continue;
 			}	
 			if (s.contains("2.5K"))
 			{
 			Quantity = 2500;
-			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
+			logger.info("Set quantity to "+Quantity+" becuase message contains "+s+"");
 			_location++;
 			continue;
 			}	
 			if (s.contains("3K"))
 			{
 			Quantity = 3000;
-			log.log(Level.INFO ,"Set quantity to {0} becuase message contains {1}",new Object[]{Quantity,s});
+			logger.info("Set quantity to "+Quantity+" becuase message contains "+s+"");
 			_location++;
 			continue;
 			}	
@@ -306,14 +333,14 @@ public class mailReader extends Thread{
 			_location++;
 			
 		}
-		log.log(Level.INFO ,"End of main logic, checking entire message");
+		logger.info("End of main logic, checking entire message");
 		
 		//if (Quantity==0)
 	//	{
 			if (Subject.contains("COVER") || Subject.contains("FLAT") || Subject.contains("LAST"))
 			{
 				int Position = GetPosition(Ticker);
-				log.log(Level.INFO ,"Position {0}",Position);
+				logger.info("Position "+Position+"");
 				if (Position < 0)
 				{
 					Side = Action.BUY;
@@ -344,12 +371,14 @@ public class mailReader extends Thread{
 				if (Quantity ==0 || Quantity > Math.abs(Position))
 					{
 						Quantity = Position;
-						log.log(Level.INFO ,"Quantity = {0} and Position = {1} so setting Quantity to Position",new Object[]{Quantity,Position});
-						log.log(Level.INFO ,"Set Quantity to {0}",Quantity);
+						logger.info("Quantity = "+Quantity+" and Position = "+Position+" so setting Quantity to Position");
+						logger.info("Set Quantity to "+Quantity+"");
 					}
+				
+				logger.info("Set SIDE to "+Side.toString()+" becuase subject contains COVER/FLAT/LAST");
 			}
 				
-				log.log(Level.INFO ,"Set SIDE to {0} becuase subject contains COVER/FLAT",Side.toString());
+				
 				
 				_location++;
 				
@@ -362,7 +391,7 @@ public class mailReader extends Thread{
 			if (Position ==0)
 			{
 			Ticker = null;
-			log.log(Level.INFO ,"Message contains SWING and so Ticker is {0}",Ticker);
+			logger.info("Message contains SWING and so Ticker is "+Ticker+"");
 			}
 			else
 			{
@@ -403,11 +432,12 @@ public class mailReader extends Thread{
 		
 		return _OrderTemplate;
 	}
-	 PositionModel m_model = new PositionModel();
+	
+	PositionModel m_model = new PositionModel();
 	private int GetPosition(String Symbol)
 	{
 		
-		log.log(Level.INFO ,"Getting Position data for {0}",Symbol);
+		logger.info("Getting Position data for "+Symbol);
 		
 	//	ITradeReportHandler m_tradeReportHandler = null;
 	//	OrdersModel m_model1 = new OrdersModel();
@@ -422,7 +452,7 @@ public class mailReader extends Thread{
 		int _PositionQuantity = 0;
 		int count2=0;
 		int count=0;
-		log.log(Level.INFO ,"{0} Executions found",m_model.getRowCount());
+		logger.info(""+m_model.getRowCount()+" Executions found");
 		
 	
 		  long lDateTime = new Date().getTime();
@@ -432,7 +462,7 @@ public class mailReader extends Thread{
 		  int _iterator=0;
 		while (m_model.getRowCount()==0 && _iterator<5)
 		{
-			log.log(Level.FINEST ,"{0} Executions found retrying",m_model.getRowCount());
+			logger.info(""+m_model.getRowCount()+" Executions found retrying");
 				
 			try {
 				Thread.sleep(1000);
@@ -458,17 +488,17 @@ public class mailReader extends Thread{
 			}
 		
 		
-		log.log(Level.INFO ,"It took {0} ms to find the position data",_delta);
+		logger.info("It took "+_delta+" ms to find the position data");
 		
 		
 		
-		log.log(Level.INFO ,"{0} Executions found",m_model.getRowCount());
+		logger.info(""+m_model.getRowCount()+" Executions found");
 		
 		
 		
 		for (int i=0;i< count;i++)
 		{
-			log.log(Level.INFO ,"{0} {1} avg price of {2}",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
+		//	logger.info(""++" "++" avg price of "++"",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
 						
 			if (m_model.getValueAt(i, 2).equals(Symbol))
 			{
@@ -487,7 +517,7 @@ public class mailReader extends Thread{
 			count2 = m_model.getRowCount();
 			for (int i=0;i< count2;i++)
 			{
-				log.log(Level.INFO ,"{0} {1} avg price of {2}",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
+			//	logger.info(""++" "++" avg price of "++"",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
 							
 				if (m_model.getValueAt(i, 2).equals(Symbol))
 				{
@@ -511,7 +541,7 @@ public class mailReader extends Thread{
 			
 			for (int i=0;i< m_model.getRowCount();i++)
 			{
-				log.log(Level.INFO ,"{0} {1} avg price of {2}",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
+		//		logger.info(""++" "++" avg price of "++"",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
 							
 				if (m_model.getValueAt(i, 2).equals(Symbol))
 				{
@@ -527,7 +557,7 @@ public class mailReader extends Thread{
 		
 		
 		
-		log.log(Level.INFO ,"Returning position {0} for Ticker {1}",new Object[]{_PositionQuantity,Symbol});
+		logger.info("Returning position "+_PositionQuantity+" for Ticker "+Symbol+"");
 		return _PositionQuantity;
 		
 		
@@ -642,7 +672,7 @@ public class mailReader extends Thread{
 		}
 	private ReturnObj TypoQuantity(String Ticker)
 	{
-		log.log(Level.INFO ,"Checking for typo..");
+		logger.info("Checking for typo..");
 		
 		boolean typo=false;
 		int _PositionQuantity=0;
@@ -651,7 +681,7 @@ public class mailReader extends Thread{
 		
 		for (int i=0;i< m_model.getRowCount();i++)
 		{
-			log.log(Level.INFO ,"{0} {1} avg price of {2}",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
+		//	logger.info(""++" "++" avg price of "++"",new Object[]{m_model.getValueAt(i, 1),m_model.getValueAt(i, 3),m_model.getValueAt(i, 4)});
 			
 			
 			Object obj = m_model.getValueAt(i, 2);
@@ -727,19 +757,6 @@ public class mailReader extends Thread{
 	
 		return Split(message);
 	}
-	 private void AttachLogHandler()
-	 {
-		 try
-			{
-			Date date = new Date();
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			Handler handler = new FileHandler("C:\\Users\\Ben\\IBLogs\\IBTrading"+sdf.format(date)+".log");
-			log.addHandler(handler);
-			}
-			catch (Exception e)
-			{
-				System.out.println(e.toString());
-			}
-	 }
+	
 	
 }
