@@ -2,15 +2,19 @@ package com.ib.sample;
 
 import org.apache.log4j.Logger;
 
+import apidemo.CreateOrderFromEmail;
+
+import com.ib.cache.MarketDataCache;
 import com.ib.cache.PositionCache;
+import com.ib.controller.Types.Action;
 
 public class CentralRiskControl extends Thread{
 	private  Logger log = Logger.getLogger( this.getClass() );
-	
+	private CreateOrderFromEmail _CreateOrder;
 	private double ThresholdLoss = -45;
 	public void run()
 	{
-				
+		_CreateOrder = new CreateOrderFromEmail();			
 		while(true)
 		{
 			
@@ -39,18 +43,17 @@ public class CentralRiskControl extends Thread{
 			log.info("Checking Position : "+Ticker+"/"+Quantity+"@"+AvgPx);
 			
 						
-			double LastPx = Cache.instance.GetLastPx(Ticker);
-			log.info("LastPx for "+Ticker+" : "+LastPx);
+			double LastPx = MarketDataCache.INSTANCE.GetLastPx(Ticker);
 			double PnL = (LastPx - AvgPx )*Quantity;
 			
 			if (PnL < ThresholdLoss)
 			{
-				log.info("PnL for "+Ticker+" is "+PnL+". This is greater than "+ThresholdLoss+" . Closing position.");
+				log.info("PnL for "+Ticker+" is "+PnL+". This is greater than threshold value ("+ThresholdLoss+") . Closing position.");
 				
 			
 				log.info("Sending close order for "+Ticker+", Quantity : "+Quantity+" , PositionAvgPx : "+AvgPx);
-				QueueHandler.instance.SendToNewOrderQueue(new NewOrderRequest(Ticker, Quantity, OrderType.MKT,0.0,Action.SELL));
-				
+			
+				  _CreateOrder.CreateOrder(Ticker,Quantity,Action.SELL,0.0);
 				//close position
 				
 			}

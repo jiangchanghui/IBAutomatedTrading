@@ -28,6 +28,7 @@ import javax.mail.internet.InternetAddress;
 import javax.swing.table.AbstractTableModel;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import apidemo.ApiDemo;
 import apidemo.CreateOrderFromEmail;
@@ -36,9 +37,11 @@ import apidemo.TradesPanel;
 import apidemo.OrdersPanel.OrdersModel;
 
 import apidemo.PositionsPanel.PositionModel;
+import apidemo.util.Util;
 
 
 
+import com.ib.cache.MarketDataCache;
 import com.ib.client.ExecutionFilter;
 import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
@@ -66,14 +69,14 @@ public class mailReader extends Thread{
 	 private static String QPassword="";
 	 static Double _FFLimit=0.0;
 	private DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-
+	Util util = new Util();
 	
 			
 	public void run()
 	{
-		
+		PropertyConfigurator.configure("c:\\Users\\Ben\\log4j.properties"); 
 		final CreateOrderFromEmail _CreateOrder = new CreateOrderFromEmail();				
-		SubjectSplitter _SubjectSplitter = new SubjectSplitter();
+	
 		
 		try{
 		 Properties props = new Properties();
@@ -115,7 +118,7 @@ public class mailReader extends Thread{
 		      logger.info("Logic completed, Routing order for "+_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 	            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
 	           
-	            SubscribeToMarketData(_OrderTemplate.getTicker());
+	            util.SubscribeToMarketData(_OrderTemplate.getTicker());
 	            
 	            IBTradingMain.INSTANCE.m_ordersMap.put(message,_OrderTemplate);
 	            String Tweet = message +" -> "+ _OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity();
@@ -144,20 +147,7 @@ public class mailReader extends Thread{
 	    
 	}
 	
-private void SubscribeToMarketData(String ticker) {
-	 logger.info("New Market Data request for "+ticker);
-	 NewContract m_contract = new NewContract();
-		m_contract.symbol( ticker); 
-		m_contract.secType( SecType.STK ); 
-		m_contract.exchange( "SMART" ); 
-		m_contract.currency( "USD" ); 
-	 
-	 
-	 HistoricResultSet dataSet = new HistoricResultSet(ticker);
-	int req_id =IBTradingMain.INSTANCE.controller().reqRealTimeBars(m_contract, WhatToShow.TRADES, false, dataSet);
-			
-		
-	}
+
 
 	public OrderTemplate Split(String Message)
 	{

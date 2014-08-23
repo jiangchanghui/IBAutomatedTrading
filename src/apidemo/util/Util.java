@@ -16,7 +16,18 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import org.apache.log4j.Logger;
+
+import com.ib.cache.MarketDataCache;
+import com.ib.controller.NewContract;
+import com.ib.controller.Types.SecType;
+import com.ib.controller.Types.WhatToShow;
+import com.ib.sample.IBTradingMain;
+import com.reademail.main.mailReader;
+import com.web.request.HistoricResultSet;
+
 public class Util {
+	private  Logger logger = Logger.getLogger( this.getClass() );
 	private static final int BUF = 14;
 	private static final int MAX = 300;
 	
@@ -72,4 +83,22 @@ public class Util {
 			e.printStackTrace();
 		}
 	}
+	
+	public void SubscribeToMarketData(String ticker) {
+		if (MarketDataCache.INSTANCE.SubscriptionExists(ticker))
+			return;
+		
+		 logger.info("New Market Data request for "+ticker);
+		 NewContract m_contract = new NewContract();
+			m_contract.symbol( ticker); 
+			m_contract.secType( SecType.STK ); 
+			m_contract.exchange( "SMART" ); 
+			m_contract.currency( "USD" ); 
+		 
+		 
+		HistoricResultSet dataSet = new HistoricResultSet(ticker);
+		int req_id =IBTradingMain.INSTANCE.controller().reqRealTimeBars(m_contract, WhatToShow.TRADES, false, dataSet);
+				
+			
+		}
 }

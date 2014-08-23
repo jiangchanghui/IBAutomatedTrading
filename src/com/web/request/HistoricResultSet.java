@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
+import com.ib.cache.MarketDataCache;
 import com.ib.controller.Bar;
 import com.ib.controller.ApiController.IHistoricalDataHandler;
 import com.ib.controller.ApiController.IRealTimeBarHandler;
@@ -65,8 +66,26 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 
 	@Override public void realtimeBar(Bar bar) {
 		m_rows.add( bar); 
-		fire();
+		fire(bar);
 	}
+	
+	private void fire(Bar bar) {
+		final double close = bar.close();
+		final long time = bar.time();
+		final Bar _bar = bar;
+		SwingUtilities.invokeLater( new Runnable() {
+			@Override public void run() {
+				m_model.fireTableRowsInserted( m_rows.size() - 1, m_rows.size() - 1);
+				
+				MarketDataCache.INSTANCE.SetLastPx(GetTicker(), close);
+				
+			
+			}
+		});
+	}
+	
+	
+	
 	
 	private void fire() {
 		SwingUtilities.invokeLater( new Runnable() {
