@@ -100,7 +100,7 @@ public class mailReader extends Thread{
 		      log.log(Level.INFO,"Trading received new message on queue {0} : {1}",new Object[]{queue_new_email,message});
 		     
 					  
-					            OrderTemplate  _OrderTemplate = Split(message);
+		      OrderTemplate  _OrderTemplate = Split(message);
 					            log.log(Level.INFO ,"*****Logic completed, Routing order for {0}",_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 					            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
 					           
