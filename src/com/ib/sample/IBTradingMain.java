@@ -119,17 +119,9 @@ public class IBTradingMain implements IConnectionHandler{
 		
 		new mailReader().start();
 		PositionCache.INSTANCE.Subscribe();
-	//	new SendTweet().start();
-	//	WebServer _webServer = new WebServer();
-	//	EoDClosePositions e = new	EoDClosePositions();
-		//Timer for task to close all positions
-	//	e.run();
 		
-		//Listen for market data requests on new thread
-		//IOn Request Call new Class
-	//	new ListenForWebRequests().start();
-		
-		
+	//	new CentralRiskControl().start();
+	
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.HOUR_OF_DAY, 21);
 		calendar.set(Calendar.MINUTE, 35);

@@ -11,7 +11,7 @@ import com.ib.controller.Types.Action;
 public class CentralRiskControl extends Thread{
 	private  Logger log = Logger.getLogger( this.getClass() );
 	private CreateOrderFromEmail _CreateOrder;
-	private double ThresholdLoss = -45;
+	private double ThresholdLoss = -450;
 	public void run()
 	{
 		_CreateOrder = new CreateOrderFromEmail();			
@@ -25,8 +25,8 @@ public class CentralRiskControl extends Thread{
 				
 			} catch (InterruptedException e) 
 			{
-				
-				e.printStackTrace();
+				log.fatal(e.toString(),e);
+			
 			}
 		}
 						

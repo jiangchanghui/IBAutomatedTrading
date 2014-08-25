@@ -74,13 +74,13 @@ public class mailReader extends Thread{
 			
 	public void run()
 	{
-		PropertyConfigurator.configure("c:\\Users\\Ben\\log4j.properties"); 
+		PropertyConfigurator.configure("c:\\Users\\Ben\\Config\\log4j.properties"); 
 		final CreateOrderFromEmail _CreateOrder = new CreateOrderFromEmail();				
 	
 		
 		try{
 		 Properties props = new Properties();
-		 props.load(new FileInputStream("C:\\Users\\Ben\\config.properties"));
+		 props.load(new FileInputStream("C:\\Users\\Ben\\Config\\config.properties"));
 		 QUsername = props.getProperty("qusername");
 		 QPassword = props.getProperty("qpassword");
 		 queue_new_trade = props.getProperty("queue_new_trade");		           
@@ -190,7 +190,7 @@ public class mailReader extends Thread{
 			//Quantity
 			if (s.matches(regex)) 
 			{
-				int Position = GetPosition(Ticker);
+			//	int Position = GetPosition(Ticker);
 				
 			   Quantity = Integer.parseInt(s);
 			
