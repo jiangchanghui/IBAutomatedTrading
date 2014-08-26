@@ -21,7 +21,7 @@ public class MarketDataCache {
 	
 	public void SetLastPx(String Ticker, double LastPx)
 	{
-		log.info("Updated last price for "+Ticker+" to "+LastPx);
+	//	log.info("Updated last price for "+Ticker+" to "+LastPx);
 		LastPx_Map.put(Ticker,new MarketDataTuple(LastPx,System.currentTimeMillis()));
 	}
 	
