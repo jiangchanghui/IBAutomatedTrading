@@ -25,6 +25,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 
 
+
+
 import com.ib.cache.PositionCache;
 import com.ib.controller.ApiController;
 import com.ib.controller.Bar;
@@ -63,12 +65,22 @@ import apidemo.TradingPanel;
 
 import apidemo.util.HtmlButton;
 import apidemo.util.NewTabbedPanel;
+import apidemo.util.Util;
 import apidemo.util.VerticalPanel;
 import apidemo.util.NewTabbedPanel.NewTabPanel;
 
-
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 public class IBTradingMain implements IConnectionHandler{
+	
 	public static IBTradingMain INSTANCE = new IBTradingMain();
 	private final JFrame m_frame = new JFrame();
 	private final NewTabbedPanel m_tabbedPanel = new NewTabbedPanel(true);
@@ -87,15 +99,17 @@ public class IBTradingMain implements IConnectionHandler{
 	public ApiController controller() 		{ return m_controller; }
 	public JFrame frame() 					{ return m_frame; }
 	private final AccountInfoPanel m_acctInfoPanel = new AccountInfoPanel();
-	
+	private Util util = new Util();
+	private CommandLine cmd;
 	public Map<String,OrderTemplate> m_ordersMap = new HashMap<String,OrderTemplate>();
 	public Map<String,String> m_errorMap = new HashMap<String,String>();	
-	
+
 	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
-		INSTANCE.run();
+		INSTANCE.run(args);
 	}
 	private static class Logger implements ILogger {
+		
 		final private JTextArea m_area;
 
 		Logger( JTextArea area) {
@@ -115,12 +129,17 @@ public class IBTradingMain implements IConnectionHandler{
 	}
 
 	 	
-	private void run() throws UnknownHostException {
+	private void run(String[] args) throws UnknownHostException {
 		
-		new mailReader().start();
-		PositionCache.INSTANCE.Subscribe();
+		util.PrintStartup();
+		PropertyConfigurator.configure("c:\\Users\\Ben\\Config\\log4j.properties"); 
 		
-	//	new CentralRiskControl().start();
+		readCommandLineArguements(args);
+		
+		new ServiceHandler(cmd).start();
+		
+		if(!cmd.hasOption("CmdLine"))
+		{
 	
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.HOUR_OF_DAY, 21);
@@ -128,13 +147,7 @@ public class IBTradingMain implements IConnectionHandler{
 		calendar.set(Calendar.SECOND, 0);
 		Date time = calendar.getTime();
 
-		Timer timer = new Timer();
-		timer.schedule(new EoDClosePositions(), time);
-	
-
-		
-		
-		
+			
 		m_tabbedPanel.addTab( "Connection", m_connectionPanel);
 		m_tabbedPanel.addTab( "Market Data", m_mktDataPanel);
 		m_tabbedPanel.addTab( "Trading", m_tradingPanel);
@@ -164,12 +177,55 @@ public class IBTradingMain implements IConnectionHandler{
         m_frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE);
         
         // make initial connection to local host, port 7496, client id 0
+		}
 		m_controller.connect( "127.0.0.1", 7496, 0);
 		
-	//GetHistoricMarketData a = new GetHistoricMarketData();
-	
-		
     }
+
+	private void readCommandLineArguements(String[] args) {
+		Options options = new Options();
+
+		// add t option
+		options.addOption("CentralRisk", false, "If specified, the central risk process will be run.");
+		options.addOption(OptionBuilder.withLongOpt("RiskLimit")
+                .withDescription("Max loss per position before auto close of position.")
+                .withType(Number.class)
+                .hasArg()
+                .withArgName("argname")
+                .create());
+		options.addOption(OptionBuilder.withLongOpt("help").create('h'));
+	//	options.addOption("RiskLimit", true, "Max loss per position before auto close of position.");
+		options.addOption("CmdLine", false, "If specified, applicatio will run command line only.");
+		
+		
+		HelpFormatter formatter = new HelpFormatter();
+		
+		
+		CommandLineParser parser = new GnuParser();
+		try {
+			cmd = parser.parse( options, args);
+			
+			if(cmd.hasOption("-h")){
+				formatter.printHelp( "program", options);
+				System.exit(-1);
+			}
+			if(cmd.hasOption("CentralRisk") && !cmd.hasOption("RiskLimit")){
+				util.Log("Must speeify a risk limit if central risk is running");
+				System.exit(-1);
+			}
+			if(cmd.hasOption("CentralRisk")) 
+				util.Log("Central Risk control enabled");
+			if(cmd.hasOption("RiskLimit")) 
+				util.Log("Risk limit :"+cmd.getOptionValue("RiskLimit"));
+			
+			
+			
+		} catch (ParseException e) {
+			
+			util.Log(e.toString(),e);
+		}
+		
+	}
 	public ApiController GetController()
 	{
 	return m_controller;	
@@ -238,8 +294,17 @@ private class ConnectionPanel extends JPanel {
 	
 }
 
+boolean _connected = false;
 
+public boolean IsApiConnected()
+{
+	return _connected;
+}
 @Override public void connected() {
+	
+	
+	
+	_connected = true;
 	show( "connected");
 	m_connectionPanel.m_status.setText( "connected");
 	
@@ -254,11 +319,13 @@ private class ConnectionPanel extends JPanel {
 			String str = String.format( "Received bulletin:  type=%s  exchange=%s", newsType, exchange);
 			show( str);
 			show( message);
+			
 		}
 	});
 }
 
 @Override public void disconnected() {
+	_connected = false;
 	show( "disconnected");
 	m_connectionPanel.m_status.setText( "disconnected");
 }

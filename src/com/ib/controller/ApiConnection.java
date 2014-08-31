@@ -13,6 +13,8 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.Socket;
 
+import org.apache.log4j.Logger;
+
 import com.ib.client.AnyWrapper;
 import com.ib.client.Builder;
 import com.ib.client.EClientErrors;
@@ -26,6 +28,7 @@ import com.ib.controller.Types.SecType;
 // NOTE: TWS 936 SERVER_VERSION is 67.
 
 public class ApiConnection extends EClientSocket {
+	private  Logger log = Logger.getLogger( this.getClass() );
 	public interface ILogger {
 		void log(String valueOf);
 	}
@@ -292,9 +295,11 @@ public class ApiConnection extends EClientSocket {
     	@Override public void close() throws IOException {
     		m_os.close();
     		m_outLogger.log( "<output stream closed>");
+    		log.warn("<output stream closed>");
     	}
 
     	void log( String str) {
+    	//	log.warn(str);
     		m_outLogger.log( str.replace( EOL, LOG_EOL) );
     	}
     }
@@ -331,6 +336,7 @@ public class ApiConnection extends EClientSocket {
 		}
 
     	void log( String str) {
+    	//	log.info(str);
     		m_inLogger.log( str.replace( EOL, LOG_EOL) );
     	}
     }

@@ -16,6 +16,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import com.ib.cache.MarketDataCache;
@@ -101,4 +102,30 @@ public class Util {
 				
 			
 		}
+	public void Log(String message)
+	{
+		 logger.info(message);
+		
+	}
+
+	public void Log(String string, ParseException e) {
+		// TODO Auto-generated method stub
+		 logger.info(string,e);
+	}
+	
+	 public void PrintStartup() {
+		 String[] Diamond =
+			   {"      /\\    ",
+			    "     /  \\   ",
+			    "    /    \\  ",
+			    "    \\    /  ",
+			    "     \\  /   ",
+			    "      \\/    "};
+		 for (int i = 0; i < Diamond.length; ++i) 
+			{
+			 logger.info(Diamond[i]);
+			}
+		 logger.info("Startup....Free memory : "+Runtime.getRuntime().freeMemory());
+		 
+	}
 }

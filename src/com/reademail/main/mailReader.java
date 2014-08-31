@@ -76,10 +76,10 @@ public class mailReader extends Thread{
 			
 	public void run()
 	{
-		PropertyConfigurator.configure("c:\\Users\\Ben\\Config\\log4j.properties"); 
+		
 		final CreateOrderFromEmail _CreateOrder = new CreateOrderFromEmail();				
 	
-		
+		String _lastMessage="";
 		try{
 		 Properties props = new Properties();
 		 props.load(new FileInputStream("C:\\Users\\Ben\\Config\\config.properties"));
@@ -113,13 +113,16 @@ public class mailReader extends Thread{
 		    //blocking call until a message enteres queue
 		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 		      String message = new String(delivery.getBody());
-		      logger.info("IN "+queue_new_trade+" > " + message);
-		     
-					  
+		      logger.info("RECV on / "+queue_new_trade+" > " + message);
+		     if (message.equals("") || message == null || message.equals(" ") || _lastMessage.equals(message))
+		     {
+		    	   logger.info("Discarded message > "+message);
+		    	 continue;
+		     }	  
 		      OrderTemplate  _OrderTemplate = Split(message);
 		      logger.info("Logic completed, Routing order for "+_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 	            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
-	           
+	            _lastMessage=message;
 	            util.SubscribeToMarketData(_OrderTemplate.getTicker());
 	            
 	            IBTradingMain.INSTANCE.m_ordersMap.put(message,_OrderTemplate);
@@ -196,7 +199,7 @@ public class mailReader extends Thread{
 				int number = Integer.parseInt(s);
 				
 				
-				if (Quantity ==0) //quantity not set yet. Set quantity
+				if (Quantity ==0 && number > 10) //quantity not set yet. Set quantity
 				{
 					Quantity = number;
 					logger.info("Set quantity to "+Quantity+" becuase message contains "+s);
@@ -216,6 +219,29 @@ public class mailReader extends Thread{
 			{
 				Side = Action.SELL;
 				logger.info("Set Ticker to SELL becuase message continas SHORT and <S>");
+				_location++;
+				continue;
+			}
+			
+			
+			
+			
+			if (s.contains("OUT") && Quantity==0)
+			{
+				PositionRow PositionRow = PositionCache.INSTANCE.GetPosition(Ticker);
+				int Position = PositionRow.m_position;
+				Quantity = Math.abs(Position);
+				
+				if (Position < 0)
+				{
+					Side=Action.BUY;
+				}
+				else if (Position > 0)
+				{
+					Side=Action.SELL;
+				}
+				logger.info("Set quantity to "+Quantity+" becuase message contains OUT");
+				logger.info("Set Side to "+Side+" becuase Position is "+Position+" and this is a cover/sell long");
 				_location++;
 				continue;
 			}
@@ -244,29 +270,6 @@ public class mailReader extends Thread{
 				_location++;
 				
 			}
-			
-			
-			
-			if (s.contains("OUT") && Quantity==0)
-			{
-				PositionRow PositionRow = PositionCache.INSTANCE.GetPosition(Ticker);
-				int Position = PositionRow.m_position;
-				Quantity = Math.abs(Position);
-				
-				if (Position < 0)
-				{
-					Side=Action.BUY;
-				}
-				else if (Position > 0)
-				{
-					Side=Action.SELL;
-				}
-				logger.info("Set quantity to "+Quantity+" becuase message contains OUT");
-				logger.info("Set Side to "+Side+" becuase Position is "+Position+" and this is a cover/sell long");
-				_location++;
-				continue;
-			}
-			
 			
 			if (s.contains("1/"))
 			{
@@ -340,7 +343,7 @@ public class mailReader extends Thread{
 		
 		//if (Quantity==0)
 	//	{
-			if (Subject.contains("COVER") || Subject.contains("FLAT") || Subject.contains("LAST"))
+			if (Subject.contains("COV") || Subject.contains("FLAT") || Subject.contains("LAST"))
 			{
 				PositionRow PositionRow = PositionCache.INSTANCE.GetPosition(Ticker);
 				int Position = PositionRow.m_position;

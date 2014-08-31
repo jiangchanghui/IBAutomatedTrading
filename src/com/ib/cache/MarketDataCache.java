@@ -40,7 +40,11 @@ public class MarketDataCache {
 	{
 		MarketDataTuple tmp = LastPx_Map.get(Ticker);
 		if (tmp == null)
+		{
+			util.SubscribeToMarketData(Ticker);
 			return 0.0;
+		}
+			
 		else
 		{
 			long LastUpdateTime = tmp.LastUpdateTime;
