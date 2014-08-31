@@ -114,11 +114,18 @@ public class mailReader extends Thread{
 		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 		      String message = new String(delivery.getBody());
 		      logger.info("RECV on / "+queue_new_trade+" > " + message);
-		     if (message.equals("") || message == null || message.equals(" ") || _lastMessage.equals(message))
+		     if (message.equals("") || message == null || message.equals(" ") )
 		     {
-		    	   logger.info("Discarded message > "+message);
+		    	 logger.info("Discarded message , Reason : empty> "+message);
 		    	 continue;
 		     }	  
+		     if (_lastMessage.equals(message))
+		     {
+		    	 logger.info("Discarded message, Reason : Duplicate message > "+message);
+		    	 continue;
+		    	 
+		     }
+		     
 		      OrderTemplate  _OrderTemplate = Split(message);
 		      logger.info("Logic completed, Routing order for "+_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 	            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
