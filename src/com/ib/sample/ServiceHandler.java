@@ -1,5 +1,9 @@
 package com.ib.sample;
 
+import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
@@ -50,8 +54,25 @@ public class ServiceHandler extends Thread{
 		log.info("New Trade Reader... OK");
 		PositionCache.INSTANCE.Subscribe();
 	
-		
+		//Create timed start of EOD close position class.
+		Timer timer = new Timer();
+		Calendar date = Calendar.getInstance();
+		date.set(Calendar.HOUR_OF_DAY, 20);
+		date.set(Calendar.MINUTE, 55);
+		timer.schedule(
+		  new SampleTask(new EoDClosePositions()),
+		  date.getTime()
+		  );
+		log.info("Scheduled start of Close Position service for : "+date.getTime());
 		
 	}
-
+	public class SampleTask extends TimerTask {
+		  Thread myThreadObj;
+		  SampleTask (Thread t){
+		   this.myThreadObj=t;
+		  }
+		  public void run() {
+		   myThreadObj.start();
+		  }
+		}
 }

@@ -104,6 +104,9 @@ public class IBTradingMain implements IConnectionHandler{
 	public Map<String,OrderTemplate> m_ordersMap = new HashMap<String,OrderTemplate>();
 	public Map<String,String> m_errorMap = new HashMap<String,String>();	
 
+	public volatile boolean _LiveStatus = true;
+	
+	
 	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
 		INSTANCE.run(args);
@@ -130,9 +133,9 @@ public class IBTradingMain implements IConnectionHandler{
 
 	 	
 	private void run(String[] args) throws UnknownHostException {
-		
-		util.PrintStartup();
 		PropertyConfigurator.configure("c:\\Users\\Ben\\Config\\log4j.properties"); 
+		util.PrintStartup();
+		
 		
 		readCommandLineArguements(args);
 		
@@ -181,7 +184,10 @@ public class IBTradingMain implements IConnectionHandler{
 		m_controller.connect( "127.0.0.1", 7496, 0);
 		
     }
-
+	public boolean IsTradingLive()
+	{
+		return _LiveStatus;
+	}
 	private void readCommandLineArguements(String[] args) {
 		Options options = new Options();
 

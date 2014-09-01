@@ -78,7 +78,7 @@ public class mailReader extends Thread{
 	{
 		
 		final CreateOrderFromEmail _CreateOrder = new CreateOrderFromEmail();				
-	
+		boolean _run = true;
 		String _lastMessage="";
 		try{
 		 Properties props = new Properties();
@@ -103,7 +103,7 @@ public class mailReader extends Thread{
 		    
 		    SendTweet sendtweet = new SendTweet();
 		    
-		    while (true) {
+		    while (_run) {
 		    	
 		    	
 		    	try{
@@ -114,6 +114,15 @@ public class mailReader extends Thread{
 		      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 		      String message = new String(delivery.getBody());
 		      logger.info("RECV on / "+queue_new_trade+" > " + message);
+		      
+		      if (!IBTradingMain.INSTANCE.IsTradingLive())
+		      {
+		    	  //SHutdown initiated
+		    	  _run=false;
+		    	  continue;
+		      }
+		      
+		      
 		     if (message.equals("") || message == null || message.equals(" ") )
 		     {
 		    	 logger.info("Discarded message , Reason : empty> "+message);
@@ -149,7 +158,7 @@ public class mailReader extends Thread{
 					            
 			    }
 							
-					
+		    logger.info("CONNECTION CLOSED BY CLIENT: Closed connection to queue "+queue_new_trade);
 		}
 		catch (Exception e)
 		{
