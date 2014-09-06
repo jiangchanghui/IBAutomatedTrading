@@ -1,4 +1,4 @@
-package com.ib.sample;
+package com.posttrade.main;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,6 +14,8 @@ import com.ib.cache.MarketDataCache;
 import com.ib.cache.PositionCache;
 import com.ib.client.ExecutionFilter;
 import com.ib.controller.Types.Action;
+import com.ib.sample.IBTradingMain;
+import com.ib.sample.PositionModel;
 
 
 

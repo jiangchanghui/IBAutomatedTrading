@@ -9,6 +9,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import com.ib.cache.PositionCache;
+import com.posttrade.main.EoDClosePositions;
 import com.reademail.main.mailReader;
 
 public class ServiceHandler extends Thread{

@@ -46,7 +46,7 @@ import com.ib.controller.Types.DurationUnit;
 import com.ib.controller.Types.NewsType;
 import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.WhatToShow;
-import com.posttrade.main.CloseAllPositions;
+
 import com.reademail.main.OrderTemplate;
 import com.reademail.main.mailReader;
 import com.twitter.main.SendTweet;
