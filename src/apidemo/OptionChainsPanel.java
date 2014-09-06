@@ -221,7 +221,7 @@ public class OptionChainsPanel extends JPanel {
 				IBTradingMain.INSTANCE.controller().reqOptionMktData(contract, "", snapshot, row);
 				
 				if (snapshot) {
-					Util.sleep( 11); // try to avoid pacing violation at TWS
+					Util.INSTANCE.sleep( 11); // try to avoid pacing violation at TWS
 				}
 			}
 

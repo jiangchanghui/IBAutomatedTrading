@@ -13,7 +13,7 @@ public class MarketDataCache {
 	
 	public static MarketDataCache INSTANCE = new MarketDataCache();
 	private HashMap<String,MarketDataTuple> LastPx_Map = new HashMap<String,MarketDataTuple>();
-	Util util = new Util();
+	
 	
 	public MarketDataCache(){
 	//	PropertyConfigurator.configure("c:\\log4j.properties"); 
@@ -41,7 +41,7 @@ public class MarketDataCache {
 		MarketDataTuple tmp = LastPx_Map.get(Ticker);
 		if (tmp == null)
 		{
-			util.SubscribeToMarketData(Ticker);
+			Util.INSTANCE.SubscribeToMarketData(Ticker);
 			return 0.0;
 		}
 			
@@ -54,7 +54,7 @@ public class MarketDataCache {
 			if (delta > 600000)
 			{
 				log.warn("Resubscribing to live market data for :"+Ticker);
-				 util.SubscribeToMarketData(Ticker);
+				 Util.INSTANCE.SubscribeToMarketData(Ticker);
 			}
 			return tmp.LastPx;
 		}

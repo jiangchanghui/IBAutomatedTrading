@@ -71,7 +71,7 @@ public class mailReader extends Thread{
 	 private static String QPassword="";
 	 static Double _FFLimit=0.0;
 	private DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-	Util util = new Util();
+	
 	
 			
 	public void run()
@@ -81,11 +81,11 @@ public class mailReader extends Thread{
 		boolean _run = true;
 		String _lastMessage="";
 		try{
-		 Properties props = new Properties();
-		 props.load(new FileInputStream("C:\\Users\\Ben\\Config\\config.properties"));
-		 QUsername = props.getProperty("qusername");
-		 QPassword = props.getProperty("qpassword");
-		 queue_new_trade = props.getProperty("queue_new_trade");		           
+	//	 Properties props = new Properties();
+	//	 props.load(new FileInputStream("C:\\Users\\Ben\\Config\\config.properties"));
+		 QUsername = Util.INSTANCE.QUsername;
+		 QPassword = Util.INSTANCE.QPassword;
+		 queue_new_trade = Util.INSTANCE.queue_new_trade;		           
 							
 		 ConnectionFactory factory = new ConnectionFactory();
 		    factory.setHost("localhost");
@@ -139,7 +139,7 @@ public class mailReader extends Thread{
 		      logger.info("Logic completed, Routing order for "+_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
 	            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
 	            _lastMessage=message;
-	            util.SubscribeToMarketData(_OrderTemplate.getTicker());
+	            Util.INSTANCE.SubscribeToMarketData(_OrderTemplate.getTicker());
 	            
 	            IBTradingMain.INSTANCE.m_ordersMap.put(message,_OrderTemplate);
 	            String Tweet = message +" -> "+ _OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity();

@@ -6,6 +6,10 @@ package apidemo.util;
 import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
@@ -28,9 +32,17 @@ import com.reademail.main.mailReader;
 import com.web.request.HistoricResultSet;
 
 public class Util {
+		public static Util INSTANCE = new Util();
 	private  Logger logger = Logger.getLogger( this.getClass() );
 	private static final int BUF = 14;
 	private static final int MAX = 300;
+	
+	
+	 public String queue_new_trade = "";
+	 public String QUsername="";
+	 public String QPassword="";
+	 public String DBUsername="";
+	 public String DBPassword="";
 	
 	/** Resize all columns in the table to fit widest row including header. */ 
 	public static void resizeColumns( JTable table) {
@@ -127,5 +139,25 @@ public class Util {
 			}
 		 logger.info("Startup....Free memory : "+Runtime.getRuntime().freeMemory());
 		 
+	}
+	 
+	public boolean ReadPropertiesFile()
+	{
+		 Properties props = new Properties();
+		 try {
+			props.load(new FileInputStream("C:\\Users\\Ben\\Config\\config.properties"));
+		
+		 QUsername = props.getProperty("qusername");
+		 QPassword = props.getProperty("qpassword");
+		 queue_new_trade = props.getProperty("queue_new_trade");
+		 DBUsername = props.getProperty("dbusername");
+		 DBPassword = props.getProperty("dbpassword");
+		 return true;
+		 } catch (Exception e) {
+				// TODO Auto-generated catch block
+			 logger.fatal(e.toString(),e);
+			 return false;
+			}
+		
 	}
 }

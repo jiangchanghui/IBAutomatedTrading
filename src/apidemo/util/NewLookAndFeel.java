@@ -105,7 +105,7 @@ public class NewLookAndFeel extends MetalLookAndFeel {
 
 	    	final Timer timer = new Timer( 300, new ActionListener() {
 				@Override public void actionPerformed(ActionEvent e) {
-					Util.resizeColumns( table);
+					Util.INSTANCE.resizeColumns( table);
 				}
 	    	});
 	    	timer.setRepeats( false);

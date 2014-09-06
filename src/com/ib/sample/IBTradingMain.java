@@ -99,7 +99,7 @@ public class IBTradingMain implements IConnectionHandler{
 	public ApiController controller() 		{ return m_controller; }
 	public JFrame frame() 					{ return m_frame; }
 	private final AccountInfoPanel m_acctInfoPanel = new AccountInfoPanel();
-	private Util util = new Util();
+	
 	private CommandLine cmd;
 	public Map<String,OrderTemplate> m_ordersMap = new HashMap<String,OrderTemplate>();
 	public Map<String,String> m_errorMap = new HashMap<String,String>();	
@@ -134,7 +134,7 @@ public class IBTradingMain implements IConnectionHandler{
 	 	
 	private void run(String[] args) throws UnknownHostException {
 		PropertyConfigurator.configure("c:\\Users\\Ben\\Config\\log4j.properties"); 
-		util.PrintStartup();
+		Util.INSTANCE.PrintStartup();
 		
 		
 		readCommandLineArguements(args);
@@ -216,19 +216,19 @@ public class IBTradingMain implements IConnectionHandler{
 				System.exit(-1);
 			}
 			if(cmd.hasOption("CentralRisk") && !cmd.hasOption("RiskLimit")){
-				util.Log("Must speeify a risk limit if central risk is running");
+				Util.INSTANCE.Log("Must speeify a risk limit if central risk is running");
 				System.exit(-1);
 			}
 			if(cmd.hasOption("CentralRisk")) 
-				util.Log("Central Risk control enabled");
+				Util.INSTANCE.Log("Central Risk control enabled");
 			if(cmd.hasOption("RiskLimit")) 
-				util.Log("Risk limit :"+cmd.getOptionValue("RiskLimit"));
+				Util.INSTANCE.Log("Risk limit :"+cmd.getOptionValue("RiskLimit"));
 			
 			
 			
 		} catch (ParseException e) {
 			
-			util.Log(e.toString(),e);
+			Util.INSTANCE.Log(e.toString(),e);
 		}
 		
 	}
