@@ -7,7 +7,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import java.util.TimeZone;
+
+import org.apache.log4j.Logger;
 
 
 import com.benberg.struct.NewMarketDataRequest;
@@ -21,10 +24,11 @@ import com.ib.controller.Types.DurationUnit;
 import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.WhatToShow;
 import com.ib.initialise.IBTradingMain;
+import com.twitter.main.SendTweet;
 
 
 public class GetHistoricMarketData {
-	
+	private  Logger log = Logger.getLogger( this.getClass() );
 	private static GetHistoricMarketData instance = null;
 	HashMap<Integer, HistoricResultSet> MarketDataMapWeb;
 	HashMap<Integer, IHistoricalDataHandler> MarketDataMap;
@@ -71,17 +75,17 @@ public class GetHistoricMarketData {
 				
 		}
 	
-	private int IsTickerInMap(String Ticker,String TimeFrame)
+	private int IsTickerInMapWeb(String Ticker,String TimeFrame)
 	{
 		
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
-		System.out.println("Searching cache for : "+Ticker);
+		log.info("Searching cache for : "+Ticker);
 		for (Entry<Integer, HistoricResultSet> m : MarketDataMapWeb.entrySet()) {
 			String _Ticker = m.getValue().GetTicker();
 			String _TimeFrame = m.getValue().GetTimeFrame();
 			if (_Ticker.equals(Ticker) && _TimeFrame.equals(TimeFrame) && m.getValue().m_rows.size()>0)
 			{
-				System.out.println("Data in cache. Req ID : "+m.getKey());
+				log.info("Data in cache. Req ID : "+m.getKey());
 				return m.getKey();
 			}
 				
@@ -89,7 +93,7 @@ public class GetHistoricMarketData {
 			
 			
 	}
-			System.out.println("Data not in cache. New Request");
+			log.info("Data not in cache. New Request");
 			return -1;
 			
 	}
@@ -99,12 +103,12 @@ public class GetHistoricMarketData {
 	{
 		
 		RTMarketDataMap = m_controller.GetTRealTimeMap();
-		System.out.println("Searching cache for : "+Ticker);
+		log.info("Searching cache for : "+Ticker);
 		for (Entry<Integer, HistoricResultSet> m : RTMarketDataMap.entrySet()) {
 			String _Ticker = m.getValue().GetTicker();
 			if (_Ticker.equals(Ticker))
 			{
-				System.out.println("Data in cache. Req ID : "+m.getKey());
+				log.info("Data in cache. Req ID : "+m.getKey());
 				return m.getKey();
 			}
 				
@@ -112,7 +116,7 @@ public class GetHistoricMarketData {
 			
 			
 	}
-			System.out.println("Data not in cache. New Request");
+			log.info("Data not in cache. New Request");
 			return -1;
 			
 	}
@@ -149,7 +153,6 @@ public class GetHistoricMarketData {
 		
 		
 	}
-	
 public HistoricResultSet GetHistoricalMarketData(String Ticker) throws InterruptedException {
 		
 		int req_id = IsTickerInMap(Ticker);
@@ -190,9 +193,13 @@ public HistoricResultSet GetHistoricalMarketData(String Ticker) throws Interrupt
 		
 	}
 	
+	
+	
+	
+	
 	public NewMarketDataRequest GetMarketDataToJson(NewMarketDataRequest message) throws InterruptedException {
 		
-		int req_id = IsTickerInMap(message.GetTicker(),message.GetTimeFrame());
+		int req_id = IsTickerInMapWeb(message.GetTicker(),message.GetTimeFrame());
 //		if(req_id != -1)
 //		{
 //		 return ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId());	
@@ -212,7 +219,7 @@ public HistoricResultSet GetHistoricalMarketData(String Ticker) throws Interrupt
 
 		Date date = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
-		System.out.println(sdf.format(date));
+		log.info(sdf.format(date));
 		
 		if (nullcheck(message))
 			req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), GetNumberDays(message.GetTimeFrame()), GetDurationUnit(message.GetTimeFrame()), GetBarSize(message.GetTimeFrame()), WhatToShow.TRADES,GetRTH(message.GetTimeFrame()), dataSet);
@@ -309,56 +316,18 @@ private int GetNumberDays(String TimeFrame) {
 
 private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String CorrelationId) throws InterruptedException 
 {
-	String result ="";
+	String price_result ="";
 	
 	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
 	format.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-	Date date; 
-	//long millis = date.getTime();
-	
-	/*
-	int _LoopCount=0;
-	System.out.println(Data.m_rows.size());
-	//Loop until there is data
-	System.out.println(Data.IsLoadComplete());
-	while(Data.m_rows.size()==0 && _LoopCount < 20)
-	{
-		Thread.sleep(500);
-		System.out.println(Data.m_rows.size());
-		_LoopCount++;
-	}
-	
-	System.out.println(Data.m_rows.size());
-	
-	int size = Data.m_rows.size();
-	boolean loading = true;
-	while(loading)
-	{
-		Thread.sleep(500);
-		if (size==Data.m_rows.size());
-			loading =false;
-	}
-	
-	if (Data.m_rows.size()==0)
-		return null;
-	System.out.println(Data.IsLoadComplete());
-	
-	*/
-	int loop=0;
-	//while(!Data.IsLoadComplete() && loop < 14)
-//	{
-//		Thread.sleep(500);
-//		System.out.println(Data.IsLoadComplete());
-//		loop++;
-//	}
 	if (Data.m_rows.size()==0)
 		return null;
 	for( int i=0;i < Data.m_rows.size();i++)
 	{
 			
 	
-		result+= "["+ConvertTime(Data.m_rows.get(i).time())+","+
+		price_result+= "["+ConvertTime(Data.m_rows.get(i).time())+","+
 				Data.m_rows.get(i).open()+","+
 				Data.m_rows.get(i).high()+","+
 				Data.m_rows.get(i).low()+","+
@@ -367,12 +336,14 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 		
 		
 	}
-	System.out.println(Data.m_rows.size());
-	result = result.substring(0, result.length() - 1);
-	//result +="]";
-	System.out.println(result);
-
-	NewMarketDataRequest _response = new NewMarketDataRequest(Data.Ticker, CorrelationId,result,true);
+	log.info(Data.m_rows.size());
+	
+	price_result = price_result.substring(0, price_result.length() - 1);
+	log.info(price_result);
+	
+		
+	
+	NewMarketDataRequest _response = new NewMarketDataRequest(Data.Ticker, CorrelationId,price_result,true);
 
 	return _response;
 }

@@ -1,5 +1,7 @@
 package com.ib.initialise;
 
+import hft.main.HftMain;
+
 import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -40,6 +42,9 @@ public class ServiceHandler extends Thread{
 			return;
 		}
 		log.info("SUCCESS : Connected to Trading");
+		
+		//CENTRAL RISK 
+		
 		if (cmd.hasOption("CentralRisk"))
 		{
 			try {
@@ -51,11 +56,15 @@ public class ServiceHandler extends Thread{
 				System.exit(-1);
 			}
 		}
+		
+		//NEW TRADE HANDLER
 		new mailReader().start();
 		log.info("New Trade Reader... OK");
+		
+		//POSITION CACHE SUBSCRIPTION FOR REAL TIME POSITION UPDATES
 		PositionCache.INSTANCE.Subscribe();
 	
-		//Create timed start of EOD close position class.
+		//TIMED START OF EOD POSITION CLOSE
 		Timer timer = new Timer();
 		Calendar date = Calendar.getInstance();
 		date.set(Calendar.HOUR_OF_DAY, 20);
@@ -66,6 +75,15 @@ public class ServiceHandler extends Thread{
 		  );
 		log.info("Scheduled start of Close Position service for : "+date.getTime());
 		
+		//HFT WORKERS
+		if (cmd.hasOption("TASlowSto"))
+		{
+			log.info("Staring hft workers...");
+			HftMain _hftmain = new HftMain();
+			_hftmain.start();
+					
+		}
+		log.info("All services initiated, startup sequence complete");
 	}
 	public class SampleTask extends TimerTask {
 		  Thread myThreadObj;

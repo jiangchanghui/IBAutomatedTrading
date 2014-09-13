@@ -40,7 +40,7 @@ import com.ib.controller.Types.WhatToShow;
 import com.ib.initialise.IBTradingMain;
 
 
-public class Main extends Thread{
+public class HftMain extends Thread{
 	private  Logger log = Logger.getLogger( this.getClass() );
 		
 	
@@ -56,8 +56,8 @@ public class Main extends Thread{
 		 
 		 StartStochasticsWorkers(); //starts 2 stochastic workers per ticker 
 		 
-		 CentralRiskControl C = new CentralRiskControl(); //starts Central risk process.
-		 C.start();  
+	//	 CentralRiskControl C = new CentralRiskControl(); //starts Central risk process.
+	//	 C.start();  
 		 
 		 LivePositionHandler H = new LivePositionHandler();
 		 H.start();

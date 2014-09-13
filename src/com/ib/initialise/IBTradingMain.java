@@ -210,7 +210,7 @@ public class IBTradingMain implements IConnectionHandler{
 		options.addOption(OptionBuilder.withLongOpt("help").create('h'));
 	//	options.addOption("RiskLimit", true, "Max loss per position before auto close of position.");
 		options.addOption("CmdLine", false, "If specified, applicatio will run command line only.");
-		
+		options.addOption("TASlowSto", false, "If specified, the Stochastics worker will run for the specified symbols in config");
 		
 		HelpFormatter formatter = new HelpFormatter();
 		
