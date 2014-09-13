@@ -18,9 +18,14 @@ import com.ib.controller.ApiController.IMarketValueSummaryHandler;
 import com.ib.controller.MarketValueTag;
 import com.ib.sample.IBTradingMain;
 public class MarketValueSummaryPanel extends NewTabPanel implements IMarketValueSummaryHandler {
-	private MktValModel m_model = new MktValModel();
-
-	MarketValueSummaryPanel() {
+	public MktValModel m_model = new MktValModel();
+	private boolean isUpdating = false;
+	
+	public boolean isUpdating()
+	{
+		return isUpdating;
+	}
+	public MarketValueSummaryPanel() {
 		HtmlButton sub = new HtmlButton( "Subscribe") {
 			protected void actionPerformed() {
 				subscribe();
@@ -55,7 +60,8 @@ public class MarketValueSummaryPanel extends NewTabPanel implements IMarketValue
 		desubscribe();
 	}
 
-	private void subscribe() {
+	public void subscribe() {
+		isUpdating=true;
 		IBTradingMain.INSTANCE.controller().reqMarketValueSummary( "All", this);
 	}
 
@@ -69,5 +75,6 @@ public class MarketValueSummaryPanel extends NewTabPanel implements IMarketValue
 	}
 
 	@Override public void marketValueSummaryEnd() {
+		isUpdating=false;
 	}
 }

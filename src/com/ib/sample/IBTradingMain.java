@@ -47,6 +47,7 @@ import com.ib.controller.Types.NewsType;
 import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.WhatToShow;
 
+import com.posttrade.main.RecordDailyTrades;
 import com.reademail.main.OrderTemplate;
 import com.reademail.main.mailReader;
 import com.twitter.main.SendTweet;
@@ -134,6 +135,13 @@ public class IBTradingMain implements IConnectionHandler{
 	 	
 	private void run(String[] args) throws UnknownHostException {
 		PropertyConfigurator.configure("c:\\Users\\Ben\\Config\\log4j.properties"); 
+		
+		Util.INSTANCE.ReadPropertiesFile();
+		
+		RecordDailyTrades a = new RecordDailyTrades();
+		a.start();
+		
+		
 		Util.INSTANCE.PrintStartup();
 		
 		

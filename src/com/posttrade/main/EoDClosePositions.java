@@ -56,8 +56,9 @@ public class EoDClosePositions extends Thread {
 		}
 		
 		
-		
-		
+		RecordDailyTrades _record = new RecordDailyTrades();
+		_record.start();
 	}
-
+	
+	
 }

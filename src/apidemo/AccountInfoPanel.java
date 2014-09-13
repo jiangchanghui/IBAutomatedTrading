@@ -46,7 +46,16 @@ public class AccountInfoPanel extends JPanel implements INewTab, IAccountHandler
 	private MktValModel m_mktValModel = new MktValModel();
 	private JTable m_mktValTable = new Table( m_mktValModel, 2);
 	private JLabel m_lastUpdated = new JLabel();
-
+	private boolean _isUpdating = true;
+	
+	public boolean IsUpdating()
+	{
+		return _isUpdating;
+	}
+	public MktValModel getMarketValData()
+	{
+		return m_mktValModel;
+	}
 	public AccountInfoPanel() {
 		m_lastUpdated.setHorizontalAlignment( SwingConstants.RIGHT);
 		
@@ -102,7 +111,9 @@ public class AccountInfoPanel extends JPanel implements INewTab, IAccountHandler
 				m_marginModel.clear();
 				m_mktValModel.clear();
 				m_portfolioModel.clear();
+				_isUpdating=true;
 				IBTradingMain.INSTANCE.controller().reqAccountUpdates(true, m_selAcct, this);
+				
 			}
 		}
 	}
@@ -133,6 +144,8 @@ public class AccountInfoPanel extends JPanel implements INewTab, IAccountHandler
 	}
 	
 	public void accountDownloadEnd(String account) {
+		//think this is called when finished updating
+		_isUpdating=false;
 	}
 	
 	private class MarginModel extends AbstractTableModel {
@@ -261,7 +274,7 @@ public class AccountInfoPanel extends JPanel implements INewTab, IAccountHandler
 		}
 	}
 	
-	static class MktValModel extends AbstractTableModel {
+	public static class MktValModel extends AbstractTableModel {
 		private HashMap<String,MktValRow> m_map = new HashMap<String,MktValRow>();
 		private ArrayList<MktValRow> m_list = new ArrayList<MktValRow>();
 		
