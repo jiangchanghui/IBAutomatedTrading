@@ -33,7 +33,7 @@ import com.ib.controller.ApiController.IAdvisorHandler;
 import com.ib.controller.Profile.Type;
 import com.ib.controller.Types.FADataType;
 import com.ib.controller.Types.Method;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 public class AdvisorPanel extends NewTabPanel implements IAdvisorHandler {
 	static DefaultCellEditor DEF_CELL_EDITOR = new DefaultCellEditor( new JTextField() );

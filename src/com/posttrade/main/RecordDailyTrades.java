@@ -31,7 +31,7 @@ import com.ib.client.ExecutionFilter;
 import com.ib.controller.NewContract;
 import com.ib.controller.ApiController.IAccountHandler;
 import com.ib.controller.ApiController.ITradeReportHandler;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;
 

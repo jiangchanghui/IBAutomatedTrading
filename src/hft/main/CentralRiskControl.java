@@ -1,80 +1,97 @@
-/* Copyright (C) 2013 Interactive Brokers LLC. All rights reserved.  This code is subject to the terms
- * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
+package hft.main;
 
-package apidemo;
+import hft.main.Cache.PositionRow;
 
-import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-
 import javax.swing.table.AbstractTableModel;
 
+import org.apache.log4j.Logger;
 
-import apidemo.util.HtmlButton;
-import apidemo.util.VerticalPanel;
-import apidemo.util.NewTabbedPanel.NewTabPanel;
 
+import com.benberg.struct.NewOrderRequest;
 import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
+import com.ib.controller.OrderType;
 import com.ib.controller.ApiController.IPositionHandler;
+import com.ib.controller.Types.Action;
 import com.ib.initialise.IBTradingMain;
 
-public class PositionsPanel extends NewTabPanel {
-	private PositionModel m_model = new PositionModel();
-	private boolean m_complete;
+public class CentralRiskControl extends Thread{
+	
 
-	PositionsPanel() {
-		HtmlButton sub = new HtmlButton( "Subscribe") {
-			protected void actionPerformed() {
-				subscribe();
+private  Logger log = Logger.getLogger( this.getClass() );
+
+private double ThresholdLoss = -45;
+	public void run()
+	{
+				
+		while(true)
+		{
+			
+			try 
+			{
+				Thread.sleep(10000);
+				CheckPositions();
+				
+			} catch (InterruptedException e) 
+			{
+				
+				e.printStackTrace();
 			}
-		};
-		
-		HtmlButton desub = new HtmlButton( "Desubscribe") {
-			protected void actionPerformed() {
-				desubscribe();
-			}
-		};
-
-		JPanel buts = new VerticalPanel();
-		buts.add( sub);
-		buts.add( desub);
-
-		JTable table = new JTable( m_model);
-		JScrollPane scroll = new JScrollPane( table);
-		
-		setLayout( new BorderLayout() );
-		add( scroll);
-		add( buts, BorderLayout.EAST);
-	}
-
-	/** Called when the tab is first visited. Sends request for all positions. */
-	@Override public void activated() {
-		subscribe();
-	}
-
-	/** Called when the tab is closed by clicking the X. */
-	@Override public void closed() {
-		desubscribe();
+		}
+						
 	}
 	
-	private void subscribe() {
-		IBTradingMain.INSTANCE.controller().reqPositions( m_model);
+	private void CheckPositions()
+	{
+
+		for(hft.main.Cache.PositionRow _position : Cache.instance.GetAllPositions().m_list)
+		{
+		
+			String Ticker = _position.m_contract.symbol();
+			int Quantity = _position.m_position;
+			double AvgPx = _position.m_avgCost;
+			log.info("Checking Position : "+Ticker+"/"+Quantity+"@"+AvgPx);
+			
+						
+			double LastPx = Cache.instance.GetLastPx(Ticker);
+			log.info("LastPx for "+Ticker+" : "+LastPx);
+			double PnL = (LastPx - AvgPx )*Quantity;
+			
+			if (PnL < ThresholdLoss)
+			{
+				log.info("PnL for "+Ticker+" is "+PnL+". This is greater than "+ThresholdLoss+" . Closing position.");
+				
+			
+				log.info("Sending close order for "+Ticker+", Quantity : "+Quantity+" , PositionAvgPx : "+AvgPx);
+				QueueHandler.instance.SendToNewOrderQueue(new NewOrderRequest(Ticker, Quantity, OrderType.MKT,0.0,Action.SELL));
+				
+				//close position
+				
+			}
+			else
+			{
+				log.info("PnL for "+Ticker+" is "+PnL+". Within limit ("+ThresholdLoss+"), no action to take");
+				
+			}
+			
+		}
+		
+		
+		
+		
+		
 	}
 	
-	private void desubscribe() {
-		IBTradingMain.INSTANCE.controller().cancelPositions( m_model);
-		m_model.clear();
-	}
+
+	
 	
 	public class PositionModel extends AbstractTableModel implements IPositionHandler {
 		HashMap<PositionKey,PositionRow> m_map = new HashMap<PositionKey,PositionRow>();
 		ArrayList<PositionRow> m_list = new ArrayList<PositionRow>();
-
+		boolean m_complete=false;
 		@Override public void position(String account, NewContract contract, int position, double avgCost) {
 			PositionKey key = new PositionKey( account, contract.conid() );
 			PositionRow row = m_map.get( key);
@@ -85,16 +102,15 @@ public class PositionsPanel extends NewTabPanel {
 			}
 			row.update( account, contract, position, avgCost);
 			
-			if (m_complete) {
-				m_model.fireTableDataChanged();
-			}
-		}
+					}
 
 		@Override public void positionEnd() {
-			m_model.fireTableDataChanged();
-			m_complete = true;
+				m_complete = true;
 		}
-
+		public boolean IsLoadingPositions()
+		{
+			return m_complete;
+		}
 		public void clear() {
 			m_map.clear();
 			m_list.clear();
@@ -132,11 +148,11 @@ public class PositionsPanel extends NewTabPanel {
 		}
 	}
 	
-	public static class PositionKey {
+	private static class PositionKey {
 		String m_account;
 		int m_conid;
 
-		public PositionKey( String account, int conid) {
+		PositionKey( String account, int conid) {
 			m_account = account;
 			m_conid = conid;
 		}
@@ -151,17 +167,18 @@ public class PositionsPanel extends NewTabPanel {
 		}
 	}
 
-	public static class PositionRow {
-		public String m_account;
-		public NewContract m_contract;
-		public int m_position;
-		public double m_avgCost;
+	private static class PositionRow {
+		String m_account;
+		NewContract m_contract;
+		int m_position;
+		double m_avgCost;
 
-		public void update(String account, NewContract contract, int position, double avgCost) {
+		void update(String account, NewContract contract, int position, double avgCost) {
 			m_account = account;
 			m_contract = contract;
 			m_position = position;
 			m_avgCost = avgCost;
 		}
 	}
+	
 }

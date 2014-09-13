@@ -2,7 +2,8 @@ package com.ib.cache;
 
 import org.apache.log4j.Logger;
 
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
+
 import apidemo.OrdersPanel.OrdersModel;
 import apidemo.PositionsPanel.PositionRow;
 

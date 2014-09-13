@@ -2,7 +2,6 @@
  * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
 
 package apidemo;
-import com.ib.sample.IBTradingMain;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import com.ib.client.Execution;
 import com.ib.client.ExecutionFilter;
 import com.ib.controller.NewContract;
 import com.ib.controller.ApiController.ITradeReportHandler;
+import com.ib.initialise.IBTradingMain;
 
 public class TradesPanel extends JPanel implements ITradeReportHandler {
 	private ArrayList<FullExec> m_trades = new ArrayList<FullExec>();

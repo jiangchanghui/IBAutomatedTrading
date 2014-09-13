@@ -25,7 +25,7 @@ import com.ib.controller.NewOrderState;
 import com.ib.controller.OrderStatus;
 import com.ib.controller.OrderType;
 import com.ib.controller.ApiController.ILiveOrderHandler;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 public class OrdersPanel extends JPanel {
 	public OrdersModel m_model = new OrdersModel();
 	private JTable m_table = new JTable( m_model);
@@ -172,7 +172,7 @@ public class OrdersPanel extends JPanel {
 	
 	public static class OrdersModel extends AbstractTableModel implements ILiveOrderHandler {
 		private HashMap<Long,OrderRow> m_map = new HashMap<Long,OrderRow>();
-		private ArrayList<OrderRow> m_orders = new ArrayList<OrderRow>();
+		public ArrayList<OrderRow> m_orders = new ArrayList<OrderRow>();
 
 		@Override public int getRowCount() {
 			return m_orders.size();
@@ -261,11 +261,11 @@ public class OrdersPanel extends JPanel {
 	}
 	
 	public static class OrderRow {
-		NewContract m_contract;
-		NewOrder m_order;
-		NewOrderState m_state;
+		public NewContract m_contract;
+		public NewOrder m_order;
+		public NewOrderState m_state;
 
-		OrderRow( NewContract contract, NewOrder order, NewOrderState state) {
+		public OrderRow( NewContract contract, NewOrder order, NewOrderState state) {
 			m_contract = contract;
 			m_order = order;
 			m_state = state;

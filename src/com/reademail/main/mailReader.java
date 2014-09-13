@@ -52,7 +52,7 @@ import com.ib.controller.ApiController.ITradeReportHandler;
 import com.ib.controller.Types.Action;
 import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.WhatToShow;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;

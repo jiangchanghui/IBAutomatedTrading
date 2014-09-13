@@ -19,7 +19,7 @@ import com.ib.controller.Formats;
 import com.ib.controller.NewContract;
 import com.ib.controller.NewTickType;
 import com.ib.controller.Types.MktDataType;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 
 public class TopModel extends AbstractTableModel {

@@ -12,7 +12,7 @@ import com.ib.controller.ApiController.IRealTimeBarHandler;
 
 public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarHandler {
 
-	final ArrayList<Bar> m_rows = new ArrayList<Bar>();
+	public final ArrayList<Bar> m_rows = new ArrayList<Bar>();
 	final BarModel m_model = new BarModel();
 	private volatile boolean complete =false;
 	String Ticker ="";

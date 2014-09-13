@@ -27,7 +27,7 @@ import com.ib.controller.ApiController.ITradeReportHandler;
 import com.ib.controller.OrderType;
 import com.ib.controller.Types.Action;
 import com.ib.controller.Types.SecType;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 import com.reademail.main.mailReader;
 
 public class CreateOrderFromEmail {

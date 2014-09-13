@@ -47,7 +47,7 @@ import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.TimeInForce;
 import com.ib.controller.Types.TriggerMethod;
 import com.ib.controller.Types.VolatilityType;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 public class TicketDlg extends JDialog {
 	private boolean m_editContract;

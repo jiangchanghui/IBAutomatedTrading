@@ -27,7 +27,7 @@ import com.ib.cache.MarketDataCache;
 import com.ib.controller.NewContract;
 import com.ib.controller.Types.SecType;
 import com.ib.controller.Types.WhatToShow;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 import com.reademail.main.mailReader;
 import com.web.request.HistoricResultSet;
 

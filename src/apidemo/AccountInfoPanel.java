@@ -33,7 +33,7 @@ import com.ib.controller.MarketValueTag;
 import com.ib.controller.Position;
 import com.ib.controller.ApiController.IAccountHandler;
 import com.ib.controller.Types.SecType;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 public class AccountInfoPanel extends JPanel implements INewTab, IAccountHandler {
 	private DefaultListModel m_acctList = new DefaultListModel();

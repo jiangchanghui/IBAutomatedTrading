@@ -19,7 +19,7 @@ import apidemo.util.VerticalPanel;
 import com.ib.controller.AccountSummaryTag;
 import com.ib.controller.ApiController.IAccountSummaryHandler;
 import com.ib.controller.Formats;
-import com.ib.sample.IBTradingMain;
+import com.ib.initialise.IBTradingMain;
 
 
 public class AccountSummaryPanel extends NewTabPanel {
