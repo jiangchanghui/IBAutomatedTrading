@@ -48,8 +48,7 @@ public class Main extends Thread{
 	
 	 public void run()
 		{	
-		 Common.instance.PrintStartup();
-		 
+		  
 		
 		 StartQueueHandler();//Initialise the singleton for queues used for market data and new orders. 
 		 

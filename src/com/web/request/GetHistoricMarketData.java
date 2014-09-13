@@ -51,7 +51,25 @@ public class GetHistoricMarketData {
 	      }
 	      return instance;
 	   }
-
+	 private int IsTickerInMap(String Ticker)
+		{
+			
+			MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
+		//	log.info("Searching cache for : "+Ticker);
+			for (Entry<Integer, HistoricResultSet> m : MarketDataMapWeb.entrySet()) {
+				String _Ticker = m.getValue().GetTicker();
+				
+				if (_Ticker.equals(Ticker))
+				{
+			//		log.info("Data in cache. Req ID : "+m.getKey());
+					return m.getKey();
+				}
+				
+		}
+				log.info("Data not in cache. New Request");
+				return -1;
+				
+		}
 	
 	private int IsTickerInMap(String Ticker,String TimeFrame)
 	{
@@ -132,7 +150,45 @@ public class GetHistoricMarketData {
 		
 	}
 	
+public HistoricResultSet GetHistoricalMarketData(String Ticker) throws InterruptedException {
+		
+		int req_id = IsTickerInMap(Ticker);
+		if(req_id != -1)
+		{
+		 return MarketDataMapWeb.get(req_id);	
+		 
+		}
+		else
+		{	
+
+		
+		NewContract m_contract = new NewContract();
+		m_contract.symbol( Ticker); 
+		m_contract.secType( SecType.STK ); 
+		m_contract.exchange( "SMART" ); 
+		m_contract.currency( "USD" ); 
+				
+		HistoricResultSet dataSet = new HistoricResultSet(Ticker,null);
+
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
+	//	log.info(sdf.format(date));
+		
 	
+		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 2, DurationUnit.DAY, BarSize._1_min, WhatToShow.TRADES,true, dataSet);
+		
+		
+		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
+		MarketDataMap = m_controller.GetHistoricalMap();
+		return MarketDataMapWeb.get(req_id);
+		}
+		
+		
+	
+		
+		
+		
+	}
 	
 	public NewMarketDataRequest GetMarketDataToJson(NewMarketDataRequest message) throws InterruptedException {
 		
