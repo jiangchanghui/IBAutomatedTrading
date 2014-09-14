@@ -19,7 +19,7 @@ import com.ib.initialise.IBTradingMain;
 import com.twitter.main.SendTweet;
 
 public class LivePositionHandler extends Thread{
-	public static LivePositionHandler instance = new LivePositionHandler();
+	public static LivePositionHandler INSTANCE = new LivePositionHandler();
 	private  Logger log = Logger.getLogger( this.getClass() );
 		
 	
@@ -134,7 +134,7 @@ public class LivePositionHandler extends Thread{
 		//Add onto current position
 		double LimitPx = avgPx+av_barsize;
 		log.info("Sending close order for "+Ticker+", Quantity : "+Quantity+" , PositionAvgPx : "+avgPx+" , LimitPx : "+LimitPx);
-		QueueHandler.instance.SendToNewOrderQueue(new NewOrderRequest(Ticker, Quantity, OrderType.LMT, LimitPx,Action.SELL));
+		QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(Ticker, Quantity, OrderType.LMT, LimitPx,Action.SELL));
 		
 		
 		//place order

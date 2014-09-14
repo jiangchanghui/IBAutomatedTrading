@@ -67,9 +67,9 @@ public class CentralRiskControl extends Thread{
 			//Check if order exists for the position.
 				log.info("Sending close order for "+Ticker+", Quantity : "+Quantity+" , PositionAvgPx : "+AvgPx);
 				if (Quantity > 0)
-					 _CreateOrder.CreateOrder(Ticker,Math.abs(Quantity),Action.SELL,0.0);
+					 _CreateOrder.CreateOrder(this.getClass().getName(),Ticker,Math.abs(Quantity),Action.SELL,0.0);
 				else
-					 _CreateOrder.CreateOrder(Ticker,Math.abs(Quantity),Action.BUY,0.0);
+					 _CreateOrder.CreateOrder(this.getClass().getName(),Ticker,Math.abs(Quantity),Action.BUY,0.0);
 						
 		
 				

@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 
+import apidemo.util.Util;
+
 import com.benberg.struct.MarketDataTick;
 import com.benberg.struct.NewMarketDataRequest;
 import com.ib.controller.Bar;
@@ -22,7 +24,7 @@ import com.web.request.HistoricResultSet;
 
 public class RSICalculator extends Thread{
 
-	 private final static String Q_marketdata_tick = "Q_marketdata_tick";
+//	 private final static String Q_marketdata_tick = "Q_marketdata_tick";
 	// private final static String QUEUE_OUT = "q_web_in";
 	 ConnectionFactory factory;
 	 Connection connection;
@@ -40,11 +42,11 @@ public class RSICalculator extends Thread{
 		    connection = factory.newConnection();
 		    channel = connection.createChannel();
 
-		    channel.queueDeclare(Q_marketdata_tick, false, false, false, null);
+		    channel.queueDeclare(Util.INSTANCE.queue_marketdata_tick, false, false, false, null);
 		    System.out.println("Initiliased lisener thread "+ this.getId());
 		_overbought = SDM.overbought;
 		_oversold = SDM.oversold;
-		_QueueHandler = new QueueHandler().instance;
+		_QueueHandler = new QueueHandler().INSTANCE;
 		}
 		catch(Exception e)
 		{
@@ -59,7 +61,7 @@ public class RSICalculator extends Thread{
 		try{
 			setup();
 		QueueingConsumer consumer = new QueueingConsumer(channel);
-	    channel.basicConsume(Q_marketdata_tick, true, consumer);
+	    channel.basicConsume(Util.INSTANCE.queue_marketdata_tick, true, consumer);
 
 		    while (true) {
 		      System.out.println("RSI worker "+ this.getId()+"Waiting for data");
@@ -136,7 +138,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 	{
 		//is _time > 5 minutes from last time in Data
 		
-		AnalyticsCache _AnalyticsCache = AnalyticsCache.instance;
+		AnalyticsCache _AnalyticsCache = AnalyticsCache.INSTANCE;
 		
 		int size = Data.m_rows.size();
 		long _time = bar.time();

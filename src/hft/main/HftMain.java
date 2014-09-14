@@ -14,6 +14,7 @@ import apidemo.TradesPanel;
 import apidemo.OrdersPanel.OrderRow;
 import apidemo.OrdersPanel.OrdersModel;
 import apidemo.PositionsPanel.PositionModel;
+import apidemo.util.Util;
 
 import com.ib.client.ExecutionFilter;
 import com.ib.controller.NewContract;
@@ -67,8 +68,8 @@ public class HftMain extends Thread{
 
 	private void StartQueueHandler()
 	 {
-		 QueueHandler Q = new QueueHandler().instance;
-		 Q.setup();
+		 QueueHandler.INSTANCE.setup();
+		
 	 }
 	 private void StartNewOrderHandler()
 	 {
@@ -87,7 +88,7 @@ public class HftMain extends Thread{
 		 
 			//creates subscription for market data ticks every 2 seconds
 			int i=0;
-			while(!AnalyticsCache.instance.IsConnected() && i <20)
+			while(!IBTradingMain.INSTANCE.IsApiConnected() && i <20)
 			{
 				try {
 					Thread.sleep(1000);
@@ -109,7 +110,7 @@ public class HftMain extends Thread{
 	{
 		for(String ticker : _HftCache.GetTickersList())
 		{
-		RequestMarketData(ticker);
+		Util.INSTANCE.SubscribeToMarketData(ticker);
 		SlowStochasticsCalculator s = new SlowStochasticsCalculator();
 		s.SetTicker(ticker);
 		s.setThreadName("Stochastics Worker "+ticker+j);
@@ -125,7 +126,7 @@ public class HftMain extends Thread{
 				
 		
 		}
-	 private void RequestMarketData(String _Ticker)
+	/* private void RequestMarketData(String _Ticker)
 	 {
 		 log.info("New Market Data request for "+_Ticker);
 		 NewContract m_contract = new NewContract();
@@ -148,6 +149,7 @@ public class HftMain extends Thread{
 	//	IBTradingMain.INSTANCE.controller().reqExecutions(new ExecutionFilter(), m_tradesPanel);
 		
 	}
+	*/
 //deprecated
 	public void MarketDataTick(String Ticker,double _RSI) {
 		

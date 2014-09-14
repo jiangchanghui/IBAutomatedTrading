@@ -17,6 +17,8 @@ import org.apache.log4j.Logger;
 
 
 
+import apidemo.util.Util;
+
 import com.benberg.struct.MarketDataTick;
 import com.benberg.struct.NewMarketDataRequest;
 import com.benberg.struct.NewOrderRequest;
@@ -33,9 +35,9 @@ import com.web.request.HistoricResultSet;
 
 public class SlowStochasticsCalculator extends Thread{
 	private  Logger log = Logger.getLogger( this.getClass() );
-	 private final static String Q_marketdata_tick = "Q_marketdata_tick";
+//	 private final static String Q_marketdata_tick = "Q_marketdata_tick";
 	// private final static String QUEUE_OUT = "q_web_in";
-	 private final static String Ex_marketdata_routing = "Ex_marketdata_routing";
+//	 private final static String Ex_marketdata_routing = "Ex_marketdata_routing";
 	 private String QueueName;
 	 private ConnectionFactory factory;
 	 private Connection connection;
@@ -65,11 +67,11 @@ public class SlowStochasticsCalculator extends Thread{
 			factory.setPassword("Admin"); 
 		    connection = factory.newConnection();
 		    channel = connection.createChannel();
-		    channel.exchangeDeclare(Ex_marketdata_routing, "topic");
+		    channel.exchangeDeclare(Util.INSTANCE.exchange_marketdata_routing, "topic");
 	   
-		    QueueName = Q_marketdata_tick+"_"+Ticker; //Ticker for the thread is set before thread started
+		    QueueName = Util.INSTANCE.queue_marketdata_tick+"_"+Ticker; //Ticker for the thread is set before thread started
 	        channel.queueDeclare(QueueName, false, false, false, null);
-		    channel.queueBind(QueueName, Ex_marketdata_routing, Ticker); //Bind quque to exchange with routing key of Ticker.
+		    channel.queueBind(QueueName, Util.INSTANCE.exchange_marketdata_routing, Ticker); //Bind quque to exchange with routing key of Ticker.
 	        
 	        
 		//    channel.queueDeclare(Q_marketdata_tick, false, false, false, null);
@@ -180,7 +182,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 		
 		
 		String _Ticker = Data.GetTicker();
-		AnalyticsCache _AnalyticsCache = AnalyticsCache.instance;
+		AnalyticsCache _AnalyticsCache = AnalyticsCache.INSTANCE;
 	
 		double _CurrentClose = bar.close();
 		double _lowestLowOfPreviousPeriods = CalcLowestLow(Data,counter);
@@ -245,7 +247,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 	{
 		//is _time > 5 minutes from last time in Data
 		
-		AnalyticsCache _AnalyticsCache = AnalyticsCache.instance;
+		AnalyticsCache _AnalyticsCache = AnalyticsCache.INSTANCE;
 		String _Ticker = Data.GetTicker();
 		int size = Data.m_rows.size();
 		
@@ -299,7 +301,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 			PositionRow tmp = hft.main.Cache.instance.IsPosiitonExist(_Ticker);
 			if(tmp== null)
 			{
-			QueueHandler.instance.SendToNewOrderQueue(new NewOrderRequest(_Ticker,100,OrderType.MKT,0.0,Action.BUY));
+			QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(_Ticker,100,OrderType.MKT,0.0,Action.BUY));
 			log.info("Average Bar size is currently :"+Cache.instance.GetAverageBarSize(_Ticker));
 			}
 			else

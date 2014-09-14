@@ -38,11 +38,15 @@ public class Util {
 	private static final int MAX = 300;
 	
 	
-	 public String queue_new_trade = "";
-	 public String QUsername="";
-	 public String QPassword="";
-	 public String DBUsername="";
-	 public String DBPassword="";
+	 public String queue_new_trade;
+	 public String queue_new_order;
+	 public String queue_marketdata_tick;
+	 public String exchange_marketdata_routing;
+	 public String QUsername;
+	 public String QPassword;
+	 public String DBUsername;
+	 public String DBPassword;
+	 
 	
 	/** Resize all columns in the table to fit widest row including header. */ 
 	public static void resizeColumns( JTable table) {
@@ -152,6 +156,9 @@ public class Util {
 		 queue_new_trade = props.getProperty("queue_new_trade");
 		 DBUsername = props.getProperty("dbusername");
 		 DBPassword = props.getProperty("dbpassword");
+		 queue_new_order = props.getProperty("queue_new_order");
+		 queue_marketdata_tick = props.getProperty("queue_marketdata_tick");
+		 exchange_marketdata_routing = props.getProperty("exchange_marketdata_routing");
 		 return true;
 		 } catch (Exception e) {
 				// TODO Auto-generated catch block

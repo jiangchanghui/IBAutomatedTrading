@@ -10,7 +10,7 @@ import com.web.request.HistoricResultSet;
 
 public class AnalyticsCache {
 	private static final Logger log = Logger.getLogger( SendTweet.class.getName() );
-	public static AnalyticsCache instance = new AnalyticsCache();
+	public static AnalyticsCache INSTANCE = new AnalyticsCache();
 	HashMap<String, Double> _RSICache;
 	HashMap<String, HistoricalRsiCache> _HistRSICache;
 	HashMap<String,HistoricalStochasticsCache>  _StochasticsCache;

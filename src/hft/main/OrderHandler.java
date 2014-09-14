@@ -9,6 +9,7 @@ import javax.swing.SwingUtilities;
 import org.apache.log4j.Logger;
 
 import analytics.SDM;
+import apidemo.util.Util;
 
 import com.benberg.struct.MarketDataTick;
 import com.ib.controller.NewContract;
@@ -32,7 +33,7 @@ public class OrderHandler extends Thread{
 	private  Logger log = Logger.getLogger( this.getClass() );
 
 	 
-	 private final static String Q_create_new_order = "Q_create_new_order";
+	// private final static String Q_create_new_order = "Q_create_new_order";
 		// private final static String QUEUE_OUT = "q_web_in";
 		 ConnectionFactory factory;
 		 Connection connection;
@@ -49,7 +50,7 @@ public class OrderHandler extends Thread{
 			    connection = factory.newConnection();
 			    channel = connection.createChannel();
 
-			    channel.queueDeclare(Q_create_new_order, false, false, false, null);
+			    channel.queueDeclare(Util.INSTANCE.queue_new_order, false, false, false, null);
 			    log.info("Initiliased Order listener for Q_create_new_order - DISABLED");
 			
 			
@@ -66,7 +67,7 @@ public class OrderHandler extends Thread{
 		try{
 			Setup();
 			QueueingConsumer consumer = new QueueingConsumer(channel);
-		    channel.basicConsume(Q_create_new_order, true, consumer);
+		    channel.basicConsume(Util.INSTANCE.queue_new_order, true, consumer);
 
 			    while (true) {
 			      log.info("Order listener waiting for data");

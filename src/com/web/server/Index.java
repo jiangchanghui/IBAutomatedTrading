@@ -220,7 +220,7 @@ public class Index extends Thread{
 		    	  Action _Side = Action.valueOf(parts[3].toUpperCase());
 		    	  
 		    	  log.log(Level.INFO,"Routing order for creation from Email request {0}", message);
-		    	  _CreateOrder.CreateOrder(_Symbol,_Quantity,_Side,0.0);
+		//    	  _CreateOrder.CreateOrder(_Symbol,_Quantity,_Side,0.0);
 		    	  Response = "Routed order for "+_Side.toString()+" "+_Quantity+" "+_Symbol+" at MKT";
 		      }
 		      if (message.equals("GET_ERRORS"))

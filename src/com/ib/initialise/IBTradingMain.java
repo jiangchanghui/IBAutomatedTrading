@@ -138,8 +138,8 @@ public class IBTradingMain implements IConnectionHandler{
 		
 		Util.INSTANCE.ReadPropertiesFile();
 		
-		RecordDailyTrades a = new RecordDailyTrades();
-		a.start();
+	//	RecordDailyTrades a = new RecordDailyTrades();
+	//	a.start();
 		
 		
 		Util.INSTANCE.PrintStartup();

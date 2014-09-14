@@ -137,7 +137,7 @@ public class mailReader extends Thread{
 		     
 		      OrderTemplate  _OrderTemplate = Split(message);
 		      logger.info("Logic completed, Routing order for "+_OrderTemplate.getSide()+" "+_OrderTemplate.getTicker()+" "+_OrderTemplate.getQuantity());
-	            _CreateOrder.CreateOrder(_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
+	            _CreateOrder.CreateOrder(this.getClass().getName(),_OrderTemplate.getTicker(),_OrderTemplate.getQuantity(),_OrderTemplate.getSide(),_FFLimit);
 	            _lastMessage=message;
 	            Util.INSTANCE.SubscribeToMarketData(_OrderTemplate.getTicker());
 	            

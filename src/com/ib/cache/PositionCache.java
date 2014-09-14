@@ -16,7 +16,7 @@ public class PositionCache {
 	
 	public void Subscribe(){
 		IBTradingMain.INSTANCE.controller().reqPositions( _positions);		//Needed to store live position updates
-		log.info("Position Cache subscrption... OK");
+		log.info("Position Cache subscription... OK");
 	
 	}
 	public PositionModel GetAllPositions()

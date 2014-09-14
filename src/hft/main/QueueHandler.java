@@ -8,6 +8,8 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 
+import apidemo.util.Util;
+
 import com.benberg.struct.MarketDataTick;
 import com.benberg.struct.NewOrderRequest;
 import com.rabbitmq.client.Channel;
@@ -17,10 +19,10 @@ import com.twitter.main.SendTweet;
 
 public class QueueHandler {
 	private  Logger log = Logger.getLogger( this.getClass() );
-	public static QueueHandler instance = new QueueHandler();
-	 private final static String Q_create_new_order = "Q_create_new_order";
-	 private final static String Q_marketdata_tick = "Q_marketdata_tick";
-	 private final static String Ex_marketdata_routing="Ex_marketdata_routing";
+	public static QueueHandler INSTANCE = new QueueHandler();
+//	 private final static String Q_create_new_order = "Q_create_new_order";
+//	 private final static String Q_marketdata_tick = "Q_marketdata_tick";
+//	 private final static String Ex_marketdata_routing="Ex_marketdata_routing";
 	 // private final static String QUEUE_OUT = "q_web_in";
 	 ConnectionFactory factory;
 	 Connection connection;
@@ -42,15 +44,15 @@ public class QueueHandler {
 			//for market data ticks - Topic method
 		    connection = factory.newConnection();
 		    channel = connection.createChannel();
-		    channel.exchangeDeclare(Ex_marketdata_routing, "topic");
+		    channel.exchangeDeclare(Util.INSTANCE.exchange_marketdata_routing, "topic");
 		    
 		    channel_order = connection.createChannel();
-		    channel.queueDeclare(Q_marketdata_tick, false, false, false, null);
-		    channel_order.queueDeclare(Q_create_new_order, false, false, false, null);
+		    channel.queueDeclare(Util.INSTANCE.queue_marketdata_tick, false, false, false, null);
+		    channel_order.queueDeclare(Util.INSTANCE.queue_new_order, false, false, false, null);
 		    }
 		    catch (Exception e)
 		    {
-		    	log.fatal(e.getStackTrace().toString());
+		    	log.fatal(e.toString(),e);
 		    }
 		    
 		 //   channel.close();
@@ -59,16 +61,16 @@ public class QueueHandler {
 	 public synchronized void SendToMarketDataTickQueue(MarketDataTick _message)
 	 { 
 		 try {
-			 channel.basicPublish(Ex_marketdata_routing, _message.getTicker(), null, toBytes(_message));
+			 channel.basicPublish(Util.INSTANCE.exchange_marketdata_routing, _message.getTicker(), null, toBytes(_message));
 			//	channel.basicPublish("", Q_marketdata_tick, null, toBytes(_message));
-				log.info(" [x] Sent Tick for '" + _message.getTicker() + "' to exchange "+Ex_marketdata_routing);
+				log.info(" [x] Sent Tick for '" + _message.getTicker() + "' to exchange "+Util.INSTANCE.exchange_marketdata_routing);
 			
 			Cache.instance.MarketDataTick(_message);	
 				
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				log.fatal(e.getStackTrace().toString());
+				log.fatal(e.toString(),e);
 			}
 		  
 		 
@@ -77,13 +79,13 @@ public class QueueHandler {
 	 { 
 		 try {
 			   
-				channel_order.basicPublish("", Q_create_new_order, null, toBytes(_message));
+				channel_order.basicPublish("", Util.INSTANCE.queue_new_order, null, toBytes(_message));
 				log.info(" [x] Sent Order creation request for '" + _message.toString() + "' ");
 			
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				log.fatal(e.getStackTrace().toString());
+				log.fatal(e.toString(),e);
 			}
 		  
 		 

@@ -33,8 +33,9 @@ import com.reademail.main.mailReader;
 public class CreateOrderFromEmail {
 	private  Logger log = Logger.getLogger( this.getClass() );
 	private DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-	public void CreateOrder(String Symbol, int Quantity, Action Side, Double FFLimit)
+	public void CreateOrder(String SenderId, String Symbol, int Quantity, Action Side, Double FFLimit)
 	{
+		log.info("RECV new order request from : "+SenderId);
 		if (Symbol==null  || Quantity == 0 || Side == null)
 		{
 			log.warn("Order Creation failed with Symbol :"+Symbol+", Quantity : "+Quantity+", Side : "+Side);
@@ -57,7 +58,7 @@ public class CreateOrderFromEmail {
 		contract.currency("USD");
 		
 	
-		log.info("Order being executed for "+Side+" "+Quantity+" "+Symbol+" "+order.orderType().toString());
+		log.info("SEND > API Order being executed for "+Side+" "+Quantity+" "+Symbol+" "+order.orderType().toString());
 		IBTradingMain.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 			@Override public void orderState(NewOrderState orderState) {
 				SwingUtilities.invokeLater( new Runnable() {
