@@ -1,10 +1,13 @@
 package com.web.request;
 
+import hft.main.QueueHandler;
+
 import java.util.ArrayList;
 
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
+import com.benberg.struct.MarketDataTick;
 import com.ib.cache.MarketDataCache;
 import com.ib.controller.Bar;
 import com.ib.controller.ApiController.IHistoricalDataHandler;
@@ -79,7 +82,7 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 				
 				MarketDataCache.INSTANCE.SetLastPx(GetTicker(), close);
 				
-			
+				QueueHandler.INSTANCE.SendToMarketDataTickQueue(new MarketDataTick(GetTicker(), _bar));
 			}
 		});
 	}

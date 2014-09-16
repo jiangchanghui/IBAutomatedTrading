@@ -9,9 +9,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 
 import org.apache.log4j.Logger;
 
@@ -106,7 +109,7 @@ public class SlowStochasticsCalculator extends Thread{
 		      MarketDataTick _message = fromBytes( delivery.getBody());
 		      String routingKey = delivery.getEnvelope().getRoutingKey();
 		      
-		     log.info(ThreadName+" received '" + _message + "'. Calculating SlowSto");
+		     log.info(ThreadName+" received new market data tick for :'" + _message.getTicker() + "'. Calculating SlowSto");
 		     if(routingKey.equals(Ticker))
 		    	 CalculatSlowSto(_message);
 		     else
@@ -243,7 +246,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 	{
 		//is _time > 5 minutes from last time in Data
 		
-		AnalyticsCache _AnalyticsCache = AnalyticsCache.INSTANCE;
+		
 		String _Ticker = Data.GetTicker();
 		int size = Data.m_rows.size();
 		
@@ -262,8 +265,11 @@ public  MarketDataTick fromBytes(byte[] body) {
 		{
 		long lastTime = Data.m_rows.get(size-1).time();
 		
-		log.info("Last current time = "+lastTime);
-			
+		
+		
+		Date date = new Date(lastTime);
+		DateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");
+		log.info("Last current time = "+formatter.format(date));
 		
 			if((_time < (lastTime+60)))
 			{
@@ -279,7 +285,11 @@ public  MarketDataTick fromBytes(byte[] body) {
 		b.SetTime(_TempIntraMinuteBar.time());
 		Data.historicalData(b, false);
 		
-
+		if (Data.m_rows.size()<14)
+		{
+			log.info("Calc ended, not enough data. Only have "+Data.m_rows.size()+" periods");
+			return;
+		}
 		
 		double[] result = CalcSto(bar,Data,Data.m_rows.size());
 		

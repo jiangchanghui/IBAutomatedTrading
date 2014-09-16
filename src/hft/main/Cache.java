@@ -41,15 +41,18 @@ public class Cache {
 	private volatile boolean _isloading=false;
 	boolean IsApiConnected = false;
 	private OrdersModel _OpenOrders = new OrdersModel();
-	public Cache()
+	public void Setup()
 	{
 		
 		IBTradingMain.INSTANCE.controller().reqPositions( _positions);		//Needed to store live position updates
 		Tickers_list.add("AAPL");
-		IBTradingMain.INSTANCE.controller().takeFutureTwsOrders( _OpenOrders); //Pushes order updates live. 
+		IBTradingMain.INSTANCE.controller().takeFutureTwsOrders( _OpenOrders);
+		IBTradingMain.INSTANCE.controller().reqLiveOrders(_OpenOrders);//Pushes order updates live. 
 	}
+	
 	public OrdersModel GetOpenOrders()
 	{
+		IBTradingMain.INSTANCE.controller().reqLiveOrders(_OpenOrders);
 		return _OpenOrders;
 	}
 	

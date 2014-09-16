@@ -50,7 +50,7 @@ public class HftMain extends Thread{
 	 public void run()
 		{	
 		  
-		
+		 Cache.instance.Setup();
 		 StartQueueHandler();//Initialise the singleton for queues used for market data and new orders. 
 		 
 		 StartNewOrderHandler(); //New thread to continuously listen for new orders created from analytics workers
@@ -62,6 +62,7 @@ public class HftMain extends Thread{
 		 
 		 LivePositionHandler H = new LivePositionHandler();
 		 H.start();
+		
 		}
 	 
 	

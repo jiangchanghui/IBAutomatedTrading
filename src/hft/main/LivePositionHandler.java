@@ -130,7 +130,7 @@ public class LivePositionHandler extends Thread{
 
 	private void CreateNewClosePositionOrder(String Ticker, int Quantity, double avgPx) {
 		//Get Average bar size - is there a better way to set sell limit price?
-		double av_barsize = Cache.instance.GetAverageBarSize(Ticker);
+		double av_barsize = Cache.instance.GetAverageBarSize(Ticker)/2;
 		//Add onto current position
 		double LimitPx = avgPx+av_barsize;
 		log.info("Sending close order for "+Ticker+", Quantity : "+Quantity+" , PositionAvgPx : "+avgPx+" , LimitPx : "+LimitPx);
