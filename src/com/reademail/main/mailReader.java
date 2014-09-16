@@ -451,6 +451,18 @@ public class mailReader extends Thread{
 			Quantity =0;
 			
 		}
+		
+		if (Subject.contains("out"))
+		{
+			PositionRow PositionRow = PositionCache.INSTANCE.GetPosition(Ticker);
+			int Position = PositionRow.m_position;	
+			
+			if (Math.abs(Quantity) > Position)
+				Quantity = Position;
+		}
+		
+		
+		
 		OrderTemplate _OrderTemplate = new OrderTemplate(Math.abs(Quantity),Ticker,Side);
 		
 		

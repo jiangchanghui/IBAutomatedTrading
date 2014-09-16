@@ -82,9 +82,7 @@ public class SlowStochasticsCalculator extends Thread{
 		}
 		catch(Exception e)
 		{
-			StringWriter sw = new StringWriter();
-			e.printStackTrace(new PrintWriter(sw));
-		log.fatal(sw.toString());
+			log.fatal(e.toString(),e);
 		}
 		
 		
@@ -117,9 +115,7 @@ public class SlowStochasticsCalculator extends Thread{
 		}
 		catch(Exception e)
 		{
-			StringWriter sw = new StringWriter();
-				e.printStackTrace(new PrintWriter(sw));
-			log.fatal(sw.toString());
+			log.fatal(e.toString(),e);
 		}
 		
 		
@@ -135,7 +131,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 	        bis.close();
 	    }
 	    catch (Exception e) {
-	    	log.fatal(e.toString());
+	    	log.fatal(e.toString(),e);
 	    }
 	  
 	   
@@ -157,7 +153,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 		}
 		catch(Exception e)
 		{
-			log.fatal(e.toString());
+			log.fatal(e.toString(),e);
 		}
 	
 	}
