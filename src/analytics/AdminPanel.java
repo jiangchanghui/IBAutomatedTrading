@@ -3,7 +3,6 @@ package analytics;
 
 
 
-import hft.main.Cache;
 import hft.main.QueueHandler;
 
 import java.awt.BorderLayout;
@@ -14,6 +13,7 @@ import javax.swing.JPanel;
 
 import com.benberg.struct.MarketDataTick;
 import com.benberg.struct.NewOrderRequest;
+import com.ib.cache.CommonCache;
 import com.ib.client.Contract;
 import com.ib.controller.NewContract;
 import com.ib.controller.OrderType;
@@ -33,8 +33,7 @@ public class AdminPanel  extends NewTabPanel{
     private final NewContract m_contract = new NewContract();
     public AdminPanel() {
         
-     //   m_requestPanel.addTab( "Invoke", new Panel() );    
-        
+     
         setLayout( new BorderLayout() );
         add( new Panel(), BorderLayout.NORTH);
         
@@ -50,7 +49,7 @@ public class AdminPanel  extends NewTabPanel{
             HtmlButton SetQty = new HtmlButton( "Set Qty") {
                 @Override protected void actionPerformed() {
                 	if (m_Qty.getInt() != 0)
-    					hft.main.Cache.instance.SetHftQty(m_Qty.getInt());
+    					com.ib.cache.CommonCache.instance.SetHftQty(m_Qty.getInt());
                     
                     
                 }
@@ -60,7 +59,7 @@ public class AdminPanel  extends NewTabPanel{
                 @Override protected void actionPerformed() {
                //     onsetPos();
                 	if (m_Ratio.getDouble() != 0)
-    					hft.main.Cache.instance.SetHftRatio(m_Ratio.getDouble());
+    					com.ib.cache.CommonCache.instance.SetHftRatio(m_Ratio.getDouble());
                     
                 }
             };

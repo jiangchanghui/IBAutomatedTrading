@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 
-import hft.main.Cache.PositionModel;
-import hft.main.Cache.PositionRow;
 import apidemo.OrdersPanel.OrderRow;
 import apidemo.OrdersPanel.OrdersModel;
 
 import com.benberg.struct.NewOrderRequest;
+import com.ib.cache.CommonCache;
+import com.ib.cache.CommonCache.PositionModel;
+import com.ib.cache.CommonCache.PositionRow;
 import com.ib.client.Contract;
 import com.ib.controller.OrderStatus;
 import com.ib.controller.OrderType;
@@ -43,41 +44,13 @@ public class LivePositionHandler extends Thread{
 	
 	private void CheckPositions() {
 		
-		for(PositionRow _position : Cache.instance.GetAllPositions().m_list)
+		for(PositionRow _position : CommonCache.instance.GetAllPositions().ToList())
 		{
-			CheckIfHasCLoseOrder(_position.m_contract.symbol(),_position.m_position,_position.m_avgCost);
+			CheckIfHasCLoseOrder(_position.GetContract().symbol(),_position.GetPosition(),_position.GetAvgPx());
 		}
 		
 	}
 
-
-
-	public void OnPositionChanged(Contract contract, int pos, double avgCost)
-	{
-	//	if(pos==0)
-		//	return;
-		log.info("Poisiton CHange for :"+contract.m_symbol+", Position : "+pos+", AvCost : "+avgCost);
-			
-		int timeout = 0;
-		//this happens so that theres time for the orders to be processed and read before continuing. Prevent race condition.
-		while(Cache.instance.IsLoadingOrders() && timeout < 100)
-		{
-			try {
-				Thread.sleep(100);
-				timeout++;
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		log.info("Completed loading orders : " + Cache.instance.IsLoadingOrders());
-		if (Cache.instance.IsLoadingOrders())
-			return;
-		
-		
-		String Ticker = contract.m_symbol;
-		
-	}
 	private void CheckIfHasCLoseOrder(String Ticker,int pos,double AvgPx)
 	{
 	
@@ -86,14 +59,14 @@ public class LivePositionHandler extends Thread{
 		if (pos < 0)
 		{
 			//there should be no negative positions. If there is, its an error and close the position.
-			log.warn("Position for "+Ticker+" is "+pos+". Cancelling orders and closing position");
+			log.warn("Position for "+Ticker+" is "+pos+". Cancelling all orders and closing position");
 			IBTradingMain.INSTANCE.controller().cancelAllOrders();
 			QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(Ticker, Math.abs(pos), OrderType.MKT, 0.0,Action.BUY,this.getClass().getName()));
 			return;
 		}
 		
 		
-		for (OrderRow row : Cache.instance.GetOpenOrders().m_orders)
+		for (OrderRow row : CommonCache.instance.GetOpenOrders().m_orders)
 		{
 
 			log.info("Checking order ticker :  "+ row.m_contract.symbol()+" for position  "+Ticker);	
@@ -148,9 +121,9 @@ public class LivePositionHandler extends Thread{
 
 	private void CreateNewClosePositionOrder(String Ticker, int Quantity, double avgPx, Action side) {
 		//Get Average bar size - is there a better way to set sell limit price?
-		double av_barsize = Cache.instance.GetAverageBarSize(Ticker);
+		double av_barsize = CommonCache.instance.GetAverageBarSize(Ticker);
 		//Add onto current position
-		double LimitPx = avgPx+(av_barsize*Cache.instance.GetHftRatio());
+		double LimitPx = avgPx+(av_barsize*CommonCache.instance.GetHftRatio());
 		log.info("Sending close order for "+Ticker+", Quantity : "+Quantity+" , PositionAvgPx : "+avgPx+" , LimitPx : "+LimitPx);
 		QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(Ticker, Quantity, OrderType.LMT, LimitPx,side,this.getClass().getName()));
 		

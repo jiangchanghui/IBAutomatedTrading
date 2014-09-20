@@ -12,6 +12,7 @@ import apidemo.util.Util;
 
 import com.benberg.struct.MarketDataTick;
 import com.benberg.struct.NewOrderRequest;
+import com.ib.cache.CommonCache;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -65,7 +66,7 @@ public class QueueHandler {
 			//	channel.basicPublish("", Q_marketdata_tick, null, toBytes(_message));
 				log.info("SEND > "+Util.INSTANCE.exchange_marketdata_routing+" { Mkt Data Tick for '" + _message.getTicker() + "}");
 			
-			Cache.instance.MarketDataTick(_message);	
+			CommonCache.instance.MarketDataTick(_message);	
 				
 				
 			} catch (IOException e) {

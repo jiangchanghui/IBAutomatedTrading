@@ -43,24 +43,6 @@ public class ServiceHandler extends Thread{
 		}
 		log.info("SUCCESS : Connected to Trading");
 		
-		//CENTRAL RISK 
-		
-		if (cmd.hasOption("CentralRisk"))
-		{
-			try {
-				new CentralRiskControl(((Number)cmd.getParsedOptionValue("RiskLimit")).intValue()).start();
-				log.info("Central Risk Control... OK");
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				log.fatal(e.toString(),e);
-				System.exit(-1);
-			}
-		}
-		
-		//NEW TRADE HANDLER
-		new mailReader().start();
-		log.info("New Trade Reader... OK");
-		
 		//POSITION CACHE SUBSCRIPTION FOR REAL TIME POSITION UPDATES
 		PositionCache.INSTANCE.Subscribe();
 	
@@ -82,6 +64,23 @@ public class ServiceHandler extends Thread{
 			HftMain _hftmain = new HftMain();
 			_hftmain.start();
 					
+		}
+		//NEW TRADE HANDLER
+		if (cmd.hasOption("TradeReader")){
+			new mailReader().start();
+			log.info("New Trade Reader... OK");
+			}
+		//CENTRAL RISK 
+		if (cmd.hasOption("RiskControl"))
+		{
+			try {
+				new CentralRiskControl(((Number)cmd.getParsedOptionValue("RiskLimit")).intValue()).start();
+				log.info("Central Risk Control... OK");
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				log.fatal(e.toString(),e);
+				System.exit(-1);
+			}
 		}
 		log.info("All services initiated, startup sequence complete");
 	}

@@ -51,10 +51,10 @@ public class MarketDataCache {
 			long delta = System.currentTimeMillis() - LastUpdateTime;
 			if (delta > 60000 )
 				log.warn("STALE MARKET DATA : Last Update time for "+Ticker+"+is over "+delta/1000+" seconds old");
-			if (delta > 600000)
+			if (delta > 300000)
 			{
 				log.warn("Resubscribing to live market data for :"+Ticker);
-				 Util.INSTANCE.SubscribeToMarketData(Ticker);
+				Util.INSTANCE.SubscribeToMarketData(Ticker);
 			}
 			return tmp.LastPx;
 		}

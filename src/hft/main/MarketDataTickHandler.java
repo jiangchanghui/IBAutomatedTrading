@@ -11,6 +11,7 @@ import apidemo.OrdersPanel.OrderRow;
 import apidemo.OrdersPanel.OrdersModel;
 import apidemo.PositionsPanel.PositionModel;
 
+import com.ib.cache.CommonCache;
 import com.ib.controller.Types.Action;
 import com.ib.initialise.IBTradingMain;
 import com.twitter.main.SendTweet;
@@ -31,7 +32,7 @@ public class MarketDataTickHandler extends Thread{
 			IBTradingMain.INSTANCE.controller().reqLiveOrders( m_model);
 			
 			
-			Cache c = new Cache().instance;
+			CommonCache c = new CommonCache().instance;
 			c.IsLoadingOrders(true);
 			
 			

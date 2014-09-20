@@ -16,6 +16,7 @@ import apidemo.OrdersPanel.OrdersModel;
 import apidemo.PositionsPanel.PositionModel;
 import apidemo.util.Util;
 
+import com.ib.cache.CommonCache;
 import com.ib.client.ExecutionFilter;
 import com.ib.controller.NewContract;
 import com.ib.controller.Types.SecType;
@@ -50,7 +51,7 @@ public class HftMain extends Thread{
 	 public void run()
 		{	
 		  
-		 Cache.instance.Setup();
+		 CommonCache.instance.Setup();
 		 StartQueueHandler();//Initialise the singleton for queues used for market data and new orders. 
 		 
 		 StartNewOrderHandler(); //New thread to continuously listen for new orders created from analytics workers
@@ -105,20 +106,17 @@ public class HftMain extends Thread{
 				return;
 			}
 		
-		Cache _HftCache = new Cache().instance;
 		
-	for (int j=1;j<2;j++)
-	{
-		for(String ticker : _HftCache.GetTickersList())
+		for(String ticker : CommonCache.instance.GetTickersList())
 		{
 		Util.INSTANCE.SubscribeToMarketData(ticker);
 		SlowStochasticsCalculator s = new SlowStochasticsCalculator();
 		s.SetTicker(ticker);
-		s.setThreadName("Stochastics Worker "+ticker+j);
+		s.setThreadName("Stochastics Worker for :"+ticker);
 		s.start();
 	//	log.info("Initialised HFT module for "+ticker);
 		}
-	}
+	
 	log.info("Initialising HFT module... Complete");	
 		
 
@@ -164,7 +162,7 @@ public class HftMain extends Thread{
 		IBTradingMain.INSTANCE.controller().reqLiveOrders( m_model);
 		
 		
-		Cache c = new Cache().instance;
+		CommonCache c = new CommonCache().instance;
 		c.IsLoadingOrders(true);
 		
 		

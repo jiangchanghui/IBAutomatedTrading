@@ -140,16 +140,8 @@ public class IBTradingMain implements IConnectionHandler{
 		PropertyConfigurator.configure("c:\\Users\\Ben\\Config\\log4j.properties"); 
 		
 		Util.INSTANCE.ReadPropertiesFile();
-		
-	//	RecordDailyTrades a = new RecordDailyTrades();
-	//	a.start();
-		
-		
-		Util.INSTANCE.PrintStartup();
-		
-		
 		readCommandLineArguements(args);
-		
+		Util.INSTANCE.PrintStartup();
 		new ServiceHandler(cmd).start();
 		
 		if(!cmd.hasOption("CmdLine"))
@@ -204,7 +196,7 @@ public class IBTradingMain implements IConnectionHandler{
 		Options options = new Options();
 
 		// add t option
-		options.addOption("CentralRisk", false, "If specified, the central risk process will be run.");
+		options.addOption("RiskControl", false, "If specified, the central risk process will be run.");
 		options.addOption(OptionBuilder.withLongOpt("RiskLimit")
                 .withDescription("Max loss per position before auto close of position.")
                 .withType(Number.class)
@@ -212,9 +204,9 @@ public class IBTradingMain implements IConnectionHandler{
                 .withArgName("argname")
                 .create());
 		options.addOption(OptionBuilder.withLongOpt("help").create('h'));
-	//	options.addOption("RiskLimit", true, "Max loss per position before auto close of position.");
-		options.addOption("CmdLine", false, "If specified, applicatio will run command line only.");
+		options.addOption("CmdLine", false, "If specified, the application will run without a gui");
 		options.addOption("TASlowSto", false, "If specified, the Stochastics worker will run for the specified symbols in config");
+		options.addOption("TradeReader", false, "If specified, the service to read trades sent from the trade capture system will be read.");
 		
 		HelpFormatter formatter = new HelpFormatter();
 		
@@ -227,15 +219,11 @@ public class IBTradingMain implements IConnectionHandler{
 				formatter.printHelp( "program", options);
 				System.exit(-1);
 			}
-			if(cmd.hasOption("CentralRisk") && !cmd.hasOption("RiskLimit")){
-				Util.INSTANCE.Log("Must speeify a risk limit if central risk is running");
+			if(cmd.hasOption("RiskControl") && !cmd.hasOption("RiskLimit")){
+				Util.INSTANCE.Log("Must speeify a risk limit if risk control is running using \"-RiskLimit <$ risk limit per position>\" ");
 				System.exit(-1);
 			}
-			if(cmd.hasOption("CentralRisk")) 
-				Util.INSTANCE.Log("Central Risk control enabled");
-			if(cmd.hasOption("RiskLimit")) 
-				Util.INSTANCE.Log("Risk limit :"+cmd.getOptionValue("RiskLimit"));
-			
+		
 			
 			
 		} catch (ParseException e) {

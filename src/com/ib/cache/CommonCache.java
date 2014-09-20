@@ -1,4 +1,4 @@
-package hft.main;
+package com.ib.cache;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,9 +30,9 @@ import apidemo.OrdersPanel.OrderRow;
 import apidemo.OrdersPanel.OrdersModel;
 import apidemo.PositionsPanel.PositionModel;
 
-public class Cache {
+public class CommonCache {
 	private  Logger log = Logger.getLogger( this.getClass() );
-	public static Cache instance = new Cache();
+	public static CommonCache instance = new CommonCache();
 	private HashMap<String,OrderRow> orders_map = new HashMap<String,OrderRow>();
 	private ArrayList<String> Tickers_list = new ArrayList<>();
 	private HashMap<String,ArrayList<Double>> AverageBarSize_Map = new HashMap<String,ArrayList<Double>>();
@@ -171,9 +171,77 @@ public class Cache {
 		}
 		return 0;
 	}
-	
+	public void MarketDataTick(MarketDataTick _message) {
 
-public class PositionModel extends AbstractTableModel implements IPositionHandler {
+		log.info("Updating last price for "+_message.getTicker()+" , LastPx : "+_message.getBar().close());
+
+			LastPx_Map.put(_message.getTicker(), new MarketDataTuple(_message.getBar().close(), System.currentTimeMillis()));
+		
+		
+		
+	}
+	public void SetLastPx(String Ticker, double LastPx)
+	{
+		log.info("Updated last price for "+Ticker+" to "+LastPx);
+		LastPx_Map.put(Ticker,new MarketDataTuple(LastPx,System.currentTimeMillis()));
+	}
+	public double GetLastPx(String Ticker)
+	{
+		MarketDataTuple tmp = LastPx_Map.get(Ticker);
+		if (tmp == null)
+			return 0.0;
+		else
+		{
+			long LastUpdateTime = tmp.LastUpdateTime;
+			long delta = System.currentTimeMillis() - LastUpdateTime;
+			if (delta > 60000 );
+				log.warn("STALE MARKET DATA : Last Update time for "+Ticker+"+is over "+delta/1000+" seconds old");
+			return tmp.LastPx;
+		}
+		
+		
+	}
+
+	private class MarketDataTuple
+	{
+		double LastPx = 0.0;
+		long LastUpdateTime=0;
+		
+		public MarketDataTuple (double LastPx, long LastUpdateTime)
+		{
+			this.LastPx = LastPx;
+			this.LastUpdateTime = LastUpdateTime;
+		}
+		
+		
+		
+		
+		
+	}
+
+
+
+	public void SetHftQty(int qty) {
+		// TODO Auto-generated method stub
+		_hftQty = qty;
+		log.info("Invocation successfull, hftQty = "+_hftQty);
+	}
+	public int GetHftQty()
+	{
+		return _hftQty;
+	}
+
+	public void SetHftRatio(double ratio) {
+		// TODO Auto-generated method stub
+		_hftRatio = ratio;
+		log.info("Invocation successfull, hftRatio = "+_hftRatio);
+	}
+	public double GetHftRatio()
+	{
+		return _hftRatio;
+	}
+
+public class PositionModel implements IPositionHandler {
 	HashMap<PositionKey,PositionRow> m_map = new HashMap<PositionKey,PositionRow>();
 	ArrayList<PositionRow> m_list = new ArrayList<PositionRow>();
 
@@ -191,50 +259,22 @@ public class PositionModel extends AbstractTableModel implements IPositionHandle
 		
 	}
 
-	@Override public void positionEnd() {
-	//	m_model.fireTableDataChanged();
+	public ArrayList<PositionRow> ToList()
+	{
+		return m_list;
+	}
+
+	@Override
+	public void positionEnd() {
+		// TODO Auto-generated method stub
 		
-	}
-
-	public void clear() {
-		m_map.clear();
-		m_list.clear();
-		fireTableDataChanged();
-	}
-
-	@Override public int getRowCount() {
-		return m_map.size();
-	}
-
-	@Override public int getColumnCount() {
-		return 4;
 	}
 	
-	@Override public String getColumnName(int col) {
-		switch( col) {
-			case 0: return "Account";
-			case 1: return "Contract";
-			case 2: return "Position";
-			case 3: return "Avg Cost";
-			default: return null;
 		}
-	}
+	
 
-	@Override public Object getValueAt(int rowIn, int col) {
-		PositionRow row = m_list.get( rowIn);
-		
-		switch( col) {
-			case 0: return row.m_account;
-			case 1: return row.m_contract.description();
-			case 2: return row.m_contract.symbol();
-			case 3: return row.m_position;
-			case 4: return Formats.fmt( row.m_avgCost);
-			default: return null;
-		}
-	}
-}
 
-private static class PositionKey {
+class PositionKey {
 	String m_account;
 	int m_conid;
 
@@ -253,7 +293,7 @@ private static class PositionKey {
 	}
 }
 
-public static class PositionRow {
+public class PositionRow {
 	String m_account;
 	NewContract m_contract;
 	int m_position;
@@ -266,180 +306,30 @@ public static class PositionRow {
 		m_avgCost = avgCost;
 	}
 	
+	public NewContract GetContract()
+	{
+		return m_contract;
+		
+	}
+	public int GetPosition()
+	{
+		return m_position;
+	}
+	
+	public double GetAvgPx()
+	{
+		return m_avgCost;		
+	}
+	
 	public String ToString()
 	{
 		return m_contract.symbol()+"/"+m_position+"/@"+m_avgCost;
 	}
 	
- private void AttachLogHandler()
- {
-	 try
-		{
-		Date date = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Handler handler = new FileHandler("C:\\Users\\Ben\\IBLogs\\IBTrading"+sdf.format(date)+".log");
-		//log.addHandler(handler);
-		}
-		catch (Exception e)
-		{
-			System.out.println(e.toString());
-		}
- }
- private class SummaryModel extends AbstractTableModel implements IAccountSummaryHandler {
-		ArrayList<SummaryRow> m_rows = new ArrayList<SummaryRow>();
-		HashMap<String,SummaryRow> m_map = new HashMap<String,SummaryRow>();
-		boolean m_complete;
-
-		public void clear() {
-			IBTradingMain.INSTANCE.controller().cancelAccountSummary( this);
-			m_rows.clear();
-			m_map.clear();
-			m_complete = false;
-			fireTableDataChanged();
-		}
-
-		@Override public void accountSummary(String account, AccountSummaryTag tag, String value, String currency) {
-			SummaryRow row = m_map.get( account);
-			if (row == null) {
-				row = new SummaryRow();
-				m_map.put( account, row);
-				m_rows.add( row);
-			}
-			row.update( account, tag, value);
-			
-			if (m_complete) {
-				fireTableDataChanged();
-			}
-		}
-		
-		@Override public void accountSummaryEnd() {
-			fireTableDataChanged();
-			m_complete = true;
-		}
-
-		@Override public int getRowCount() {
-			return m_rows.size();
-		}
-
-		@Override public int getColumnCount() {
-			return AccountSummaryTag.values().length + 1; // add one for Account column 
-		}
-		
-		@Override public String getColumnName(int col) {
-			if (col == 0) {
-				return "Account";
-			}
-			return AccountSummaryTag.values()[col - 1].toString();
-		}
-
-		@Override public Object getValueAt(int rowIn, int col) {
-			SummaryRow row = m_rows.get( rowIn);
-
-			if (col == 0) {
-				return row.m_account;
-			}
-			
-			AccountSummaryTag tag = AccountSummaryTag.values()[col - 1];
-			String val = row.m_map.get( tag);
-			
-			switch( tag) {
-				case Cushion: return fmtPct( val);
-				case LookAheadNextChange: return fmtTime( val);
-				default: return AccountInfoPanel.format( val, null);
-			}
-		}
-
-		public String fmtPct(String val) {
-			return val == null || val.length() == 0 ? null : Formats.fmtPct( Double.parseDouble( val) );
-		}
-
-		public String fmtTime(String val) {
-			return val == null || val.length() == 0 || val.equals( "0") ? null : Formats.fmtDate( Long.parseLong( val) * 1000);
-		}
-	}
-	
-	private static class SummaryRow {
-		String m_account;
-		HashMap<AccountSummaryTag,String> m_map = new HashMap<AccountSummaryTag,String>();
-		
-		public void update(String account, AccountSummaryTag tag, String value) {
-			m_account = account;
-			m_map.put( tag, value);
-		} 
-	}
+ 
 }
 
 
-
-public void MarketDataTick(MarketDataTick _message) {
-
-	log.info("Updating last price for "+_message.getTicker()+" , LastPx : "+_message.getBar().close());
-
-		LastPx_Map.put(_message.getTicker(), new MarketDataTuple(_message.getBar().close(), System.currentTimeMillis()));
-	
-	
-	
-}
-public void SetLastPx(String Ticker, double LastPx)
-{
-	log.info("Updated last price for "+Ticker+" to "+LastPx);
-	LastPx_Map.put(Ticker,new MarketDataTuple(LastPx,System.currentTimeMillis()));
-}
-public double GetLastPx(String Ticker)
-{
-	MarketDataTuple tmp = LastPx_Map.get(Ticker);
-	if (tmp == null)
-		return 0.0;
-	else
-	{
-		long LastUpdateTime = tmp.LastUpdateTime;
-		long delta = System.currentTimeMillis() - LastUpdateTime;
-		if (delta > 60000 );
-			log.warn("STALE MARKET DATA : Last Update time for "+Ticker+"+is over "+delta/1000+" seconds old");
-		return tmp.LastPx;
-	}
-	
-	
-}
-
-private class MarketDataTuple
-{
-	double LastPx = 0.0;
-	long LastUpdateTime=0;
-	
-	public MarketDataTuple (double LastPx, long LastUpdateTime)
-	{
-		this.LastPx = LastPx;
-		this.LastUpdateTime = LastUpdateTime;
-	}
-	
-	
-	
-	
-	
-}
-
-
-
-public void SetHftQty(int qty) {
-	// TODO Auto-generated method stub
-	_hftQty = qty;
-	log.info("Invocation successfull, hftQty = "+_hftQty);
-}
-public int GetHftQty()
-{
-	return _hftQty;
-}
-
-public void SetHftRatio(double ratio) {
-	// TODO Auto-generated method stub
-	_hftRatio = ratio;
-	log.info("Invocation successfull, hftRatio = "+_hftRatio);
-}
-public double GetHftRatio()
-{
-	return _hftRatio;
-}
 }
 
 

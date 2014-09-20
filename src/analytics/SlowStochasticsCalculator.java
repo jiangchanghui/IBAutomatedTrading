@@ -1,7 +1,5 @@
 package analytics;
 
-import hft.main.Cache;
-import hft.main.Cache.PositionRow;
 import hft.main.QueueHandler;
 
 import java.io.ByteArrayInputStream;
@@ -25,6 +23,8 @@ import apidemo.util.Util;
 import com.benberg.struct.MarketDataTick;
 import com.benberg.struct.NewMarketDataRequest;
 import com.benberg.struct.NewOrderRequest;
+import com.ib.cache.CommonCache;
+import com.ib.cache.CommonCache.PositionRow;
 import com.ib.controller.Bar;
 import com.ib.controller.OrderType;
 import com.ib.controller.Types.Action;
@@ -94,13 +94,13 @@ public class SlowStochasticsCalculator extends Thread{
 	public void run()
 	{
 		
-		 log.info(ThreadName+" Starting worker");
+		 log.info(ThreadName+" Starting worker....");
 		try{
 			setup();
 			GetHistMarketData = new GetHistoricMarketData();
 		//	SlowStoWorkerHistorical(GetHistMarketData.GetHistoricalMarketData(Ticker));
-		QueueingConsumer consumer = new QueueingConsumer(channel);
-	    channel.basicConsume(QueueName, true, consumer);
+			QueueingConsumer consumer = new QueueingConsumer(channel);
+			channel.basicConsume(QueueName, true, consumer);
 
 		    while (true) {
 		      log.info(ThreadName+" Waiting for data");
@@ -113,7 +113,7 @@ public class SlowStochasticsCalculator extends Thread{
 		     if(routingKey.equals(Ticker))
 		    	 CalculatSlowSto(_message);
 		     else
-		    	 log.info("Received routing key :"+routingKey+", Expected : "+Ticker);
+		    	 log.warn("Received routing key :"+routingKey+", Expected : "+Ticker);
 		    }
 		}
 		catch(Exception e)
@@ -299,18 +299,19 @@ public  MarketDataTick fromBytes(byte[] body) {
 			
 		log.info("Stochastics Calc to be: Slo Stow : "+SlowSto+" , Signal Line : "+SignalLine);
 		
-		Cache.instance.CalcAverageBarSize(_Ticker, _TempIntraMinuteBar);
+		CommonCache.instance.CalcAverageBarSize(_Ticker, _TempIntraMinuteBar);
 		//if signal line has moved above Slow sto and slow sto is below 20.
 		if (SlowSto < 20 && SignalLine > SlowSto)
 		{
 			log.info("Stock is marketable. Routing order for execution : "+_Ticker);
-			int position = hft.main.Cache.instance.IsPosiitonExist(_Ticker);
+			int position = com.ib.cache.CommonCache.instance.IsPosiitonExist(_Ticker);
 			if(position ==0)
 			{
 				if (AnalyticsCache.INSTANCE.SufficientTimeSinceLastExec())
 				{
-					QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(_Ticker,Cache.instance.GetHftQty(),OrderType.MKT,0.0,Action.BUY,this.getClass().getName()));
-					log.info("Average Bar size is currently :"+Cache.instance.GetAverageBarSize(_Ticker));
+					log.info("Stochastic is MARKETABLE, routing order for executions in : "+_Ticker);
+					QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(_Ticker,CommonCache.instance.GetHftQty(),OrderType.MKT,0.0,Action.BUY,this.getClass().getName()));
+				//	log.info("Average Bar size is currently :"+CommonCache.instance.GetAverageBarSize(_Ticker));
 				}
 				else
 					log.info("Insufficient time since last execution. Skipping execution."); 

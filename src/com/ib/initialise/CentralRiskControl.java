@@ -15,7 +15,7 @@ import com.ib.controller.Types.Action;
 public class CentralRiskControl extends Thread{
 	private  Logger log = Logger.getLogger( this.getClass() );
 
-	private int ThresholdLoss = -1200;
+	private int ThresholdLoss = -50;
 	
 	public CentralRiskControl(int RiskLimit) {
 		if (RiskLimit > 0)
@@ -46,6 +46,7 @@ public class CentralRiskControl extends Thread{
 	}
 	private void CheckPositions()
 	{
+		int _zeroPositions=0;
 		log.info("Position Count : "+PositionCache.INSTANCE.GetAllPositions().m_list.size());
 		for(apidemo.PositionsPanel.PositionRow _position : PositionCache.INSTANCE.GetAllPositions().m_list)
 		{
@@ -54,9 +55,10 @@ public class CentralRiskControl extends Thread{
 			int Quantity = _position.m_position;
 			double AvgPx = _position.m_avgCost;
 			
-			if (Quantity ==0)
+			if (Quantity ==0){
+				_zeroPositions++;
 				continue;
-			log.info("Checking Position : "+Ticker+"/"+Quantity+"@"+AvgPx);
+			}
 			
 						
 			double LastPx = MarketDataCache.INSTANCE.GetLastPx(Ticker);
@@ -87,7 +89,7 @@ public class CentralRiskControl extends Thread{
 			
 		}
 		
-		
+		log.info("There is an additional "+_zeroPositions+" flat positions.");
 		
 		
 		
