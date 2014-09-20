@@ -304,15 +304,20 @@ public  MarketDataTick fromBytes(byte[] body) {
 		if (SlowSto < 20 && SignalLine > SlowSto)
 		{
 			log.info("Stock is marketable. Routing order for execution : "+_Ticker);
-			PositionRow tmp = hft.main.Cache.instance.IsPosiitonExist(_Ticker);
-			if(tmp== null)
+			int position = hft.main.Cache.instance.IsPosiitonExist(_Ticker);
+			if(position ==0)
 			{
-			QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(_Ticker,100,OrderType.MKT,0.0,Action.BUY));
-			log.info("Average Bar size is currently :"+Cache.instance.GetAverageBarSize(_Ticker));
+				if (AnalyticsCache.INSTANCE.SufficientTimeSinceLastExec())
+				{
+					QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(_Ticker,Cache.instance.GetHftQty(),OrderType.MKT,0.0,Action.BUY,this.getClass().getName()));
+					log.info("Average Bar size is currently :"+Cache.instance.GetAverageBarSize(_Ticker));
+				}
+				else
+					log.info("Insufficient time since last execution. Skipping execution."); 
 			}
 			else
 			{
-				log.info("Position in "+_Ticker+" already exists : "+tmp.ToString());
+				log.info("Position in "+_Ticker+" already exists : "+position);
 			}
 			
 			

@@ -35,6 +35,7 @@ public class CreateOrderFromEmail {
 	private DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 	public void CreateOrder(String SenderId, String Symbol, int Quantity, Action Side, Double FFLimit)
 	{
+		/* DEPRECATED - REMOVE LATER
 		log.info("RECV new order request from : "+SenderId);
 		if (Symbol==null  || Quantity == 0 || Side == null)
 		{
@@ -57,9 +58,9 @@ public class CreateOrderFromEmail {
 		contract.exchange("SMART");
 		contract.currency("USD");
 		
-	
-		log.info("SEND > API Order being executed for "+Side+" "+Quantity+" "+Symbol+" "+order.orderType().toString());
-		IBTradingMain.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
+		IBTradingMain.INSTANCE.controller().
+	//	log.info("SEND > API Order being executed for "+Side+" "+Quantity+" "+Symbol+" "+order.orderType().toString());
+	//	IBTradingMain.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 			@Override public void orderState(NewOrderState orderState) {
 				SwingUtilities.invokeLater( new Runnable() {
 					@Override public void run() {
@@ -181,7 +182,8 @@ public class CreateOrderFromEmail {
 		{
 			return Quantity;
 		}
+		*/
 	}
-	*/
+	
 		
 }

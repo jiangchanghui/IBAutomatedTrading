@@ -1,5 +1,7 @@
 package com.posttrade.main;
 
+import hft.main.QueueHandler;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimerTask;
@@ -10,9 +12,11 @@ import org.apache.log4j.Logger;
 import apidemo.CreateOrderFromEmail;
 import apidemo.TradesPanel;
 
+import com.benberg.struct.NewOrderRequest;
 import com.ib.cache.MarketDataCache;
 import com.ib.cache.PositionCache;
 import com.ib.client.ExecutionFilter;
+import com.ib.controller.OrderType;
 import com.ib.controller.Types.Action;
 import com.ib.initialise.IBTradingMain;
 import com.ib.initialise.PositionModel;
@@ -26,7 +30,6 @@ public class EoDClosePositions extends Thread {
 	public void run() {
 		log.info("Running EOD position close process");
 		IBTradingMain.INSTANCE._LiveStatus = false;
-		CreateOrderFromEmail _CreateOrder = new CreateOrderFromEmail();			
 		log.info("Position Count : "+PositionCache.INSTANCE.GetAllPositions().m_list.size());
 		for(apidemo.PositionsPanel.PositionRow _position : PositionCache.INSTANCE.GetAllPositions().m_list)
 		{
@@ -40,9 +43,9 @@ public class EoDClosePositions extends Thread {
 			log.info("Closing Position : "+Ticker+"/"+Quantity+"@"+AvgPx);
 			
 			if (Quantity > 0)
-				 _CreateOrder.CreateOrder(this.getClass().getName(),Ticker,Math.abs(Quantity),Action.SELL,0.0);
+				QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(Ticker,Math.abs(Quantity), OrderType.MKT, 0.0,Action.SELL,this.getClass().getName()));
 			else
-				 _CreateOrder.CreateOrder(this.getClass().getName(),Ticker,Math.abs(Quantity),Action.BUY,0.0);
+				QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(Ticker,Math.abs(Quantity), OrderType.MKT, 0.0,Action.BUY,this.getClass().getName()));
 			
 			double LastPx = MarketDataCache.INSTANCE.GetLastPx(Ticker);
 			

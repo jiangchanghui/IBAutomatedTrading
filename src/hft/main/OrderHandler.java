@@ -51,7 +51,7 @@ public class OrderHandler extends Thread{
 			    channel = connection.createChannel();
 
 			    channel.queueDeclare(Util.INSTANCE.queue_new_order, false, false, false, null);
-			    log.info("Initiliased Order listener for Q_create_new_order - DISABLED");
+			    log.info("Initiliased Order listener for "+Util.INSTANCE.queue_new_order);
 			
 			
 			}
@@ -70,12 +70,12 @@ public class OrderHandler extends Thread{
 		    channel.basicConsume(Util.INSTANCE.queue_new_order, true, consumer);
 
 			    while (true) {
-			      log.info("Order listener waiting for data");
+			      log.info("Order listener waiting for data on queue :"+Util.INSTANCE.queue_new_order );
 			      QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 			      
 			    NewOrderRequest _message =  fromBytes(delivery.getBody());
 			      
-			     log.info(" [x] Received '" + _message + "', for new order creation");
+			     log.info("RECV < " +Util.INSTANCE.queue_new_order+" {"+  _message.toString() + "}");
 			   
 			     try{
 			     NewOrderRequest(_message);
@@ -145,8 +145,14 @@ public class OrderHandler extends Thread{
 			}
 						
 			
+		if(!IBTradingMain.INSTANCE._LiveStatus)
+		{
+			log.error("Order execution failed, Trading live status = "+IBTradingMain.INSTANCE._LiveStatus);
+			return;
+		}
 			
-		log.info("SEND new order creation for "+order.action()+"/"+order.totalQuantity()+"/"+order.orderType()+"/"+order.lmtPrice()+"/"+order.tif());
+			
+		log.info("SEND > API {new order creation for "+order.action()+"/"+order.totalQuantity()+"/"+order.orderType()+"/"+order.lmtPrice()+"/"+order.tif()+"}");
 			//log.log(Level.INFO ,"Order being executed for {0} {1} {2} at {3}",new Object[]{Side,Quantity,Symbol,order.orderType().toString()});
 			IBTradingMain.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 				@Override public void orderState(NewOrderState orderState) {
@@ -165,16 +171,9 @@ public class OrderHandler extends Thread{
 						@Override public void run() {
 						log.error("Order execution failed with ("+errorCode+","+errorMsg+")");						
 						//	IBTradingMain.INSTANCE.m_errorMap.put(dateFormat.format(new Date()), errorMsg);
-							
-							if (errorMsg.contains("Order held"))
-							{
-							//	log.log(Level.SEVERE ,"Order is held, cancelling all open orders");
-						//		IBTradingMain.INSTANCE.controller().cancelAllOrders();
-							}
-							if (errorMsg.contains("not be placed"))
-							{
-						//		IBTradingMain.INSTANCE.controller().cancelAllOrders();
-							}
+						
+								IBTradingMain.INSTANCE.controller().cancelAllOrders();
+					
 							
 						}
 					});

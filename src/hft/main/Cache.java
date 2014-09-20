@@ -41,6 +41,8 @@ public class Cache {
 	private volatile boolean _isloading=false;
 	boolean IsApiConnected = false;
 	private OrdersModel _OpenOrders = new OrdersModel();
+	private int _hftQty=500;
+	private double _hftRatio=0.5;
 	public void Setup()
 	{
 		
@@ -160,14 +162,14 @@ public class Cache {
 			
 		return 0;
 	}
-	public PositionRow IsPosiitonExist(String Ticker)
+	public int IsPosiitonExist(String Ticker)
 	{
 		for (PositionRow row : _positions.m_map.values())
 		{
 			if (row.m_contract.symbol().equals(Ticker))
-				return row;
+				return row.m_position;
 		}
-		return null;
+		return 0;
 	}
 	
 
@@ -415,6 +417,28 @@ private class MarketDataTuple
 	
 	
 	
+}
+
+
+
+public void SetHftQty(int qty) {
+	// TODO Auto-generated method stub
+	_hftQty = qty;
+	log.info("Invocation successfull, hftQty = "+_hftQty);
+}
+public int GetHftQty()
+{
+	return _hftQty;
+}
+
+public void SetHftRatio(double ratio) {
+	// TODO Auto-generated method stub
+	_hftRatio = ratio;
+	log.info("Invocation successfull, hftRatio = "+_hftRatio);
+}
+public double GetHftRatio()
+{
+	return _hftRatio;
 }
 }
 

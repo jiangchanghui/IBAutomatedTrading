@@ -1,16 +1,20 @@
 package com.ib.initialise;
 
+import hft.main.QueueHandler;
+
 import org.apache.log4j.Logger;
 
 import apidemo.CreateOrderFromEmail;
 
+import com.benberg.struct.NewOrderRequest;
 import com.ib.cache.MarketDataCache;
 import com.ib.cache.PositionCache;
+import com.ib.controller.OrderType;
 import com.ib.controller.Types.Action;
 
 public class CentralRiskControl extends Thread{
 	private  Logger log = Logger.getLogger( this.getClass() );
-	private CreateOrderFromEmail _CreateOrder;
+
 	private int ThresholdLoss = -1200;
 	
 	public CentralRiskControl(int RiskLimit) {
@@ -23,7 +27,7 @@ public class CentralRiskControl extends Thread{
 	public void run()
 	{
 		log.info("Running - Threshhold loss : $"+ThresholdLoss);
-		_CreateOrder = new CreateOrderFromEmail();			
+			
 		while(true)
 		{
 			
@@ -66,10 +70,11 @@ public class CentralRiskControl extends Thread{
 				
 			//Check if order exists for the position.
 				log.info("Sending close order for "+Ticker+", Quantity : "+Quantity+" , PositionAvgPx : "+AvgPx);
+				IBTradingMain.INSTANCE.controller().cancelAllOrders(); //Close any existing orders first.
 				if (Quantity > 0)
-					 _CreateOrder.CreateOrder(this.getClass().getName(),Ticker,Math.abs(Quantity),Action.SELL,0.0);
+					QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(Ticker,Math.abs(Quantity), OrderType.MKT,0.0,Action.SELL,this.getClass().getName()));
 				else
-					 _CreateOrder.CreateOrder(this.getClass().getName(),Ticker,Math.abs(Quantity),Action.BUY,0.0);
+					QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(Ticker,Math.abs(Quantity), OrderType.MKT,0.0,Action.BUY,this.getClass().getName()));
 						
 		
 				

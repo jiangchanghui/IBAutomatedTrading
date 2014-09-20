@@ -83,6 +83,16 @@ public class LivePositionHandler extends Thread{
 	
 		log.info("Checking Position  :"+Ticker+", Position : "+pos+", AvCost : "+AvgPx);
 		
+		if (pos < 0)
+		{
+			//there should be no negative positions. If there is, its an error and close the position.
+			log.warn("Position for "+Ticker+" is "+pos+". Cancelling orders and closing position");
+			IBTradingMain.INSTANCE.controller().cancelAllOrders();
+			QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(Ticker, Math.abs(pos), OrderType.MKT, 0.0,Action.BUY,this.getClass().getName()));
+			return;
+		}
+		
+		
 		for (OrderRow row : Cache.instance.GetOpenOrders().m_orders)
 		{
 
@@ -106,35 +116,43 @@ public class LivePositionHandler extends Thread{
 					IBTradingMain.INSTANCE.controller().cancelOrder( row.m_order.orderId());
 					//create new order for position size.
 					log.info("Replacing order for "+ Ticker + " with quantity : "+pos+". Average execution cost : "+AvgPx);	
-					CreateNewClosePositionOrder(Ticker,pos,AvgPx);
-					break;
+					if(pos>0)
+						CreateNewClosePositionOrder(Ticker,pos,AvgPx,Action.SELL);
+					else
+						CreateNewClosePositionOrder(Ticker,pos,AvgPx,Action.BUY);	
+					
+					return;
 				}
 				
 				else if (row.m_order.action()==Action.BUY)
-					break;
+					return;
 				else
-					break; //order placed is equal to pending order therefore nothing to be done.
+					return; //order placed is equal to pending order therefore nothing to be done.
 					
 			}
 			}
 		}
 		// if we get here there is no order, so need to create one
-		if(pos!=0)
+		if(pos>0)
 		{
 		log.info("No close order found for  "+ Ticker + ". Creating order with quantity : "+pos+". Average execution cost : "+AvgPx);	
-		CreateNewClosePositionOrder(Ticker,pos,AvgPx);
+		CreateNewClosePositionOrder(Ticker,pos,AvgPx,Action.SELL);
 		}
-	
+		if(pos<0)
+		{
+		log.info("No close order found for  "+ Ticker + ". Creating order with quantity : "+pos+". Average execution cost : "+AvgPx);	
+		CreateNewClosePositionOrder(Ticker,Math.abs(pos),AvgPx,Action.BUY);
+		}
 		
 	}
 
-	private void CreateNewClosePositionOrder(String Ticker, int Quantity, double avgPx) {
+	private void CreateNewClosePositionOrder(String Ticker, int Quantity, double avgPx, Action side) {
 		//Get Average bar size - is there a better way to set sell limit price?
-		double av_barsize = Cache.instance.GetAverageBarSize(Ticker)/2;
+		double av_barsize = Cache.instance.GetAverageBarSize(Ticker);
 		//Add onto current position
-		double LimitPx = avgPx+av_barsize;
+		double LimitPx = avgPx+(av_barsize*Cache.instance.GetHftRatio());
 		log.info("Sending close order for "+Ticker+", Quantity : "+Quantity+" , PositionAvgPx : "+avgPx+" , LimitPx : "+LimitPx);
-		QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(Ticker, Quantity, OrderType.LMT, LimitPx,Action.SELL));
+		QueueHandler.INSTANCE.SendToNewOrderQueue(new NewOrderRequest(Ticker, Quantity, OrderType.LMT, LimitPx,side,this.getClass().getName()));
 		
 		
 		//place order

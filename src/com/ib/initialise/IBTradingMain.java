@@ -57,6 +57,8 @@ import com.web.server.Index;
 import com.web.server.WebServer;
 
 
+import analytics.AdminPanel;
+import analytics.AnalyticsCache;
 import apidemo.AccountInfoPanel;
 import apidemo.Chart;
 import apidemo.MarketDataPanel;
@@ -95,6 +97,7 @@ public class IBTradingMain implements IConnectionHandler{
 	private final ApiController m_controller = new ApiController( this, m_inLogger, m_outLogger);
 	private final JTextArea m_msg = new JTextArea();
 	private final TradingPanel m_tradingPanel = new TradingPanel();
+	private final AdminPanel m_adminPanel = new AdminPanel();
 	private final ArrayList<String> m_acctList = new ArrayList<String>();
 	public ArrayList<String> accountList() 	{ return m_acctList; }
 	public ApiController controller() 		{ return m_controller; }
@@ -163,6 +166,7 @@ public class IBTradingMain implements IConnectionHandler{
 		m_tabbedPanel.addTab( "Market Data", m_mktDataPanel);
 		m_tabbedPanel.addTab( "Trading", m_tradingPanel);
 		m_tabbedPanel.addTab( "Account Info", m_acctInfoPanel);
+		m_tabbedPanel.addTab( "Admin Page", m_adminPanel);
 		// m_tabbedPanel.addTab( "Strategy", m_stratPanel); in progress
 			
 		m_msg.setEditable( false);

@@ -1,20 +1,24 @@
 package analytics;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
+
 
 import com.twitter.main.SendTweet;
 import com.web.request.HistoricResultSet;
 
 public class AnalyticsCache {
-	private static final Logger log = Logger.getLogger( SendTweet.class.getName() );
+	private  Logger log = Logger.getLogger( this.getClass() );
 	public static AnalyticsCache INSTANCE = new AnalyticsCache();
 	HashMap<String, Double> _RSICache;
 	HashMap<String, HistoricalRsiCache> _HistRSICache;
 	HashMap<String,HistoricalStochasticsCache>  _StochasticsCache;
 	boolean IsApiConnected = false;
+	private long _lastExecTime=0;
 	
 	public AnalyticsCache()
 	{
@@ -72,10 +76,7 @@ public class AnalyticsCache {
 		else
 			_StochasticsCache.put(ticker, new HistoricalStochasticsCache(System.currentTimeMillis(), new StochasticsStruct(SignalLine, SlowSto,A,B)));
 	}
-	
-	
-	
-	
+		
 	
 	public void SetConnected(boolean b) {
 		IsApiConnected = b;
@@ -85,4 +86,19 @@ public class AnalyticsCache {
 	public boolean IsConnected() {
 		return IsApiConnected;
 	}
+	
+	public boolean SufficientTimeSinceLastExec()
+	{
+		Date date = new Date();
+	    long diff = date.getTime() - _lastExecTime;
+	    log.info("Sufficient Time since last execution : "+diff+" ms");
+		if (diff > 600000) //10 minutes
+		{
+			_lastExecTime = date.getTime();
+			return true;
+		}
+		else
+			return false;
+	}
+	
 }
