@@ -1,5 +1,7 @@
 package com.ib.initialise;
 
+import hft.main.HftMain;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -27,6 +29,7 @@ import javax.swing.table.AbstractTableModel;
 
 
 
+import com.ben.mdm.server.MDMServer;
 import com.ib.cache.PositionCache;
 import com.ib.controller.ApiController;
 import com.ib.controller.Bar;
@@ -138,10 +141,14 @@ public class IBTradingMain implements IConnectionHandler{
 	 	
 	private void run(String[] args) throws UnknownHostException {
 		PropertyConfigurator.configure("c:\\Users\\Ben\\Config\\log4j.properties"); 
-		
 		Util.INSTANCE.ReadPropertiesFile();
 		readCommandLineArguements(args);
 		Util.INSTANCE.PrintStartup();
+	//	new MDMServer().start();
+		
+	//	HftMain _hftmain = new HftMain();
+	//	_hftmain.start();
+		
 		new ServiceHandler(cmd).start();
 		
 		if(!cmd.hasOption("CmdLine"))

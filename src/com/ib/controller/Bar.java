@@ -9,7 +9,7 @@ import java.util.Date;
 
 public class Bar  implements Serializable{
 	private static final SimpleDateFormat FORMAT = new SimpleDateFormat( "yyyyMMdd HH:mm:ss"); // format for historical query
-
+	protected static final long serialVersionUID = 1112122200L;
 	private long m_time;
 	private double m_high;
 	private double m_low;

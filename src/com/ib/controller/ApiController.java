@@ -918,7 +918,7 @@ public class ApiController implements EWrapper {
     public int reqRealTimeBars(NewContract contract, WhatToShow whatToShow, boolean rthOnly, HistoricResultSet handler) {
     	int reqId = m_reqId++;
     	m_realTimeBarMapWeb.put( reqId, handler);
-    	//m_realTimeBarMap.put( reqId, handler);
+    	m_realTimeBarMap.put( reqId, handler);
     	m_client.reqRealTimeBars(reqId, contract.getContract(), 0, whatToShow.toString(), rthOnly);
 		sendEOM();
 		return reqId;

@@ -45,8 +45,9 @@ public class AdminPanel  extends NewTabPanel{
          UpperField m_symbol = new UpperField();
          UpperField m_Qty = new UpperField();
          UpperField m_Ratio = new UpperField();
+         UpperField m_Price = new UpperField();
         Panel() {
-            HtmlButton SetQty = new HtmlButton( "Set Qty") {
+            HtmlButton SetQty = new HtmlButton( "Set HFT Qty") {
                 @Override protected void actionPerformed() {
                 	if (m_Qty.getInt() != 0)
     					com.ib.cache.CommonCache.instance.SetHftQty(m_Qty.getInt());
@@ -55,7 +56,7 @@ public class AdminPanel  extends NewTabPanel{
                 }
 
             };
-            HtmlButton SetRatio = new HtmlButton( "Set Ratio") {
+            HtmlButton SetRatio = new HtmlButton( "Set HFT Ratio") {
                 @Override protected void actionPerformed() {
                //     onsetPos();
                 	if (m_Ratio.getDouble() != 0)
@@ -63,9 +64,10 @@ public class AdminPanel  extends NewTabPanel{
                     
                 }
             };
-            HtmlButton setMarketable = new HtmlButton( "Analytics Marketable") {
+            HtmlButton setMarketData = new HtmlButton( "MarketDataTest") {
                 @Override protected void actionPerformed() {
-              //      onSetMarketable();
+             QueueHandler.INSTANCE.SendToMarketDataTickQueue(new MarketDataTick(m_symbol.getText(), new com.ib.controller.Bar(0000,0,0,0,m_Price.getDouble(),0,0,0)));
+             
                     
                     
                 }
@@ -73,10 +75,12 @@ public class AdminPanel  extends NewTabPanel{
             VerticalPanel butPanel = new VerticalPanel();
             butPanel.add( SetQty);
             butPanel.add( SetRatio);
+            butPanel.add(setMarketData);
                        
             VerticalPanel paramPanel = new VerticalPanel();
-            paramPanel.add("Hft Parameters");
-            paramPanel.add( "Set hft Qty", m_Qty );
+            paramPanel.add("MDM Symbol",m_symbol);
+            paramPanel.add("MDM Price",m_Price);
+            paramPanel.add( "Set hft trade Qty", m_Qty );
             paramPanel.add( "SetCloseOrderRatioToAvgBarSize", m_Ratio );          
             JPanel rightPanel = new StackPanel();
             rightPanel.add( paramPanel);
