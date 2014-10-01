@@ -320,6 +320,14 @@ public class AccountInfoPanel extends JPanel implements INewTab, IAccountHandler
 				default: return format( row.get( MarketValueTag.get( col - 2) ), null);
 			}
 		}
+		public boolean isInitialised()
+		{
+			if (m_list.size()==0)
+				return false;
+			else
+				return true;
+							
+		}
 	}
 	
 //	private static class MktValKey {

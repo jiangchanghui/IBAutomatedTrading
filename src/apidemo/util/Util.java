@@ -9,7 +9,13 @@ import java.awt.event.KeyEvent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -26,6 +32,8 @@ import javax.swing.table.TableColumnModel;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+
+import apidemo.MarketValueSummaryPanel;
 
 import com.ib.cache.CommonCache;
 import com.ib.cache.MarketDataCache;
@@ -53,6 +61,11 @@ public class Util {
 	 public String DBUsername;
 	 public String DBPassword;
 	 
+	 private java.sql.Connection connect;
+	 private java.sql.Statement statement;
+	 private ResultSet resultSet;
+	 
+	 private MarketValueSummaryPanel marketSummary = new MarketValueSummaryPanel();
 	
 	/** Resize all columns in the table to fit widest row including header. */ 
 	public static void resizeColumns( JTable table) {
@@ -154,6 +167,7 @@ public class Util {
 		 
 	}
 	 
+	
 	public boolean ReadPropertiesFile()
 	{
 		 Properties props = new Properties();
@@ -176,6 +190,128 @@ public class Util {
 			}
 		
 	}
-
+	
+	public void ConnectToDatabase()
+	{
+		
+		logger.info("Connecting to database...");
+		try {
+			connect = DriverManager
+					.getConnection("jdbc:mysql://localhost/ibtrading?"
+							+ "user=" + DBUsername + "&password="
+							+ DBPassword);
+			
+			
+			logger.info("Connecting to database...Ok");	
+			
+			
+			
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			logger.error(e.toString(),e);
+		}
+		
+		
+	}
+	public void WriteToDatabase(String statement)
+	{
+		try {
+			if (connect == null)
+				ConnectToDatabase();
+			
+			PreparedStatement preparedStatement;
+			preparedStatement = connect.prepareStatement(statement);
+			preparedStatement.executeUpdate();
+			} 
+		catch (SQLException e) {
+			logger.error(e.toString(),e);
+		}
+	}
+	public double ReadTodaysPnL(boolean high)
+	{
+		
+		
+		String column;
+		if(high)
+			column="High";
+		else
+			column="Low";
+		
+		try{
+			statement = connect.createStatement();
+			resultSet = statement
+	          .executeQuery("select "+column+" from ibtrading.daypnl where date = '"+GetDate()+"'");
+			
+			 while (resultSet.next()) {
+				 return resultSet.getDouble(column);
+			 }
+			
+		}
+		catch(Exception e)
+		{
+			
+		}
+		return 0.0;
+	}
+	
+	public int GetCurrentPnL()
+	{
+		marketSummary.subscribe();
+	//	int i=0;
+	/*		
+		while(marketSummary.isUpdating() && i <20)
+		{
+			try {
+				Thread.sleep(1000);
+				i++;
+				} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if (i >=20)
+		{
+			logger.info("Failed to subscribe to account summary. Exiting");
+			return "0";
+		}
+		*/
+		if (marketSummary.m_model.isInitialised())
+		{
+		int RPnL = Integer.parseInt( (String) marketSummary.m_model.getValueAt(0, 11));
+		logger.debug("Current pnl : $"+RPnL);	 
+		return RPnL;
+		}
+		else
+		{
+			logger.error("Market Summary not initialised");	 
+		
+			return 0;
+		}
+	}
+	public String GetDate()
+	{
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		return sdf.format(date);
+	}
+private boolean _hasInsertedTodaysDate=false;
+	public void DatabaseEntryForToday() {
+		
+		if(!_hasInsertedTodaysDate)
+		{
+			try{
+				if (connect == null)
+					ConnectToDatabase();
+				WriteToDatabase("insert into ibtrading.daypnl values('"+GetDate()+"',0,0,0)");
+		_hasInsertedTodaysDate=true;
+			}
+			catch(Exception e)
+			{
+				logger.error(e.toString(),e);
+			}
+		}
+			
+	}
 
 }

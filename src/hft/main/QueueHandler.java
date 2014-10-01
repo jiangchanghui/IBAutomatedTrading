@@ -64,9 +64,9 @@ public class QueueHandler {
 		 try {
 			 channel.basicPublish(Util.INSTANCE.exchange_marketdata_routing, _message.getTicker(), null, toBytes(_message));
 			//	channel.basicPublish("", Q_marketdata_tick, null, toBytes(_message));
-				log.info("SEND > "+Util.INSTANCE.exchange_marketdata_routing+" { Mkt Data Tick for '" + _message.getTicker() + "}");
+				log.debug("SEND > "+Util.INSTANCE.exchange_marketdata_routing+" { Mkt Data Tick for '" + _message.getTicker() + "}");
 			
-			CommonCache.instance.MarketDataTick(_message);	
+		//	CommonCache.instance.MarketDataTick(_message);	
 				
 				
 			} catch (IOException e) {
@@ -84,7 +84,6 @@ public class QueueHandler {
 				channel_order.basicPublish("", Util.INSTANCE.queue_new_order, null, toBytes(_message));
 				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				log.fatal(e.toString(),e);
 			}
 		  

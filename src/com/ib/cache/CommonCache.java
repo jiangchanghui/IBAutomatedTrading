@@ -173,34 +173,15 @@ public class CommonCache {
 	}
 	public void MarketDataTick(MarketDataTick _message) {
 
-		log.info("Updating last price for "+_message.getTicker()+" , LastPx : "+_message.getBar().close());
+		log.debug("Updating last price for "+_message.getTicker()+" , LastPx : "+_message.getBar().close());
 
 			LastPx_Map.put(_message.getTicker(), new MarketDataTuple(_message.getBar().close(), System.currentTimeMillis()));
 		
 		
 		
 	}
-	public void SetLastPx(String Ticker, double LastPx)
-	{
-		log.info("Updated last price for "+Ticker+" to "+LastPx);
-		LastPx_Map.put(Ticker,new MarketDataTuple(LastPx,System.currentTimeMillis()));
-	}
-	public double GetLastPx(String Ticker)
-	{
-		MarketDataTuple tmp = LastPx_Map.get(Ticker);
-		if (tmp == null)
-			return 0.0;
-		else
-		{
-			long LastUpdateTime = tmp.LastUpdateTime;
-			long delta = System.currentTimeMillis() - LastUpdateTime;
-			if (delta > 60000 );
-				log.warn("STALE MARKET DATA : Last Update time for "+Ticker+"+is over "+delta/1000+" seconds old");
-			return tmp.LastPx;
-		}
-		
-		
-	}
+	
+
 
 	private class MarketDataTuple
 	{

@@ -45,45 +45,10 @@ public class RecordDailyTrades extends Thread {
 		log.info("Starting record of PnL");
 		// Connect to db
 		try {
-			log.info("Connecting to database...");
-			connect = DriverManager
-					.getConnection("jdbc:mysql://localhost/ibtrading?"
-							+ "user=" + Util.INSTANCE.DBUsername + "&password="
-							+ Util.INSTANCE.DBPassword);
-
-			// statements allow to issue SQL queries to the database
-			statement = connect.createStatement();
-			// resultSet gets the result of the SQL query
-				
-
-			// get all trades for the day
-			log.info("Subscribing to account summary...");
-			MarketValueSummaryPanel a = new MarketValueSummaryPanel();
-			a.subscribe();
-	
 			
-			int i=0;
-			
-			
-			while(a.isUpdating() && i <20)
-			{
-				try {
-					Thread.sleep(1000);
-					i++;
-					} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			if (i >=20)
-			{
-				log.info("Failed to subscribe to account summary. Exiting");
-				return;
-			}
-			
-			String RPnL = (String) a.m_model.getValueAt(0, 11);
+			int RPnL = Util.INSTANCE.GetCurrentPnL();
 			log.info("Writing daily pnl : $"+RPnL);	 
-			WriteDayPnL(RPnL.replace(",",""));
+			WriteDayPnL(RPnL);
 			
 			
 			Set<String> _ListOfTickers = new HashSet<String>();
@@ -132,33 +97,18 @@ public class RecordDailyTrades extends Thread {
 
 	}
 
-	private void WriteDayPnL(String rPnL) {
-		PreparedStatement preparedStatement;
-		try {
-			Date date = new Date();
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-			
-			String s = "insert into ibtrading.daypnl values ("+sdf.format(date)+","+rPnL+")";
-			preparedStatement = connect.prepareStatement(s);
-			preparedStatement.executeUpdate();
-				
-		} catch (SQLException e) {
-			log.fatal(e.toString(),e);
-		}
+	private void WriteDayPnL(int rPnL) {
+		
+			Util.INSTANCE.WriteToDatabase("update ibtrading.daypnl set pnl="+rPnL+" where date ='"+Util.INSTANCE.GetDate()+"'");
+		
 	}
 	private void WritePositionPnL(String Ticker,double rPnL) {
-		PreparedStatement preparedStatement;
-		try {
+		
 			Date date = new Date();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			
 			String s = "insert into ibtrading.positionpnl values ("+sdf.format(date)+","+Ticker+","+rPnL+")";
-			preparedStatement = connect.prepareStatement(s);
-			preparedStatement.executeUpdate();
-				
-		} catch (SQLException e) {
-			log.fatal(e.toString(),e);
-		}
+			Util.INSTANCE.WriteToDatabase(s);
 	}
 	
 }

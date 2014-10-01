@@ -29,7 +29,7 @@ public class EoDClosePositions extends Thread {
 	@Override
 	public void run() {
 		log.info("Running EOD position close process");
-		IBTradingMain.INSTANCE._LiveStatus = false;
+	
 		log.info("Position Count : "+PositionCache.INSTANCE.GetAllPositions().m_list.size());
 		for(apidemo.PositionsPanel.PositionRow _position : PositionCache.INSTANCE.GetAllPositions().m_list)
 		{
@@ -58,7 +58,7 @@ public class EoDClosePositions extends Thread {
 			}
 		}
 		
-		
+		IBTradingMain.INSTANCE._LiveStatus = false;
 		RecordDailyTrades _record = new RecordDailyTrades();
 		_record.start();
 	}

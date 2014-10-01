@@ -82,6 +82,11 @@ public class ServiceHandler extends Thread{
 				System.exit(-1);
 			}
 		}
+		
+		//Intraday PnL recording
+		
+		new RecordIntradayPnL().start();
+		
 		log.info("All services initiated, startup sequence complete");
 	}
 	public class SampleTask extends TimerTask {
