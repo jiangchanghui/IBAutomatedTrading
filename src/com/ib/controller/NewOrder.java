@@ -274,6 +274,11 @@ public class NewOrder {
 	public NewOrder() {
 	}
 
+	public String ToString()
+	{
+		return "{Side:"+this.action()+",Quantity:"+this.totalQuantity()+",OrderType:"+this.orderType()+",LimitPx:"+this.lmtPrice()+",TIF:"+this.tif()+"}";
+	}
+	
 	public NewOrder( Order order) {
 		m_clientId = order.m_clientId;
 		m_orderId = order.m_orderId;

@@ -116,7 +116,7 @@ public class OrderHandler extends Thread{
 			Action side = _message.Side();
 			int Quantity = _message.Quantity();
 			OrderType OrdType = _message.OrderType();
-			double LimitPx = RountToTick(_message.LimitPx());
+			
 			
 			if (Ticker==null || side ==null || Quantity <=0.0 || OrdType==null)
 			{
@@ -135,13 +135,13 @@ public class OrderHandler extends Thread{
 			
 			if (OrdType.equals(OrderType.MKT))
 			{
-			order.orderType(OrdType);
-			order.tif(TimeInForce.FOK);//prevents blocked shorts hanging around.
+				order.orderType(OrdType);
+				order.tif(TimeInForce.FOK);//prevents blocked shorts hanging around.
 			}
 			else
 			{
 				order.orderType(OrderType.LMT);
-				order.lmtPrice(LimitPx);	
+				order.lmtPrice(RountToTick(_message.LimitPx()));	
 			}
 						
 			
@@ -152,7 +152,7 @@ public class OrderHandler extends Thread{
 		}
 			
 			
-		log.info("SEND > API {new order creation for "+order.action()+"/"+order.totalQuantity()+"/"+order.orderType()+"/"+order.lmtPrice()+"/"+order.tif()+"}");
+		log.info("SEND > API {new order creation for "+order.ToString());
 			//log.log(Level.INFO ,"Order being executed for {0} {1} {2} at {3}",new Object[]{Side,Quantity,Symbol,order.orderType().toString()});
 			IBTradingMain.INSTANCE.controller().placeOrModifyOrder(contract, order, new IOrderHandler() {
 				@Override public void orderState(NewOrderState orderState) {

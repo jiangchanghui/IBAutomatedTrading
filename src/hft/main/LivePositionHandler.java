@@ -69,8 +69,8 @@ public class LivePositionHandler extends Thread{
 		for (OrderRow row : CommonCache.instance.GetOpenOrders().m_orders)
 		{
 
-			log.info("Checking order ticker :  "+ row.m_contract.symbol()+" for position  "+Ticker);	
-			log.info("Order state is : "+row.m_state.status());
+		//	log.info("Checking order ticker :  "+ row.m_contract.symbol()+" for position  "+Ticker);	
+		//	log.info("Order state is : "+row.m_state.status());
 			OrderStatus state = row.m_state.status();
 			if (state ==OrderStatus.Submitted || state==OrderStatus.PreSubmitted)
 			{

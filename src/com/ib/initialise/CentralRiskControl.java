@@ -36,8 +36,7 @@ public class CentralRiskControl extends Thread{
 			{
 				Thread.sleep(10000);
 				CheckPositions();
-			//	RecordIntradayPnL();
-				
+			
 			} catch (InterruptedException e) 
 			{
 				log.fatal(e.toString(),e);
@@ -46,30 +45,7 @@ public class CentralRiskControl extends Thread{
 		}
 						
 	}
-	private void RecordIntradayPnL() {
-		
-		double CurrentHigh= Util.INSTANCE.ReadTodaysPnL(true);
-		double CurrentLow= Util.INSTANCE.ReadTodaysPnL(false);
-		double LastPnL =Util.INSTANCE.GetCurrentPnL();
-		
-		
-		//Check entry exists for todays date
-		Util.INSTANCE.DatabaseEntryForToday();
-				
-		//check high
-		if (LastPnL>CurrentHigh){
-			Util.INSTANCE.WriteToDatabase("update ibtrading.daypnl set High="+LastPnL+" where date ='"+Util.INSTANCE.GetDate()+"'");
-			log.info("Recorded new intraday PnL high of "+LastPnL);
-			return;
-		}
-		else if (LastPnL < CurrentLow){
-			Util.INSTANCE.WriteToDatabase("update ibtrading.daypnl set Low="+LastPnL+" where date ='"+Util.INSTANCE.GetDate()+"'");
-			log.info("Recorded new intraday PnL low of "+LastPnL);
-			return;
-		}
-		return;
-		
-	}
+
 	private void CheckPositions()
 	{
 		int _zeroPositions=0;
