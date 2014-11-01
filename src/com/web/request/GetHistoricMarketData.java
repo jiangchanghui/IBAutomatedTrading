@@ -157,13 +157,9 @@ public HistoricResultSet GetHistoricalMarketData(String Ticker) throws Interrupt
 		
 		int req_id = IsTickerInMap(Ticker);
 		if(req_id != -1)
-		{
-		 return MarketDataMapWeb.get(req_id);	
+			 return MarketDataMapWeb.get(req_id);	
 		 
-		}
-		else
-		{	
-
+		
 		
 		NewContract m_contract = new NewContract();
 		m_contract.symbol( Ticker); 
@@ -178,7 +174,7 @@ public HistoricResultSet GetHistoricalMarketData(String Ticker) throws Interrupt
 	//	log.info(sdf.format(date));
 		
 	
-		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 2, DurationUnit.DAY, BarSize._1_min, WhatToShow.TRADES,true, dataSet);
+		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 1, DurationUnit.DAY, BarSize._1_min, WhatToShow.TRADES,true, dataSet);
 		
 		
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
@@ -191,7 +187,7 @@ public HistoricResultSet GetHistoricalMarketData(String Ticker) throws Interrupt
 		
 		
 		
-	}
+	
 	
 	
 	

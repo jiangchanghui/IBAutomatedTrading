@@ -136,7 +136,7 @@ public class OrderHandler extends Thread{
 			if (OrdType.equals(OrderType.MKT))
 			{
 				order.orderType(OrdType);
-				order.tif(TimeInForce.FOK);//prevents blocked shorts hanging around.
+			//	order.tif(TimeInForce.FOK);//prevents blocked shorts hanging around.
 			}
 			else
 			{

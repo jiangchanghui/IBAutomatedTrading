@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 import com.benberg.struct.NewMarketDataRequest;
+import com.benberg.struct.RequestType;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -23,7 +24,7 @@ public class ListenForWebRequests extends Thread{
 		 factory = new ConnectionFactory();
 		    factory.setHost("localhost");
 		    factory.setUsername("Admin"); 
-			factory.setPassword("Typhoon1"); 
+			factory.setPassword("Admin"); 
 		    connection = factory.newConnection();
 		    channel = connection.createChannel();
 
@@ -64,17 +65,19 @@ public class ListenForWebRequests extends Thread{
 		                                       .correlationId(props.getCorrelationId())
 		                                       .build();
 		      
-		      String message = new String(delivery.getBody());
-		      
-		      System.out.println(" [x] Received '" + message + "'");
-		      
 		      NewMarketDataRequest _message = fromBytes( delivery.getBody());
+		      
+		      System.out.println(" [x] Received '" + _message.toString() + "'");
+		      
+		     
 		      
 		      
 		      GetHistoricMarketData MDM = new  GetHistoricMarketData();
 		      MDM = GetHistoricMarketData.getInstance();
 		      if(_message.IsRealTime())
 		    	  SendReplyMessage (MDM.GetNewRealTimeDataRequest(_message),props, replyProps);
+		      else if (_message.GetRequestType().equals(RequestType.DAY))
+		    	  SendReplyMessage (MDM.GetHistoricalMarketData(_message.GetTicker()),props, replyProps);
 		      else
 		    	  SendReplyMessage (MDM.GetMarketDataToJson(_message),props, replyProps);
 		    } 

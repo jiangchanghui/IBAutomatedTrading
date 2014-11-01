@@ -13,15 +13,23 @@ public class NewMarketDataRequest implements Serializable{
 	private String TimeFrame;
 	private boolean RealTime;
 	private static final long serialVersionUID = 1L;
+	public static int MARKETDATA = 1;
+	public  static int RSIDATA = 2;
+	private RequestType RequestType;		
 	//public static final int HISTORICAL = 1;
 //	public static final int LIVE = 2;
 //	private int type;
-	public NewMarketDataRequest(boolean Realtime,String Ticker,String CorrId, String TimeFrame)
+	public NewMarketDataRequest(boolean Realtime,String Ticker,String CorrId, String TimeFrame,RequestType requestType)
 	{
 		this.RealTime = Realtime;
 		this.Ticker = Ticker;
 		this.CorrelationId = CorrId;
 		this.TimeFrame = TimeFrame;
+		this.RequestType = requestType;
+	}
+	public RequestType getType()
+	{
+		return RequestType;
 	}
 	public boolean IsRealTime()
 	{
@@ -31,11 +39,23 @@ public class NewMarketDataRequest implements Serializable{
 //	{
 //		return type;		
 //	}
-	public NewMarketDataRequest(String Ticker,String CorrId, String MarketData,boolean hasData)
+	public NewMarketDataRequest(String Ticker,String correlationId, String MarketData,boolean hasData)
 	{
 		this.Ticker = Ticker;
-		this.CorrelationId = CorrId;
+		this.CorrelationId = correlationId;
 		this.MarketDataJson=MarketData;
+	}
+	public NewMarketDataRequest(String ticker, RequestType requestType) {
+		this.RequestType = requestType;
+		this.Ticker=ticker;
+	}
+	public NewMarketDataRequest(String ticker, String correlationId,RequestType requestType,boolean realTime) {
+		this.Ticker = ticker;
+		this.CorrelationId = correlationId;
+		this.RequestType = requestType;
+		this.RealTime = realTime;
+		
+	
 	}
 	public String GetTicker()
 	{
@@ -52,6 +72,10 @@ public class NewMarketDataRequest implements Serializable{
 	public String GetTimeFrame()
 	{
 		return TimeFrame;
+	}
+	public RequestType GetRequestType()
+	{
+		return RequestType;
 	}
 	 public byte[] toBytes() {
 	      byte[]bytes; 

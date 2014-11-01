@@ -257,37 +257,24 @@ public class Util {
 	
 	public int GetCurrentPnL()
 	{
-		marketSummary.subscribe();
-	//	int i=0;
-	/*		
-		while(marketSummary.isUpdating() && i <20)
+		
+	
+		if (!marketSummary.m_model.isInitialised())
 		{
-			try {
-				Thread.sleep(1000);
-				i++;
-				} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			marketSummary.subscribe();
+			logger.error("Market Summary not initialised");	 
+			return 0;
 		}
-		if (i >=20)
+		else
 		{
-			logger.info("Failed to subscribe to account summary. Exiting");
-			return "0";
-		}
-		*/
-		if (marketSummary.m_model.isInitialised())
-		{
+					
 		int RPnL = Integer.parseInt( (String) marketSummary.m_model.getValueAt(0, 11));
 		logger.debug("Current pnl : $"+RPnL);	 
 		return RPnL;
 		}
-		else
-		{
-			logger.error("Market Summary not initialised");	 
+			
 		
-			return 0;
-		}
+		
 	}
 	public String GetDate()
 	{
