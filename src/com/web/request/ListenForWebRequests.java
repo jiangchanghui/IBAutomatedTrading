@@ -122,9 +122,10 @@ public class ListenForWebRequests extends Thread{
 	    if(_message != null)
 	    {
 	 //   channel.basicPublish("", QUEUE_OUT, null, _message.toBytes());
-	    	 System.out.println("sending : "+_message.GetMessage());
+	  //  	 System.out.println("sending : "+_message.GetMessage());
+	    System.out.println(" [x] Sending reply on topic  '" + QUEUE_IN + "'");
 	    channel.basicPublish( "", props.getReplyTo(), replyProps, _message.toBytes());
-	    System.out.println(" [x] Sent reply on topic  '" + QUEUE_IN + "'");
+	   
 	    }
 	 //   channel.close();
 	  //  connection.close();

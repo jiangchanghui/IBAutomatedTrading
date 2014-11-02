@@ -89,7 +89,7 @@ public class LevelOneSnapshot extends TopMktDataAdapter{
 
 	public String toString()
 	{
-		return ticker.toUpperCase()+": "+last+" ("+GetChangePercent()+")                            "+bid+" : "+ask;		
+		return ticker.toUpperCase()+": "+last+" ("+GetChangePercent()+")                            ["+bid+" : "+ask+"]";		
 	}
 
 	

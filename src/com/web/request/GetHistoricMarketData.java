@@ -333,10 +333,10 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 		
 		
 	}
-	log.info(Data.m_rows.size());
+	//log.info(Data.m_rows.size());
 	
 	price_result = price_result.substring(0, price_result.length() - 1);
-	log.info(price_result);
+	//log.info(price_result);
 	
 		
 	
