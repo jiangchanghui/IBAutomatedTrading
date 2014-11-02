@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 
 
 import com.benberg.struct.NewMarketDataRequest;
+import com.benberg.struct.RequestType;
 import com.ib.controller.ApiController;
 import com.ib.controller.ApiController.IRealTimeBarHandler;
 import com.ib.controller.Bar;
@@ -75,15 +76,15 @@ public class GetHistoricMarketData {
 				
 		}
 	
-	private int IsTickerInMapWeb(String Ticker,String TimeFrame)
+	private int IsTickerInHistMap(String Ticker,RequestType RequestType)
 	{
 		
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
 		log.info("Searching cache for : "+Ticker);
 		for (Entry<Integer, HistoricResultSet> m : MarketDataMapWeb.entrySet()) {
-			String _Ticker = m.getValue().GetTicker();
-			String _TimeFrame = m.getValue().GetTimeFrame();
-			if (_Ticker.equals(Ticker) && _TimeFrame.equals(TimeFrame) && m.getValue().m_rows.size()>0)
+			String ticker = m.getValue().GetTicker();
+			RequestType requestType = m.getValue().getRequestType();
+			if (ticker.equals(Ticker) && requestType.equals(RequestType) && m.getValue().m_rows.size()>0)
 			{
 				log.info("Data in cache. Req ID : "+m.getKey());
 				return m.getKey();
@@ -153,49 +154,51 @@ public class GetHistoricMarketData {
 		
 		
 	}
-public HistoricResultSet GetHistoricalMarketData(String Ticker) throws InterruptedException {
-		
-		int req_id = IsTickerInMap(Ticker);
-		if(req_id != -1)
-			 return MarketDataMapWeb.get(req_id);	
+public NewMarketDataRequest GetHistoricalMarketData(NewMarketDataRequest message) throws InterruptedException {
+		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
+	//	int req_id = IsTickerInHistMap( message.GetTicker(),message.getType());
+	
+	//	if(req_id != -1)
+	//		 return ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId());		
 		 
 		
-		
 		NewContract m_contract = new NewContract();
-		m_contract.symbol( Ticker); 
+		m_contract.symbol(  message.GetTicker()); 
 		m_contract.secType( SecType.STK ); 
 		m_contract.exchange( "SMART" ); 
 		m_contract.currency( "USD" ); 
 				
-		HistoricResultSet dataSet = new HistoricResultSet(Ticker,null);
+		HistoricResultSet dataSet = new HistoricResultSet(message.GetTicker(),message.GetRequestType());
 
 		Date date = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
 	//	log.info(sdf.format(date));
 		
 	
-		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 1, DurationUnit.DAY, BarSize._1_min, WhatToShow.TRADES,true, dataSet);
+		int req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 1, DurationUnit.DAY, BarSize._1_min, WhatToShow.TRADES,true, dataSet);
 		
+		int timeout=0;
+		while (!dataSet.IsLoadComplete() && timeout < 40)
+		{
+			Thread.sleep(100);
+			timeout++;
+		}
 		
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
 		MarketDataMap = m_controller.GetHistoricalMap();
-		return MarketDataMapWeb.get(req_id);
-		}
+	//	return MarketDataMapWeb.get(req_id);
+		return ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId());	
 		
+
+
+
+
+}
 		
-	
-		
-		
-		
-	
-	
-	
-	
-	
 	
 	public NewMarketDataRequest GetMarketDataToJson(NewMarketDataRequest message) throws InterruptedException {
-		
-		int req_id = IsTickerInMapWeb(message.GetTicker(),message.GetTimeFrame());
+		/*
+	//	int req_id = IsTickerInMapWeb(message.GetTicker(),message.GetTimeFrame());
 //		if(req_id != -1)
 //		{
 //		 return ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId());	
@@ -218,20 +221,18 @@ public HistoricResultSet GetHistoricalMarketData(String Ticker) throws Interrupt
 		log.info(sdf.format(date));
 		
 		if (nullcheck(message))
-			req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), GetNumberDays(message.GetTimeFrame()), GetDurationUnit(message.GetTimeFrame()), GetBarSize(message.GetTimeFrame()), WhatToShow.TRADES,GetRTH(message.GetTimeFrame()), dataSet);
+	//		req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), GetNumberDays(message.GetTimeFrame()), GetDurationUnit(message.GetTimeFrame()), GetBarSize(message.GetTimeFrame()), WhatToShow.TRADES,GetRTH(message.GetTimeFrame()), dataSet);
 		else
 			return null;
 			
 		
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
 		MarketDataMap = m_controller.GetHistoricalMap();
-		return (ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId()));
+	//	return (ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId()));
 		
-		
-		
-	//	}
-		
-		
+		*/
+		return null;
+	
 		
 	}
 private boolean GetRTH(String TimeFrame) {
@@ -339,7 +340,7 @@ private NewMarketDataRequest ConvertToJson(HistoricResultSet Data,String Correla
 	
 		
 	
-	NewMarketDataRequest _response = new NewMarketDataRequest(Data.Ticker, CorrelationId,price_result,true);
+	NewMarketDataRequest _response = new NewMarketDataRequest(Data.Ticker, CorrelationId,RequestType.CHART_DAY,price_result);
 
 	return _response;
 }

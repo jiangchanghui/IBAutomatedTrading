@@ -8,6 +8,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 import com.benberg.struct.MarketDataTick;
+import com.benberg.struct.RequestType;
 import com.ib.cache.MarketDataCache;
 import com.ib.controller.Bar;
 import com.ib.controller.ApiController.IHistoricalDataHandler;
@@ -20,6 +21,7 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	private volatile boolean complete =false;
 	String Ticker ="";
 	String TimeFrame;
+	RequestType RequestType;
 	
 	
 	public int GetCount()
@@ -42,6 +44,11 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	}
 	
 	
+	public HistoricResultSet(String ticker, RequestType requestType) {
+		this.Ticker = ticker;
+		this.RequestType=requestType;;
+	}
+
 	public String GetTicker()
 	{
 		return Ticker;
@@ -50,6 +57,9 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	{
 		return TimeFrame;
 	}
+	public RequestType getRequestType() {
+		return RequestType;
+	}		
 	public void SetLoadComplete()
 	{
 		complete = true;		
@@ -133,5 +143,6 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 				default: return null;
 			}
 		}
-	}		
+	}
+	
 }

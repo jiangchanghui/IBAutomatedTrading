@@ -112,7 +112,7 @@ public  MarketDataTick fromBytes(byte[] body) {
 		
 		GetHistoricMarketData GetHistMarketData = new GetHistoricMarketData();
 		
-		double _rsi = RSIWorker(GetHistMarketData.GetHistoricalMarketData(_Ticker),bar);
+	//	double _rsi = RSIWorker(GetHistMarketData.GetHistoricalMarketData(_Ticker),bar);
 		
 	//	if (_rsi > _overbought)
 		//	_QueueHandler.SendToNewOrderQueue(_Ticker);

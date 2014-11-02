@@ -34,8 +34,10 @@ import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
 import apidemo.MarketValueSummaryPanel;
+import apidemo.TopModel.TopRow;
 
 import com.ib.cache.CommonCache;
+import com.ib.cache.LevelOneSnapshot;
 import com.ib.cache.MarketDataCache;
 import com.ib.controller.NewContract;
 import com.ib.controller.Types.SecType;
@@ -121,7 +123,7 @@ public class Util {
 	}
 	
 	public void SubscribeToMarketData(String ticker) {
-		if (MarketDataCache.INSTANCE.SubscriptionExists(ticker))
+		if (MarketDataCache.INSTANCE.IsLastPxSubscriptionExists(ticker))
 			return;
 		
 		 logger.info("New Market Data request for "+ticker);
@@ -137,7 +139,25 @@ public class Util {
 				
 			
 		}
-	
+	public void SubscribeToLevelOneQuote(String ticker) {
+		if (MarketDataCache.INSTANCE.IsLevelOneSubscriptionExists(ticker))
+			return;
+		
+		 logger.info("New LevelOne Market Data request for "+ticker);
+		 NewContract m_contract = new NewContract();
+			m_contract.symbol( ticker); 
+			m_contract.secType( SecType.STK ); 
+			m_contract.exchange( "SMART" ); 
+			m_contract.currency( "USD" ); 
+		
+			LevelOneSnapshot dataSet = new LevelOneSnapshot(ticker);
+		
+		
+		IBTradingMain.INSTANCE.controller().reqTopMktData(m_contract, "", false, dataSet);
+		
+		MarketDataCache.INSTANCE.AddLevelOneQuote(dataSet);
+		
+	}
 	
 	
 	public void Log(String message)
@@ -300,5 +320,7 @@ private boolean _hasInsertedTodaysDate=false;
 		}
 			
 	}
+
+	
 
 }

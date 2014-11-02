@@ -9,13 +9,15 @@ import java.io.Serializable;
 public class NewMarketDataRequest implements Serializable{
 	private String Ticker;
 	private String CorrelationId;
-	private String MarketDataJson;
+	private String messageBody;
 	private String TimeFrame;
+	
 	private boolean RealTime;
 	private static final long serialVersionUID = 1L;
 	public static int MARKETDATA = 1;
 	public  static int RSIDATA = 2;
-	private RequestType RequestType;		
+	private RequestType RequestType;
+	
 	//public static final int HISTORICAL = 1;
 //	public static final int LIVE = 2;
 //	private int type;
@@ -39,24 +41,24 @@ public class NewMarketDataRequest implements Serializable{
 //	{
 //		return type;		
 //	}
-	public NewMarketDataRequest(String Ticker,String correlationId, String MarketData,boolean hasData)
-	{
-		this.Ticker = Ticker;
-		this.CorrelationId = correlationId;
-		this.MarketDataJson=MarketData;
-	}
-	public NewMarketDataRequest(String ticker, RequestType requestType) {
+	
+
+	//used by Web to request either Chart or level one quote.
+	public NewMarketDataRequest(String ticker, String correlationId, RequestType requestType) {
 		this.RequestType = requestType;
 		this.Ticker=ticker;
-	}
-	public NewMarketDataRequest(String ticker, String correlationId,RequestType requestType,boolean realTime) {
-		this.Ticker = ticker;
 		this.CorrelationId = correlationId;
-		this.RequestType = requestType;
-		this.RealTime = realTime;
-		
-	
 	}
+	
+	//used when returning Market Data/Quotes to the web request. messageBody contains Json or quote.
+	public NewMarketDataRequest(String ticker, String correlationId, RequestType requestType, String messageBody) {
+		this.Ticker=ticker;
+		this.RequestType=requestType;
+		this.messageBody=messageBody;
+		this.CorrelationId=correlationId;
+		
+	}
+
 	public String GetTicker()
 	{
 		return Ticker;
@@ -65,9 +67,9 @@ public class NewMarketDataRequest implements Serializable{
 	{
 		return CorrelationId;
 	}
-	public String GetMarketDataJson()
+	public String GetMessage()
 	{
-		return MarketDataJson;
+		return messageBody;
 	}
 	public String GetTimeFrame()
 	{

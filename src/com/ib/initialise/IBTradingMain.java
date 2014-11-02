@@ -213,7 +213,8 @@ public class IBTradingMain implements IConnectionHandler{
 		options.addOption(OptionBuilder.withLongOpt("help").create('h'));
 		options.addOption("CmdLine", false, "If specified, the application will run without a gui");
 		options.addOption("TASlowSto", false, "If specified, the Stochastics worker will run for the specified symbols in config");
-		options.addOption("TradeReader", false, "If specified, the service to read trades sent from the trade capture system will be read.");
+		options.addOption("TradeReader", false, "If specified, the service to read trades sent from the trade capture system will be used.");
+		options.addOption("ChartServer", false, "If specified, the chart server will be enabled.");
 		
 		HelpFormatter formatter = new HelpFormatter();
 		

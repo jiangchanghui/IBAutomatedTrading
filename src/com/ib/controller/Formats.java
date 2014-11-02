@@ -11,7 +11,7 @@ import java.util.Date;
 public class Formats {
 	private static final Format FMT2 = new DecimalFormat( "#,##0.00");
 	private static final Format FMT0 = new DecimalFormat( "#,##0");
-	private static final Format PCT = new DecimalFormat( "0.0%");
+	private static final Format PCT = new DecimalFormat( "0.00%");
 	private static final SimpleDateFormat DATE_TIME = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss"); // format for display
 	private static final SimpleDateFormat TIME = new SimpleDateFormat( "HH:mm:ss"); // format for display
 

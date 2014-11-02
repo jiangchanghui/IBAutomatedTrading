@@ -60,7 +60,7 @@ public class ApiController implements EWrapper {
 	private final HashMap<Integer, HistoricResultSet> m_realTimeBarMapWeb = new HashMap<Integer, HistoricResultSet>();
 
 	private final HashMap<Integer, IHistoricalDataHandler> m_historicalDataMap = new HashMap<Integer, IHistoricalDataHandler>();
-	private final HashMap<Integer, HistoricResultSet> m_historicalDataMapWeb = new HashMap<Integer, HistoricResultSet>();
+	private final HashMap<Integer, HistoricResultSet> m_historicalDataMapForWeb = new HashMap<Integer, HistoricResultSet>();
 	
 	private final HashMap<Integer, IFundamentalsHandler> m_fundMap = new HashMap<Integer, IFundamentalsHandler>();
 	private final HashMap<Integer, IOrderHandler> m_orderHandlers = new HashMap<Integer, IOrderHandler>();
@@ -847,7 +847,7 @@ public class ApiController implements EWrapper {
 	public int reqHistoricalData( NewContract contract, String endDateTime, int duration, DurationUnit durationUnit, BarSize barSize, WhatToShow whatToShow, boolean rthOnly, HistoricResultSet handler) {
     	int reqId = m_reqId++;
     //	m_historicalDataMap.put( reqId, handler);
-    	m_historicalDataMapWeb.put( reqId, handler);
+    	m_historicalDataMapForWeb.put( reqId, handler);
     	String durationStr = duration + " " + durationUnit.toString().charAt( 0);
     	m_client.reqHistoricalData(reqId, contract.getContract(), endDateTime, durationStr, barSize.toString(), whatToShow.toString(), rthOnly ? 1 : 0, 2);
 		sendEOM();
@@ -865,7 +865,7 @@ public class ApiController implements EWrapper {
 
     public HashMap<Integer, HistoricResultSet> GetHistoricalMapWeb()
     {
-		return m_historicalDataMapWeb;
+		return m_historicalDataMapForWeb;
     	
     }
     public HashMap<Integer,  IHistoricalDataHandler> GetHistoricalMap()
@@ -883,7 +883,7 @@ public class ApiController implements EWrapper {
 
 	@Override public void historicalData(int reqId, String date, double open, double high, double low, double close, int volume, int count, double wap, boolean hasGaps) {
 		//IHistoricalDataHandler handler = m_historicalDataMap.get( reqId);
-		HistoricResultSet handler = m_historicalDataMapWeb.get(reqId);
+		HistoricResultSet handler = m_historicalDataMapForWeb.get(reqId);
 			
 		
 		if (handler != null) {

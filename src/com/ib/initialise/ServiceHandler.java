@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import com.ib.cache.PositionCache;
 import com.posttrade.main.EoDClosePositions;
 import com.reademail.main.mailReader;
+import com.web.request.ListenForWebRequests;
 
 public class ServiceHandler extends Thread{
 	private  Logger log = Logger.getLogger( this.getClass() );
@@ -84,8 +85,13 @@ public class ServiceHandler extends Thread{
 		}
 		
 		//Intraday PnL recording
-		
 		new RecordIntradayPnL().start();
+		
+		
+		if (cmd.hasOption("ChartServer")){
+			new ListenForWebRequests().start();
+			
+		}
 		
 		log.info("All services initiated, startup sequence complete");
 	}
