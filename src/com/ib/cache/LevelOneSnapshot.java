@@ -38,7 +38,7 @@ public class LevelOneSnapshot extends TopMktDataAdapter{
 	
 	public String GetChangePercent()
 	{
-		return close == 0	? null : fmtPct( (last - close) /close);
+		return close == 0	? "--" : fmtPct( (last - close) /close);
 	}
 	
 	@Override public void tickPrice( NewTickType tickType, double price, int canAutoExecute) {

@@ -37,11 +37,7 @@ public class NewMarketDataRequest implements Serializable{
 	{
 		return RealTime;
 	}
-//	public int GetType()
-//	{
-//		return type;		
-//	}
-	
+
 
 	//used by Web to request either Chart or level one quote.
 	public NewMarketDataRequest(String ticker, String correlationId, RequestType requestType) {
@@ -96,4 +92,17 @@ public class NewMarketDataRequest implements Serializable{
 	      }         
 	      return bytes; 
 	    }
+	 
+	 public String toString()
+	 {
+		 String ticker = Ticker ==null? "": Ticker;
+		 String correlationID = CorrelationId ==null? "": CorrelationId;
+		 String MessageBody = messageBody ==null? "": messageBody;
+		 RequestType requestType = RequestType==null? RequestType.QUOTE : RequestType;
+		 
+		return "{ticker:"+ticker+",RequestType:"+requestType+",correlationID:"+CorrelationId+",MessageLength:"+MessageBody.length()+"}" ;
+		 
+	 }
+	 
+	 
 }

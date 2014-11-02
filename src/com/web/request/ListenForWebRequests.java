@@ -93,13 +93,12 @@ public class ListenForWebRequests extends Thread{
 		    		  quote = snapshot.toString();
 		    	  else
 		    		  quote = ticker;
+		    	  
+		    	  
 		    	 SendReplyMessage (new NewMarketDataRequest(ticker,_message.GetCorrelationId(),RequestType.QUOTE,quote),props,replyProps);
 		      	 
 		      }
-		      if(_message.IsRealTime())
-		    	  SendReplyMessage (HistoricMarketDataHandler.GetNewRealTimeDataRequest(_message),props, replyProps);
-		      
-		      if (_message.GetRequestType().equals(RequestType.CHART_DAY)) //for PhoneCharts - Show trading on the day so far.
+		     else //for PhoneCharts - Show trading on the day so far.
 		    	  SendReplyMessage (HistoricMarketDataHandler.GetHistoricalMarketData(_message),props, replyProps);
 		      
 		      
@@ -121,16 +120,12 @@ public class ListenForWebRequests extends Thread{
 		
 	    if(_message != null)
 	    {
-	 //   channel.basicPublish("", QUEUE_OUT, null, _message.toBytes());
-	  //  	 System.out.println("sending : "+_message.GetMessage());
-	    System.out.println(" [x] Sending reply on topic  '" + QUEUE_IN + "'");
+
+	    log.info("SEND on \\" + QUEUE_IN + ">"+_message.toString());
 	    channel.basicPublish( "", props.getReplyTo(), replyProps, _message.toBytes());
 	   
 	    }
-	 //   channel.close();
-	  //  connection.close();
-	  
-		
+	
 		
 	
 	}

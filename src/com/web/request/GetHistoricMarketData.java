@@ -156,12 +156,7 @@ public class GetHistoricMarketData {
 	}
 public NewMarketDataRequest GetHistoricalMarketData(NewMarketDataRequest message) throws InterruptedException {
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
-	//	int req_id = IsTickerInHistMap( message.GetTicker(),message.getType());
-	
-	//	if(req_id != -1)
-	//		 return ConvertToJson(MarketDataMapWeb.get(req_id),message.GetCorrelationId());		
-		 
-		
+
 		NewContract m_contract = new NewContract();
 		m_contract.symbol(  message.GetTicker()); 
 		m_contract.secType( SecType.STK ); 
@@ -174,9 +169,11 @@ public NewMarketDataRequest GetHistoricalMarketData(NewMarketDataRequest message
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
 	//	log.info(sdf.format(date));
 		
-	
-		int req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 1, DurationUnit.DAY, BarSize._1_min, WhatToShow.TRADES,true, dataSet);
-		
+		int req_id=0;
+		if(message.GetRequestType().equals(RequestType.CHART_DAY))
+			 req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 1, DurationUnit.DAY, BarSize._1_min, WhatToShow.TRADES,false, dataSet);
+		if(message.GetRequestType().equals(RequestType.CHART_2_DAY))
+			 req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 2, DurationUnit.DAY, BarSize._5_mins, WhatToShow.TRADES,false, dataSet);
 		int timeout=0;
 		while (!dataSet.IsLoadComplete() && timeout < 40)
 		{

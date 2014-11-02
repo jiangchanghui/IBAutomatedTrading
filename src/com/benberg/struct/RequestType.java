@@ -8,5 +8,6 @@ public enum RequestType {
 	PNL,
 	ORDERS,
 	RSI,
-	QUOTE
+	QUOTE, 
+	CHART_2_DAY
 }
