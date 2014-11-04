@@ -72,6 +72,21 @@ public class LevelOneSnapshot extends TopMktDataAdapter{
 		}
 		
 	}
+	
+	public boolean isActive()
+	{
+		if (close!=0)
+		{
+			return true;
+		}
+		else
+			return false;
+	}
+	public boolean isHalted()
+	{
+		return halted;
+	}
+	
 	//update last Time
 	@Override public void tickString(NewTickType tickType, String value) {
 		switch( tickType) {

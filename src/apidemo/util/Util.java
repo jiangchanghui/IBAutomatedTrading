@@ -141,7 +141,13 @@ public class Util {
 		}
 	public void SubscribeToLevelOneQuote(String ticker) {
 		if (MarketDataCache.INSTANCE.IsLevelOneSubscriptionExists(ticker))
+		{
 			return;
+		//	logger.info("Desubscribing to LevelOne Market Data request for "+ticker);
+		//	LevelOneSnapshot snapshot = MarketDataCache.INSTANCE.GetLevelOneSnapshot(ticker);
+		//	IBTradingMain.INSTANCE.controller().cancelTopMktData( snapshot);
+		}
+			
 		
 		 logger.info("New LevelOne Market Data request for "+ticker);
 		 NewContract m_contract = new NewContract();

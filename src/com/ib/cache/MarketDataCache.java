@@ -88,7 +88,8 @@ public class MarketDataCache {
 		
 		
 		if (!IsLevelOneSubscriptionExists(Ticker))
-		{			
+		{	
+			
 			Util.INSTANCE.SubscribeToLevelOneQuote(Ticker);
 		
 		//try waiting for subscription to come through, shouldnt take long
@@ -112,15 +113,28 @@ public class MarketDataCache {
 			return null;
 		else
 		{
+			int timeout = 0;
+			while (!snapshot.isActive() && timeout <30)
+			{
+				log.info("snapshot not ready");
+				try {
+					Thread.sleep(100);
+					timeout++;
+				} catch (InterruptedException e) {
+					log.warn(e.toString(),e);
+				}
+			}
+			
+			log.info("Snapshot for "+Ticker+" :{"+snapshot.toString()+"}");
 			long LastUpdateTime = snapshot.GetLastUpdateTime();
 			long delta = System.currentTimeMillis() - LastUpdateTime;
 			if (delta > 60000 )
 				log.warn("STALE LEVELONE QUOTE : Last Update time for "+Ticker+"+is over "+delta/1000+" seconds old");
-			if (delta > 300000)
-				{
-					log.warn("Resubscribing to level one snapshot for :"+Ticker);
-					Util.INSTANCE.SubscribeToLevelOneQuote(Ticker);
-				}
+		//	if (delta > 300000)
+		//		{
+		//			log.warn("Resubscribing to level one snapshot for :"+Ticker);
+		//			Util.INSTANCE.SubscribeToLevelOneQuote(Ticker);
+		//		}
 			return snapshot;
 		}
 		
