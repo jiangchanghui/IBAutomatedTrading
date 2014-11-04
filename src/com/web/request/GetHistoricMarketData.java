@@ -45,17 +45,13 @@ public class GetHistoricMarketData {
 		
 	}
 	
-	
-	
-	
-	
-	
 	 public static GetHistoricMarketData getInstance() {
 	      if(instance == null) {
 	         instance = new GetHistoricMarketData();
 	      }
 	      return instance;
 	   }
+	 
 	 private int IsTickerInMap(String Ticker)
 		{
 			
@@ -156,7 +152,25 @@ public class GetHistoricMarketData {
 	}
 public NewMarketDataRequest GetHistoricalMarketData(NewMarketDataRequest message) throws InterruptedException {
 		MarketDataMapWeb = m_controller.GetHistoricalMapWeb();
+		
+		String ticker = message.GetTicker();
+		RequestType requestType = message.GetRequestType();
+		
+		int previousReqId = IsTickerInHistMap(ticker,requestType);
+		
+		if (previousReqId!=-1)
+		{
+			HistoricResultSet resultSet = MarketDataMapWeb.get(previousReqId);
 
+			if (System.currentTimeMillis()-resultSet.getLastUpdateTime() < 60000)
+			{
+				log.info("Request too frequent, returning cached data");		
+				return ConvertToJson(resultSet,message.GetCorrelationId());		
+			}
+			else
+				log.info("Cached data is stale for "+ticker);
+		}
+		log.info("Requesting historic data for "+ticker);
 		NewContract m_contract = new NewContract();
 		m_contract.symbol(  message.GetTicker()); 
 		m_contract.secType( SecType.STK ); 
@@ -174,6 +188,7 @@ public NewMarketDataRequest GetHistoricalMarketData(NewMarketDataRequest message
 			 req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 1, DurationUnit.DAY, BarSize._1_min, WhatToShow.TRADES,false, dataSet);
 		if(message.GetRequestType().equals(RequestType.CHART_2_DAY))
 			 req_id =IBTradingMain.INSTANCE.controller().reqHistoricalData(m_contract, sdf.format(date), 2, DurationUnit.DAY, BarSize._5_mins, WhatToShow.TRADES,false, dataSet);
+		
 		int timeout=0;
 		while (!dataSet.IsLoadComplete() && timeout < 40)
 		{

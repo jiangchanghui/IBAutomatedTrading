@@ -21,6 +21,7 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	private volatile boolean complete =false;
 	String Ticker ="";
 	String TimeFrame;
+	long LastUpdateTime;
 	RequestType RequestType;
 	
 	
@@ -71,15 +72,21 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 	
 	@Override public void historicalData(Bar bar, boolean hasGaps) {
 		m_rows.add( bar);
+		
+		this.LastUpdateTime = System.currentTimeMillis();
+		
 	}
 	
 	@Override public void historicalDataEnd() {
 		fire();
+	
+		
 	}
 
 	@Override public void realtimeBar(Bar bar) {
 		m_rows.add( bar); 
 		fire(bar);
+	
 	}
 	
 	private void fire(Bar bar) {
@@ -143,6 +150,9 @@ public class HistoricResultSet  implements IHistoricalDataHandler, IRealTimeBarH
 				default: return null;
 			}
 		}
+	}
+	public long getLastUpdateTime() {
+		return LastUpdateTime;
 	}
 	
 }
