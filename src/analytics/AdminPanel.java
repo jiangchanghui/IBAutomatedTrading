@@ -21,6 +21,7 @@ import com.ib.controller.Types.Action;
 
 import apidemo.ContractPanel;
 
+
 import apidemo.util.HtmlButton;
 import apidemo.util.NewTabbedPanel;
 import apidemo.util.UpperField;
@@ -29,24 +30,38 @@ import apidemo.util.NewTabbedPanel.NewTabPanel;
 import apidemo.util.VerticalPanel.StackPanel;
 
 public class AdminPanel  extends NewTabPanel{
-    private final NewTabbedPanel m_requestPanel = new NewTabbedPanel();
+    private final NewTabbedPanel m_tabbedPanel = new NewTabbedPanel();
     private final NewContract m_contract = new NewContract();
     public AdminPanel() {
-        
-     
-        setLayout( new BorderLayout() );
-        add( new Panel(), BorderLayout.NORTH);
+    //	m_requestPanel.addTab( "Top Market Data", new TopRequestPanel() );
+	//	m_requestPanel.addTab( "Deep Book", new DeepRequestPanel() );
+    	m_tabbedPanel.addTab("AlgoAdmin",new AlgoAdmin() );
+    	m_tabbedPanel.addTab("LevelOneSnapshotAdmin",new LevelOneSnapshotAdmin() );
+    	
+    	
+		setLayout( new BorderLayout() );
+		add(m_tabbedPanel, BorderLayout.NORTH);
+	 
+			
         
         
     }
-    private class Panel extends JPanel {
+    private class AlgoAdmin extends JPanel {
         
      
          UpperField m_symbol = new UpperField();
          UpperField m_Qty = new UpperField();
          UpperField m_Ratio = new UpperField();
          UpperField m_Price = new UpperField();
-        Panel() {
+         AlgoAdmin() {
+        	 HtmlButton setMarketData = new HtmlButton( "SetSymbolLastPrice") {
+                 @Override protected void actionPerformed() {
+              QueueHandler.INSTANCE.SendToMarketDataTickQueue(new MarketDataTick(m_symbol.getText(), new com.ib.controller.Bar(0000,0,0,0,m_Price.getDouble(),0,0,0)));
+              
+                     
+                     
+                 }
+             };
             HtmlButton SetQty = new HtmlButton( "Set HFT Qty") {
                 @Override protected void actionPerformed() {
                 	if (m_Qty.getInt() != 0)
@@ -64,14 +79,7 @@ public class AdminPanel  extends NewTabPanel{
                     
                 }
             };
-            HtmlButton setMarketData = new HtmlButton( "MarketDataTest") {
-                @Override protected void actionPerformed() {
-             QueueHandler.INSTANCE.SendToMarketDataTickQueue(new MarketDataTick(m_symbol.getText(), new com.ib.controller.Bar(0000,0,0,0,m_Price.getDouble(),0,0,0)));
-             
-                    
-                    
-                }
-            };
+           
             VerticalPanel butPanel = new VerticalPanel();
             butPanel.add( SetQty);
             butPanel.add( SetRatio);
@@ -94,6 +102,48 @@ public class AdminPanel  extends NewTabPanel{
 
        
     }
+    
+    private class LevelOneSnapshotAdmin extends JPanel {
+        
+        
+        UpperField m_symbol = new UpperField();
+        UpperField m_bid = new UpperField();
+        UpperField m_ask = new UpperField();
+        UpperField m_last = new UpperField();
+        UpperField m_close = new UpperField();
+        LevelOneSnapshotAdmin() {
+       	 HtmlButton setMarketData = new HtmlButton( "UpdateSnapshot") {
+                @Override protected void actionPerformed() {
+        //     QueueHandler.INSTANCE.SendToMarketDataTickQueue(new MarketDataTick(m_symbol.getText(), new com.ib.controller.Bar(0000,0,0,0,m_Price.getDouble(),0,0,0)));
+             
+                    
+                    
+                }
+            };
+         
+        
+          
+           VerticalPanel butPanel = new VerticalPanel();
+            butPanel.add(setMarketData);
+                      
+           VerticalPanel paramPanel = new VerticalPanel();
+           paramPanel.add("Ticker",m_symbol);
+           paramPanel.add("bid",m_bid);
+           paramPanel.add("ask", m_ask );
+           paramPanel.add("last", m_last );          
+           JPanel rightPanel = new StackPanel();
+           rightPanel.add( paramPanel);
+           
+           setLayout( new BoxLayout( this, BoxLayout.X_AXIS) );
+         
+           
+           add (paramPanel);
+           add( butPanel);
+       }
+
+      
+   }
+    
 	@Override
 	public void activated() {
 		// TODO Auto-generated method stub

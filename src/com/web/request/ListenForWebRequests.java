@@ -99,7 +99,7 @@ public class ListenForWebRequests extends Thread{
 		      	 
 		      }
 		     else //for PhoneCharts - Show trading on the day so far.
-		    	  SendReplyMessage (HistoricMarketDataHandler.GetHistoricalMarketData(_message),props, replyProps);
+		    	  SendReplyMessage (HistoricMarketDataHandler.GetHistoricalMarketData(_message,_message.GetRequestType()),props, replyProps);
 		      
 		      
 		    

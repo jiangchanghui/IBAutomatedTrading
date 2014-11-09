@@ -77,6 +77,8 @@ public class LevelOneSnapshot extends TopMktDataAdapter{
 	{
 		if (close!=0)
 		{
+			if (last<=0)
+				last=close;
 			return true;
 		}
 		else

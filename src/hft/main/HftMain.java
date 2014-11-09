@@ -1,6 +1,8 @@
 package hft.main;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 
 import javax.swing.SwingUtilities;
@@ -58,9 +60,6 @@ public class HftMain extends Thread{
 		 
 		 StartStochasticsWorkers(); //starts 2 stochastic workers per ticker 
 		 
-	//	 CentralRiskControl C = new CentralRiskControl(); //starts Central risk process.
-	//	 C.start();  
-		 
 		 LivePositionHandler H = new LivePositionHandler();
 		 H.start();
 		
@@ -85,9 +84,9 @@ public class HftMain extends Thread{
 	//	int req_id = IsTickerInRTMap(message.GetTicker());
 	
 	//	RTMarketDataMap = m_controller.GetTRealTimeMap();
+						
+		WaitForTradingStart();
 		
-		
-		 
 			//creates subscription for market data ticks every 2 seconds
 			int i=0;
 			while(!IBTradingMain.INSTANCE.IsApiConnected() && i <20)
@@ -124,6 +123,41 @@ public class HftMain extends Thread{
 
 
 		
-	
+	private void WaitForTradingStart()
+	{
+		Calendar calendarNow = Calendar.getInstance(TimeZone.getTimeZone("EST"));
+		Calendar calendarTradingHours = Calendar.getInstance(TimeZone.getTimeZone("EST"));
+		calendarTradingHours.set(Calendar.HOUR_OF_DAY, 9);
+		calendarTradingHours.set(Calendar.MINUTE, 30);
+		
+		Date todaysTradingStart = calendarTradingHours.getTime();
+		
+		Date todaysDate = calendarNow.getTime();
+		
+		if (todaysDate.after(todaysTradingStart))
+			return;
+		else
+			log.info("Current time : "+todaysDate.toString()+". Waiting for trading to start at : "+todaysTradingStart.toString());
+		
+		while(true)
+		{
+		
+		Date currentDate = calendarNow.getTime();
+		
+		if (currentDate.after(currentDate))
+			break;
+		else
+		{
+			try {
+				Thread.sleep(60000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				log.error(e.toString(),e);
+			}
+		}
+		}
+		
+		
+	}
 
 }

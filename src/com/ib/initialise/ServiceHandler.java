@@ -64,7 +64,9 @@ public class ServiceHandler extends Thread{
 			log.info("Staring hft workers...");
 			HftMain _hftmain = new HftMain();
 			_hftmain.start();
-					
+			
+			//Intraday PnL recording		
+			new RecordIntradayPnL().start();
 		}
 		//NEW TRADE HANDLER
 		if (cmd.hasOption("TradeReader")){
@@ -84,8 +86,8 @@ public class ServiceHandler extends Thread{
 			}
 		}
 		
-		//Intraday PnL recording
-		new RecordIntradayPnL().start();
+		
+		
 		
 		
 		if (cmd.hasOption("ChartServer")){
